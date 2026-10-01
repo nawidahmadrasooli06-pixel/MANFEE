@@ -1,1 +1,31 @@
-
+<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>منفی</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="stylesheet" href="style.css"></head><body>
+<div id="menu" class="scr on">
+  <div class="logo">♠ منفی</div><div class="sub">بازی ورق چهار نفره</div>
+  <button class="btn go" onclick="show('join')">شروع بازی منفی</button>
+  <button class="btn" disabled>رنگ‌بازی — به‌زودی</button>
+  <div class="credit"><b>طراح بات:: 〘Cactuc = نــوید〙</b><a href="https://t.me/cactuc580">@cactuc580</a>
+  <span>ربات برای خوشگذرونی و ساعت تیری ساخته شده امید که لذت ببرین❤️</span></div>
+</div>
+<div id="join" class="scr">
+  <h2>ورود به میز</h2>
+  <input id="nm" maxlength="14" placeholder="اسمت را بنویس">
+  <button class="btn go" onclick="mk()">ساخت اتاق جدید</button>
+  <div class="or">یا با کد دوستت وارد شو</div>
+  <input id="cd" maxlength="4" placeholder="کد اتاق" style="text-transform:uppercase;direction:ltr;text-align:center">
+  <button class="btn" onclick="jn()">ورود با کد</button>
+  <button class="lnk" onclick="show('menu')">بازگشت</button>
+</div>
+<div id="lobby" class="scr">
+  <h2>اتاق <span id="code" style="direction:ltr;display:inline-block;color:var(--gold)"></span></h2>
+  <button class="btn" onclick="share()">دعوت دوستان</button>
+  <div id="lb"></div>
+  <small>روی صندلی خالی بزن تا بنشینی. هم‌تیمی‌ها روبه‌روی هم‌اند. صندلی خالی = ربات.</small>
+  <button id="go" class="btn go" onclick="act('start')">شروع بازی</button>
+</div>
+<div id="game" class="scr"><div id="hud"></div><div id="tbl"></div><div id="hand"></div><div id="pn"></div><div id="ov"></div><div id="ts"></div></div>
+<script src="/socket.io/socket.io.js"></script><script src="table.js"></script><script src="app.js"></script>
+</body></html>
