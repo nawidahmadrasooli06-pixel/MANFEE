@@ -129,6 +129,7 @@ class Game {
       legal: P == 'play' && this.turn == m ? this.legal(m) : [],
       bidTurn: P == 'bid' ? this.order[this.bi] : -1, bidMax: 13 - sum,
       tc: pl ? [this.tc(0), this.tc(1)] : null,
+      rem: P == 'over' || P == 'series' ? this.hands : null,
       dl: this.dl ? Math.max(0, this.dl - Date.now()) : 0, dls: this.dls
     };
   }
