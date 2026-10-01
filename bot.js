@@ -2,7 +2,7 @@
 const T = process.env.BOT_TOKEN, URL_ = (process.env.PUBLIC_URL || '').replace(/\/$/, ''), ADMIN = String(process.env.ADMIN_ID || '');
 const api = (m, b) => fetch(`https://api.telegram.org/bot${T}/${m}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(b || {}) })
   .then(r => r.json()).catch(e => ({ ok: false, description: String(e) }));
-const ABOUT = '🃏 ربات بازی منفی\n\nطراح بات:: 〘Cactuc = نــوید〙\n@cactuc580\n\nربات برای خوشگذرونی و ساعت تیری ساخته شده امید که لذت ببرین❤️';
+const ABOUT = '🃏 ربات بازی منفی\n\nطراح بات::\n\u2066〘Cactuc = نــوید\u2069\n\u2066@cactuc580\u2069\n\nربات برای خوشگذرونی و ساعت تیری ساخته شده امید که لذت ببرین❤️';
 const info = {};
 function start(rooms) {
   if (!T || !URL_) return console.log('Telegram bot disabled: set BOT_TOKEN and PUBLIC_URL');
