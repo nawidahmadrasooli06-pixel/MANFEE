@@ -7,8 +7,8 @@ class Game {
   }
   later(f, ms) { const t = setTimeout(f, ms); this.timers.push(t); return t; }
   emit() { this.cb(); }
-  arm(s, ms, f) { this.disarm(); if (this.bot[s]) return; this.dl = Date.now() + ms; this.dls = s; this.tm = this.later(f, ms); }
-  disarm() { clearTimeout(this.tm); this.dl = 0; this.dls = -1; }
+  // Human turns deliberately have no deadline or automatic action.
+  disarm() { this.dl = 0; this.dls = -1; }
   tc(t) { return this.claim[t] + this.claim[t + 2]; }
   tt(t) { return this.taken[t] + this.taken[t + 2]; }
   legal(s) {
@@ -22,22 +22,33 @@ class Game {
     this.dealer = (this.dealer + 1) % 4;
     const d = deck();
     this.hands = [0, 1, 2, 3].map(i => sortHand(d.slice(i * 13, i * 13 + 13)));
-    Object.assign(this, { claim: [0, 0, 0, 0], taken: [0, 0, 0, 0], trick: [], last: null, res: null, note: '', win: -1, bi: 0, phase: 'deal' });
+    Object.assign(this, { claim: [0, 0, 0, 0], taken: [0, 0, 0, 0], trick: [], last: null, res: null, note: '', win: -1, bi: 0, phase: 'countdown', countdown: 3 });
     this.rid++;
     this.order = [1, 2, 3, 4].map(k => (this.dealer + k) % 4);
     this.emit();
-    this.later(() => { this.phase = 'bid'; this.bidStep(); }, 3600);
+    this.countdownStep();
+  }
+  countdownStep() {
+    if (this.phase !== 'countdown') return;
+    if (this.countdown <= 0) {
+      this.phase = 'deal'; this.emit();
+      this.later(() => { this.phase = 'bid'; this.bidStep(); }, 1800);
+      return;
+    }
+    this.emit();
+    const n = this.countdown;
+    this.later(() => { if (this.phase === 'countdown' && this.countdown === n) { this.countdown--; this.countdownStep(); } }, 900);
   }
   bidStep() {
     if (this.phase != 'bid') return;
     const p = this.order[this.bi], sum = this.claim.reduce((a, b) => a + b, 0);
-    if (this.bi == 3) { this.disarm(); this.claim[p] = 13 - sum; this.phase = 'mir'; this.emit(); this.mirStep(); return; }
+    if (this.bi == 3) { this.claim[p] = 13 - sum; this.phase = 'mir'; this.emit(); this.mirStep(); return; }
     const auto = () => {
       if (this.phase != 'bid' || this.order[this.bi] != p) return;
       this.claim[p] = Math.min(bot.est(this.hands[p]), 13 - sum); this.bi++; this.bidStep();
     };
-    if (this.bot[p]) { this.disarm(); this.emit(); this.later(() => { if (this.bot[p]) auto(); }, 800); }
-    else { this.arm(p, 15000, auto); this.emit(); }
+    if (this.bot[p]) { this.emit(); this.later(() => { if (this.bot[p]) auto(); }, 900); }
+    else { this.disarm(); this.emit(); }
   }
   bid(s, n) {
     if (this.phase != 'bid' || this.order[this.bi] != s) return;
@@ -49,7 +60,7 @@ class Game {
     if (this.phase != 'mir') return;
     const p = this.dealer;
     if (this.bot[p]) { this.disarm(); this.later(() => { if (this.bot[p]) this.mirBot(); }, 1200); }
-    else { this.arm(p, 15000, () => this.mirBot()); this.emit(); }
+    else { this.disarm(); this.emit(); }
   }
   mirBot() {
     if (this.phase != 'mir') return;
@@ -76,7 +87,7 @@ class Game {
     const s = this.turn;
     const f = () => { if (this.phase == 'play' && this.turn == s && this.hands[s].length) this.play(s, bot.pick(this, s)); };
     if (this.bot[s]) { this.disarm(); this.later(() => { if (this.bot[s]) f(); }, 650); this.emit(); }
-    else { this.arm(s, 7000, f); this.emit(); }
+    else { this.disarm(); this.emit(); }
   }
   play(s, c) {
     if (this.phase != 'play' || this.turn != s || !this.legal(s).includes(c)) return;
@@ -85,7 +96,7 @@ class Game {
     this.trick.push({ s, c }); this.note = '';
     if (this.trick.length < 4) { this.turn = (s + 1) % 4; this.turnStep(); return; }
     this.phase = 'trick'; this.win = winner(this.trick); this.emit();
-    this.later(() => this.resolve(), 2000);
+    this.later(() => this.resolve(), 1700);
   }
   resolve() {
     const w = this.win;
@@ -103,16 +114,16 @@ class Game {
   again() { if (this.phase == 'series') { this.ser = [0, 0]; this.newHand(); } }
   kick(s) {
     if (this.stopped) return;
-    const P = this.phase;
-    if (P == 'bid' && this.order[this.bi] == s) this.bidStep();
-    else if (P == 'mir' && this.dealer == s) this.mirStep();
-    else if (P == 'play' && this.turn == s) this.turnStep();
+    if (this.phase == 'bid' && this.order[this.bi] == s) this.bidStep();
+    else if (this.phase == 'mir' && this.dealer == s) this.mirStep();
+    else if (this.phase == 'play' && this.turn == s) this.turnStep();
   }
   stop() { this.stopped = true; this.disarm(); this.timers.forEach(clearTimeout); this.timers = []; }
   wake() {
     if (!this.stopped) return;
     this.stopped = false; const P = this.phase;
-    if (P == 'deal') this.later(() => { this.phase = 'bid'; this.bidStep(); }, 1000);
+    if (P == 'countdown') this.countdownStep();
+    else if (P == 'deal') this.later(() => { this.phase = 'bid'; this.bidStep(); }, 1000);
     else if (P == 'bid') this.bidStep();
     else if (P == 'mir') this.mirStep();
     else if (P == 'play') this.turnStep();
@@ -123,14 +134,16 @@ class Game {
     const P = this.phase, k = i => P == 'bid' ? this.order.indexOf(i) < this.bi : P != 'deal';
     const sum = this.claim.reduce((a, b) => a + b, 0), pl = P != 'bid' && P != 'deal';
     return {
-      phase: P, dealer: this.dealer, turn: this.turn, rid: this.rid, nid: this.nid, note: this.note, res: this.res,
-      ser: this.ser, win: this.win, trick: this.trick, last: this.last, taken: this.taken, hand: this.hands[m],
+      phase: P, countdown: this.countdown || 0, dealer: this.dealer, turn: this.turn, rid: this.rid, nid: this.nid, note: this.note, res: this.res,
+      teams: [[this.names[0], this.names[2]], [this.names[1], this.names[3]]],
+      ser: this.ser, seriesWinner: this.ser[0] >= 5 ? 0 : this.ser[1] >= 5 ? 1 : -1,
+      win: this.win, trick: this.trick, last: this.last, taken: this.taken, hand: this.hands[m],
       claims: this.claim.map((c, i) => k(i) ? c : null),
       legal: P == 'play' && this.turn == m ? this.legal(m) : [],
       bidTurn: P == 'bid' ? this.order[this.bi] : -1, bidMax: 13 - sum,
       tc: pl ? [this.tc(0), this.tc(1)] : null,
       rem: P == 'over' || P == 'series' ? this.hands : null,
-      dl: this.dl ? Math.max(0, this.dl - Date.now()) : 0, dls: this.dls
+      dl: 0, dls: -1
     };
   }
 }
