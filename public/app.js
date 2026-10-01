@@ -8,30 +8,57 @@ V.init(sk);
 document.addEventListener('touchstart', () => SND.unlock(), { once: true });
 document.addEventListener('click', () => document.querySelectorAll('audio').forEach(a => a.play().catch(() => { })));
 const show = id => document.querySelectorAll('.scr').forEach(e => e.classList.toggle('on', e.id == id));
-const nm = () => { const n = $('#nm').value.trim() || 'بازیکن'; localStorage.nm = n; return n; };
+const nm = () => {
+  const el = $('#invite').classList.contains('on') ? $('#invNm') : $('#nm');
+  const n = (el && el.value || localStorage.nm || 'بازیکن').trim().slice(0, 14) || 'بازیکن';
+  localStorage.nm = n; return n;
+};
 const act = (ev, a) => sk.emit(ev, a);
 $('#nm').value = localStorage.nm || (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.first_name) || '';
+$('#invNm').value = $('#nm').value;
 const qr = new URLSearchParams(location.search).get('r');
-if (qr) { $('#cd').value = qr; show('join'); }
+if (qr) show('invite');
 function mk() { sk.emit('create', { name: nm(), token: tok }); }
 function jn() { sk.emit('join', { code: $('#cd').value, name: nm(), token: tok }); }
+function acceptInvite() { $('#nm').value = $('#invNm').value; sk.emit('join', { code: qr || $('#invCode').textContent, name: nm(), token: tok }); }
 function resume() { sk.emit('join', { code: localStorage.room, name: localStorage.nm || 'بازیکن', token: tok }); }
-function fresh() { localStorage.removeItem('room'); pend = null; history.replaceState(0, '', '/'); show('join'); }
+function fresh() { localStorage.removeItem('room'); pend = null; history.replaceState(0, '', '/'); $('#cd').value = ''; show('join'); }
 function take(i) { sk.emit('take', { ...pend, seat: i }); }
+function startGame() { sk.emit('start', { forceBots: false }); }
+function startWithBots() { sk.emit('start', { forceBots: true }); }
+function restartBot() {
+  if (BOT && tg && tg.openTelegramLink) tg.openTelegramLink('https://t.me/' + BOT);
+  else if (BOT) location.href = 'https://t.me/' + BOT;
+  else { fresh(); }
+}
 function share() {
-  const link = BOT ? `https://t.me/${BOT}?start=${st.code}` : location.origin + '/?r=' + st.code, text = 'بیا بازی منفی! کد اتاق: ' + st.code;
+  act('invite');
+  const link = BOT ? `https://t.me/${BOT}?start=${st.code}` : location.origin + '/?r=' + st.code;
+  const text = 'بیا بازی منفی! کد اتاق: ' + st.code;
   if (tg) tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(text));
   else navigator.share ? navigator.share({ title: 'منفی', text, url: link }).catch(() => { }) : navigator.clipboard.writeText(link).then(() => alert('لینک کپی شد'));
 }
 function lobby() {
   const cell = i => { const x = st.seats[i]; return `<button class="sb ${x ? 'f' : ''}" onclick="act('sit',${i})">${x ? x.name + (i == st.me ? ' (تو)' : '') : 'خالی ← ربات'}</button>`; };
   $('#lb').innerHTML = `<h3>تیم ۱ (روبه‌روی هم)</h3>${cell(0)}${cell(2)}<h3>تیم ۲ (روبه‌روی هم)</h3>${cell(1)}${cell(3)}`;
-  $('#code').textContent = st.code; $('#go').style.display = st.host ? '' : 'none';
+  $('#code').textContent = st.code;
+  $('#go').style.display = st.host ? '' : 'none';
+  $('#force').style.display = st.host && st.invitePending ? '' : 'none';
+  $('#go').disabled = !!st.starting || (!!st.invitePending && !st.inviteAccepted);
+  $('#go').textContent = st.invitePending && !st.inviteAccepted ? 'منتظر ورود دوستت…' : 'شروع بازی';
+  $('#waitMsg').textContent = st.invitePending && !st.inviteAccepted ? 'دوستت هنوز وارد اتاق نشده؛ اینجا منتظرش می‌مانیم.' : st.inviteAccepted ? 'دوستت وارد شد؛ آماده شروع بازی هستید.' : '';
+  $('#startCount').textContent = st.starting ? `شروع بازی تا ${st.starting}…` : '';
 }
 sk.on('state', s => {
   st = s; localStorage.room = s.code; history.replaceState(0, '', '?r=' + s.code);
   if (s.g) { show('game'); T.render(s); } else { show('lobby'); lobby(); }
   V.sync(s);
+});
+sk.on('inviteInfo', info => {
+  if (info.expired) { $('#expiredMsg').textContent = info.message || 'این دعوت منقضی شده است.'; show('expired'); return; }
+  $('#inviter').textContent = info.inviter || 'دوستت'; $('#invCode').textContent = info.code || qr || '';
+  $('#invNm').value = localStorage.nm || $('#invNm').value;
+  show('invite');
 });
 sk.on('sig', m => V.sig(m));
 sk.on('pick', p => {
@@ -39,9 +66,13 @@ sk.on('pick', p => {
   $('#pk').innerHTML = p.list.map(x => `<button class="sb f" onclick="take(${x.i})">جای «${x.name}» بنشین<br><small>هم‌تیمی: ${x.mate}</small></button>`).join('');
   show('pick');
 });
-sk.on('err', m => { alert(m); localStorage.removeItem('room'); show('join'); });
+sk.on('err', m => { alert(m); show('join'); });
+sk.on('expired', m => {
+  localStorage.removeItem('room'); $('#expiredMsg').textContent = m || 'این بازی به پایان رسیده یا لینک آن منقضی شده است. ربات را دوباره استارت کن.'; show('expired');
+});
 sk.on('connect', () => {
+  if (qr) { sk.emit('preview', qr); return; }
   if (st) { sk.emit('join', { code: st.code, name: localStorage.nm || 'بازیکن', token: tok }); return; }
   const r = localStorage.room;
-  if (r && (!qr || qr == r)) { $('#rs').textContent = r; show('resume'); }
+  if (r) { $('#rs').textContent = r; show('resume'); }
 });
