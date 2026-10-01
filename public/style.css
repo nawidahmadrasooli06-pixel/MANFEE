@@ -52,3 +52,18 @@ input{font:inherit;font-size:17px;padding:12px;border-radius:12px;border:2px sol
 .bn .go{font:inherit;font-weight:700;border:0;border-radius:12px;padding:10px 24px;background:var(--gold);color:#241a05}
 @keyframes pop{from{transform:scale(.6);opacity:0}}
 #ts{position:absolute;top:50px;left:50%;transform:translateX(-50%);background:var(--gold);color:#241a05;font-weight:700;padding:8px 16px;border-radius:12px;z-index:6;display:none;font-size:13px;text-align:center;max-width:90%}
+/* v2 */
+:root{--cw:min(13vw,76px,13vh)}
+.c em{position:absolute;left:.22em;top:.12em;font-style:normal;font-size:1.05em;line-height:1.05;text-align:center}
+.c b{font-size:2em}
+#hand span{margin-inline:calc(var(--cw)*-.25)}
+#wm{align-items:flex-start;padding-top:24%;font-size:min(12vw,62px);opacity:.12}
+#hud{align-items:center}
+.ib{font-size:18px;border:0;border-radius:10px;background:#0b1f1ecc;padding:4px 9px;color:#fff}
+.st i.o{background:#ff9a8f}
+.cd{position:absolute;top:-12px;left:-8px;background:var(--gold);color:#241a05;font-weight:900;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.cd.lo{background:#ff5a4d;color:#fff;animation:pop .4s infinite alternate}
+#aw{position:absolute;top:48px;left:0;right:0;z-index:4;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none}
+.aw{pointer-events:auto;background:#3a1c1cee;border:2px solid #ff9a8f;border-radius:14px;padding:8px 12px;font-size:13px;text-align:center}
+.aw button{font:inherit;font-weight:700;border:0;border-radius:10px;padding:6px 10px;margin:4px 3px 0;background:var(--gold);color:#241a05}
+.aw button+button{background:#2b5a55;color:#fff}
