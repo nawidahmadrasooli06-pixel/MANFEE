@@ -7,7 +7,7 @@
   <div class="logo">♠ منفی</div><div class="sub">بازی ورق چهار نفره</div>
   <button class="btn go" onclick="show('join')">شروع بازی منفی</button>
   <button class="btn" disabled>رنگ‌بازی — به‌زودی</button>
-  <div class="credit"><b>طراح بات:: 〘Cactuc = نــوید〙</b><a href="https://t.me/cactuc580">@cactuc580</a>
+  <div class="credit"><b>طراح بات::</b><b dir="ltr">〘Cactuc = نــوید</b><a dir="ltr" href="https://t.me/cactuc580">@cactuc580</a>
   <span>ربات برای خوشگذرونی و ساعت تیری ساخته شده امید که لذت ببرین❤️</span></div>
 </div>
 <div id="join" class="scr">
@@ -26,6 +26,8 @@
   <small>روی صندلی خالی بزن تا بنشینی. هم‌تیمی‌ها روبه‌روی هم‌اند. صندلی خالی = ربات.</small>
   <button id="go" class="btn go" onclick="act('start')">شروع بازی</button>
 </div>
-<div id="game" class="scr"><div id="hud"></div><div id="tbl"></div><div id="hand"></div><div id="pn"></div><div id="ov"></div><div id="ts"></div></div>
-<script src="/socket.io/socket.io.js"></script><script src="table.js"></script><script src="app.js"></script>
+<div id="resume" class="scr"><h2>بازی قبلی</h2><p>با کد <b id="rs" style="color:var(--gold);direction:ltr;display:inline-block"></b> قبلاً وارد این بازی بودی.<br>دوباره وارد همین بازی شوی یا بازی جدید؟</p><button class="btn go" onclick="resume()">برگشت به همین بازی</button><button class="btn" onclick="fresh()">بازی جدید</button></div>
+<div id="pick" class="scr"><h2>جای کدام ربات بنشینی؟</h2><div id="pk" style="display:flex;flex-direction:column;gap:8px;width:100%;max-width:320px"></div><button class="lnk" onclick="fresh()">بازگشت</button></div>
+<div id="game" class="scr"><div id="hud"></div><div id="tbl"></div><div id="hand"></div><div id="pn"></div><div id="ov"></div><div id="aw"></div><div id="ts"></div></div>
+<script src="/socket.io/socket.io.js"></script><script src="sound.js"></script><script src="voice.js"></script><script src="table.js"></script><script src="app.js"></script>
 </body></html>
