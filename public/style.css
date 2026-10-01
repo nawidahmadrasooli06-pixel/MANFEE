@@ -67,3 +67,15 @@ input{font:inherit;font-size:17px;padding:12px;border-radius:12px;border:2px sol
 .aw{pointer-events:auto;background:#3a1c1cee;border:2px solid #ff9a8f;border-radius:14px;padding:8px 12px;font-size:13px;text-align:center}
 .aw button{font:inherit;font-weight:700;border:0;border-radius:10px;padding:6px 10px;margin:4px 3px 0;background:var(--gold);color:#241a05}
 .aw button+button{background:#2b5a55;color:#fff}
+/* v3: drag-to-play + reveal */
+#hand{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#hand span{touch-action:none;position:relative}
+#hand span:active{transform:none}
+#hand span.sel{transform:translateY(-24px) scale(1.06);z-index:20}
+#hand span.lift{z-index:50;transition:none}
+.bn.sm{position:static}.bn.sm big{font-size:20px}
+.rvl{--k:26px;display:flex;flex-direction:column;gap:6px;margin-top:4px;direction:ltr}
+.rr{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.rr u{text-decoration:none;font-size:12px;font-weight:700;min-width:58px;text-align:right;direction:rtl}
+.rr.m u{color:#7fe0a0}.rr.e u{color:#ff9a8f}
+.rc{display:flex;padding-inline-end:12px}.rc .c{margin-inline-end:-12px;box-shadow:0 1px 3px #0008}
