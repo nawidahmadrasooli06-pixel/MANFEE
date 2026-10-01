@@ -1,25 +1,37 @@
 const T = (() => {
   const SU = ['♠', '♥', '♦', '♣'], RK = '2 3 4 5 6 7 8 9 10 J Q K A'.split(' ');
   const $ = q => document.querySelector(q);
-  const cd = (c, x = '') => { const s = c / 13 | 0; return `<div class="c ${s == 1 || s == 2 ? 'r' : ''} ${x}"><span>${RK[c % 13]}</span><b>${SU[s]}</b></div>`; };
-  let S, pl = 0, nid = 0, v = 2, tm;
+  const cd = (c, x = '') => { const s = c / 13 | 0; return `<div class="c ${s == 1 || s == 2 ? 'r' : ''} ${x}"><em>${RK[c % 13]}<br>${SU[s]}</em><b>${SU[s]}</b></div>`; };
+  let S, pl = 0, nid = 0, v = 2, tm, rid = -1, lastTk = 0, endAt = 0, myTurn = false; const hold = {};
   function toast(m) { const t = $('#ts'); t.textContent = m; t.style.display = 'block'; clearTimeout(tm); tm = setTimeout(() => t.style.display = 'none', 2800); }
+  setInterval(() => {
+    const e = $('#cdn'); if (!e || !endAt) return;
+    const r = Math.max(0, Math.ceil((endAt - Date.now()) / 1000)); e.textContent = r; e.classList.toggle('lo', r <= 3);
+  }, 250);
   function render(st) {
-    S = st; const g = st.g, me = st.me, mt = me % 2, rel = s => (s - me + 4) % 4, name = s => st.seats[s].name;
+    S = st; const g = st.g, me = st.me, mt = me % 2, rel = s => (s - me + 4) % 4, name = s => st.seats[s].name, my = g.phase == 'play' && g.turn == me;
+    if (g.rid != rid) { rid = g.rid; if (g.phase == 'deal') for (let i = 0; i < 13; i++) setTimeout(SND.deal, 500 + i * 140); }
+    if (g.trick.length > pl) SND.card();
+    const tk = g.taken.reduce((a, b) => a + b, 0); if (tk > lastTk) SND.win(); lastTk = tk;
+    if (my && !myTurn) SND.ping(); myTurn = my;
+    endAt = g.dl > 0 ? Date.now() + g.dl : 0;
     const pill = (t, l) => `<div class="pl ${t == mt ? 'm' : 'e'}">${l} · سری ${g.ser[t]} از ۵ · ${g.taken[t] + g.taken[t + 2]}/${g.tc ? g.tc[t] : '؟'}</div>`;
-    $('#hud').innerHTML = pill(mt, 'ما') + pill(1 - mt, 'حریف');
+    $('#hud').innerHTML = pill(mt, 'ما') + pill(1 - mt, 'حریف') + `<button class="ib" onclick="V.toggle()">${V.live() ? '🎙️' : '🔇'}</button><button class="ib" onclick="T.snd()">${SND.muted() ? '🔕' : '🔊'}</button>`;
     let h = '';
     for (let s = 0; s < 4; s++) {
-      const on = (g.phase == 'play' && g.turn == s) || (g.phase == 'bid' && g.bidTurn == s), c = g.claims[s];
-      h += `<div class="st p${rel(s)} ${on ? 'on' : ''} ${s % 2 == mt ? 'm' : 'e'}">${g.dealer == s ? '<i>میر</i>' : ''}<u>${name(s)}</u><b>${g.taken[s]}/${c == null ? '؟' : c}</b></div>`;
+      const x = st.seats[s], on = (g.phase == 'play' && g.turn == s) || (g.phase == 'bid' && g.bidTurn == s), c = g.claims[s];
+      const tag = x.off ? '<i class="o">قطع</i>' : x.sub ? '<i class="o">ربات</i>' : '';
+      h += `<div class="st p${rel(s)} ${on ? 'on' : ''} ${s % 2 == mt ? 'm' : 'e'}">${g.dls == s && g.dl > 0 ? '<span class="cd" id="cdn"></span>' : ''}${g.dealer == s ? '<i>میر</i>' : ''}${tag}<u>${x.name}</u><b>${g.taken[s]}/${c == null ? '؟' : c}</b></div>`;
     }
     h += '<div class="ctr">' + g.trick.map((x, i) => `<div class="q q${rel(x.s)} ${i >= pl ? 'in' : ''} ${g.win == x.s ? 'w' : ''}">${cd(x.c)}</div>`).join('') + '</div>';
     pl = g.trick.length;
     if (g.last) h += `<div class="lt"><small>دست قبل</small><div class="ctr2">${g.last.cards.map(x => `<div class="q q${rel(x.s)} ${g.last.w == x.s ? 'w' : ''}">${cd(x.c)}</div>`).join('')}</div></div>`;
     $('#tbl').innerHTML = h + '<div id="wm">CACTUC</div>';
-    const my = g.phase == 'play' && g.turn == me;
     $('#hand').innerHTML = g.hand.map((c, i) => `<span style="--i:${i}" class="${g.phase == 'deal' ? 'dl' : ''}" onclick="act('play',${c})">${cd(c, my && !g.legal.includes(c) ? 'dim' : '')}</span>`).join('');
-    if (g.nid != nid) { nid = g.nid; if (g.note) { toast(g.note); $('#hand').classList.add('sw'); setTimeout(() => $('#hand').classList.remove('sw'), 800); } }
+    if (g.nid != nid) { nid = g.nid; if (g.note) { toast(g.note); SND.swap(); $('#hand').classList.add('sw'); setTimeout(() => $('#hand').classList.remove('sw'), 800); } }
+    const away = st.away || [];
+    Object.keys(hold).forEach(k => { if (!away.some(a => a.i == k)) delete hold[k]; });
+    $('#aw').innerHTML = away.filter(a => !hold[a.i]).map(a => `<div class="aw">${a.name} قطع شد<br><button onclick="act('sub',${a.i})">ربات جایش بازی کند</button><button onclick="T.hold(${a.i})">منتظر می‌مانیم</button></div>`).join('');
     let p = '';
     if (g.phase == 'bid' && g.bidTurn == me) { v = Math.min(2, g.bidMax); p = `ادعای تو:<button onclick="T.ch(-1)">−</button><span class="big" id="bv">${v}</span><button onclick="T.ch(1)">+</button><br><button class="go" onclick="act('bid',T.val())">ثبت ادعا</button>`; }
     else if (g.phase == 'bid') p = `نوبت ادعای ${name(g.bidTurn)}…`;
@@ -33,5 +45,8 @@ const T = (() => {
     else if (g.phase == 'series') o = `<div class="bn"><big>${g.ser[mt] >= 5 ? 'تیم ما بازی را برد! 🏆' : 'حریف بازی را برد'}</big><small>${g.ser[mt]} – ${g.ser[1 - mt]}</small><button class="go" onclick="act('again')">بازی جدید</button></div>`;
     $('#ov').innerHTML = o;
   }
-  return { render, val: () => v, ch: d => { v = Math.max(0, Math.min(S.g.bidMax, v + d)); $('#bv').textContent = v; } };
+  return {
+    render, val: () => v, ch: d => { v = Math.max(0, Math.min(S.g.bidMax, v + d)); $('#bv').textContent = v; },
+    hold: i => { hold[i] = 1; render(S); }, mic: () => S && render(S), snd: () => { SND.toggle(); S && render(S); }
+  };
 })();
