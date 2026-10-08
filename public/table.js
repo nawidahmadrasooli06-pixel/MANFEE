@@ -38,7 +38,7 @@ const T = (() => {
     if (g.rid != rid) rid = g.rid;
     myTurn = my;
     const pill = (t, l) => `<div class="pl ${t == mt ? 'm' : 'e'}">${l} · سری ${g.ser[t]} از ۵ · ${g.taken[t] + g.taken[t + 2]}/${g.tc ? g.tc[t] : '؟'}</div>`;
-    $('#hud').innerHTML = pill(mt, 'ما') + pill(1 - mt, 'حریف');
+    $('#hud').innerHTML = pill(mt, 'ما') + pill(1 - mt, 'حریف') + (st.host ? '<button class="ib" onclick="backToMenu()">↩️ برگشت</button>' : '');
     let h = '';
     for (let s = 0; s < 4; s++) {
       const x = st.seats[s], on = (g.phase == 'play' && g.turn == s) || (g.phase == 'bid' && g.bidTurn == s), c = g.claims[s];
