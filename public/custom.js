@@ -4,9 +4,8 @@ let currentTrackIndex = -1;
 let tracksPlayedCount = 0;
 
 let bgAudio = new Audio();
-bgAudio.volume = 0.2; // ولوم پیش‌فرض ۲۰٪
+bgAudio.volume = 0.2;
 
-// ساخت لیست ۲۱ موزیک
 for (let i = 1; i <= TOTAL_TRACKS; i++) {
   playlist.push({ name: `موزیک شماره ${i}`, file: `music${i}.mp3` });
 }
@@ -27,7 +26,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (volRange) volRange.value = savedVol;
 });
 
-// مدیریت پخش متوالی موزیک‌ها
 bgAudio.onended = () => {
   tracksPlayedCount++;
   if (tracksPlayedCount >= TOTAL_TRACKS) {
@@ -109,7 +107,6 @@ function changeVolume(val) {
   localStorage.setItem("manfee_vol", val);
 }
 
-// ساخت پنجره تنظیمات
 function createSettingsModal() {
   if (document.getElementById("customSettingsModal")) return;
 
@@ -119,13 +116,13 @@ function createSettingsModal() {
   });
 
   const modalHTML = `
-    <div id="customSettingsModal" class="custom-modal">
-      <div class="modal-box">
+    <div id="customSettingsModal" class="custom-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
+      <div class="modal-box" style="background:#0b1f1e; border:2px solid #f0b64a; border-radius:18px; padding:20px; width:100%; max-width:320px; color:#fff; text-align:center; display:flex; flex-direction:column; gap:12px;">
         <h3 style="margin:0; color:#f0b64a;">⚙️ تنظیمات و موزیک</h3>
         
-        <div class="setting-row">
+        <div class="setting-row" style="display:flex; justify-content:space-between; align-items:center;">
           <span>🎨 تم میز:</span>
-          <select id="themeSelect" onchange="changeTheme(this.value)">
+          <select id="themeSelect" onchange="changeTheme(this.value)" style="background:#0f2a28; color:#fff; border:1px solid #f0b64a; border-radius:8px; padding:5px;">
             <option value="theme-classic">سبز کلاسیک</option>
             <option value="theme-casino">قرمز کازینویی</option>
             <option value="theme-dark">سرمه‌ای دارک</option>
@@ -133,9 +130,9 @@ function createSettingsModal() {
           </select>
         </div>
 
-        <div class="setting-row">
+        <div class="setting-row" style="display:flex; justify-content:space-between; align-items:center;">
           <span>🃏 طرح کارت‌ها:</span>
-          <select id="cardSelect" onchange="changeCardStyle(this.value)">
+          <select id="cardSelect" onchange="changeCardStyle(this.value)" style="background:#0f2a28; color:#fff; border:1px solid #f0b64a; border-radius:8px; padding:5px;">
             <option value="card-style-default">کلاسیک</option>
             <option value="card-style-joker">طرح جوکر</option>
             <option value="card-style-floral">طرح گل‌گلی</option>
@@ -143,38 +140,37 @@ function createSettingsModal() {
           </select>
         </div>
 
-        <div class="setting-row">
+        <div class="setting-row" style="display:flex; justify-content:space-between; align-items:center;">
           <span>🎵 انتخاب موزیک:</span>
-          <select id="musicSelect" onchange="startMusicFrom(parseInt(this.value))">
+          <select id="musicSelect" onchange="startMusicFrom(parseInt(this.value))" style="background:#0f2a28; color:#fff; border:1px solid #f0b64a; border-radius:8px; padding:5px;">
             ${musicOptions}
           </select>
         </div>
 
-        <div class="setting-row">
+        <div class="setting-row" style="display:flex; justify-content:space-between; align-items:center;">
           <span>🔊 ولوم زیرصدا (۱ تا ۱۰۰):</span>
           <input type="range" id="volRange" min="0" max="100" value="20" oninput="changeVolume(this.value)">
         </div>
 
-        <button class="btn go" style="min-width:auto; padding:10px; margin-top:10px;" onclick="closeSettings()">بستن</button>
+        <button class="btn go" style="min-width:auto; padding:10px; margin-top:10px; background:#f0b64a; color:#000; font-weight:bold; border:none; border-radius:10px; cursor:pointer;" onclick="closeSettingsModal()">بستن</button>
       </div>
     </div>
   `;
   document.body.insertAdjacentHTML("beforeend", modalHTML);
 }
 
-function openSettings() {
-  const modal = document.getElementById("customSettingsModal");
-  if (modal) {
-    modal.classList.add("open");
-  } else {
+function openSettingsModal() {
+  let modal = document.getElementById("customSettingsModal");
+  if (!modal) {
     createSettingsModal();
-    document.getElementById("customSettingsModal").classList.add("open");
+    modal = document.getElementById("customSettingsModal");
   }
+  if (modal) modal.style.display = "flex";
 }
 
-function closeSettings() {
+function closeSettingsModal() {
   const modal = document.getElementById("customSettingsModal");
-  if (modal) modal.classList.remove("open");
+  if (modal) modal.style.display = "none";
 }
 
 function changeTheme(themeName) {
@@ -189,7 +185,6 @@ function changeCardStyle(cardStyle) {
   localStorage.setItem("manfee_card", cardStyle);
 }
 
-// مینی پلیر جدید در پایین سمت چپ صفحه
 function injectMiniPlayer() {
   if (document.getElementById("miniPlayer")) return;
 
