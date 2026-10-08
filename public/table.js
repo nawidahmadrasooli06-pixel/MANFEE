@@ -35,12 +35,10 @@ const T = (() => {
 
   function draw(st) {
     S = st; mirReviewOverlay(st); const g = st.g, me = st.me, mt = me % 2, rel = s => (s - me + 4) % 4, name = s => st.seats[s].name, my = g.phase == 'play' && g.turn == me;
-    if (g.rid != rid) { rid = g.rid; if (g.phase == 'deal') for (let i = 0; i < 13; i++) setTimeout(SND.deal, 500 + i * 180); }
-    if (g.trick.length > pl) SND.card();
-    const tk = g.taken.reduce((a, b) => a + b, 0); if (tk > lastTk) SND.win(); lastTk = tk;
-    if (my && !myTurn) SND.ping(); myTurn = my;
+    if (g.rid != rid) rid = g.rid;
+    myTurn = my;
     const pill = (t, l) => `<div class="pl ${t == mt ? 'm' : 'e'}">${l} · سری ${g.ser[t]} از ۵ · ${g.taken[t] + g.taken[t + 2]}/${g.tc ? g.tc[t] : '؟'}</div>`;
-    $('#hud').innerHTML = pill(mt, 'ما') + pill(1 - mt, 'حریف') + `<button class="ib" onclick="V.toggle()">${V.live() ? '🎙️' : '🔇'}</button><button class="ib" onclick="T.snd()">${SND.muted() ? '🔕' : '🔊'}</button>`;
+    $('#hud').innerHTML = pill(mt, 'ما') + pill(1 - mt, 'حریف');
     let h = '';
     for (let s = 0; s < 4; s++) {
       const x = st.seats[s], on = (g.phase == 'play' && g.turn == s) || (g.phase == 'bid' && g.bidTurn == s), c = g.claims[s];
@@ -53,7 +51,7 @@ const T = (() => {
     $('#tbl').innerHTML = h + '<div id="wm">CACTUC</div>';
     if (sel != null && !g.hand.includes(sel)) sel = null;
     if (!drag) $('#hand').innerHTML = g.hand.filter(c => c != pending).map((c, i) => `<span data-c="${c}" style="--i:${i}" class="${g.phase == 'deal' ? 'dl' : ''} ${sel == c ? 'sel' : ''}">${cd(c, my && !g.legal.includes(c) ? 'dim' : '')}</span>`).join('');
-    if (g.nid != nid) { nid = g.nid; if (g.note) { toast(g.note); SND.swap(); $('#hand').classList.add('sw'); setTimeout(() => $('#hand').classList.remove('sw'), 800); } }
+    if (g.nid != nid) { nid = g.nid; if (g.note) { toast(g.note); $('#hand').classList.add('sw'); setTimeout(() => $('#hand').classList.remove('sw'), 800); } }
     const away = st.away || [];
     $('#aw').innerHTML = away.map(a => `<div class="aw">${a.name} قطع شد<br><button onclick="act('sub',${a.i})">ربات جایش بازی کند</button><button onclick="T.hold(${a.i})">منتظر می‌مانیم</button></div>`).join('');
     let p = '';
@@ -95,7 +93,7 @@ const T = (() => {
   window.addEventListener('pointercancel', () => { if (drag) { drag = null; draw(S); } });
   return {
     render, val: () => v, ch: d => { v = Math.max(0, Math.min(S.g.bidMax, v + d)); $('#bv').textContent = v; },
-    hold: i => { const els = document.querySelectorAll('#aw .aw'); els.forEach(e => { if (e.textContent.includes((S.seats[i] || {}).name || '')) e.remove(); }); }, mic: () => S && draw(S), snd: () => { SND.toggle(); S && draw(S); }
+    hold: i => { const els = document.querySelectorAll('#aw .aw'); els.forEach(e => { if (e.textContent.includes((S.seats[i] || {}).name || '')) e.remove(); }); }
   };
 })();
 
