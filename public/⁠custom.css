@@ -1,20 +1,31 @@
-/* تم‌های مختلف میز بازی */
-body.theme-classic #tbl, body.theme-classic .scr, body.theme-classic { background: #0b1f1e !important; }
-body.theme-casino #tbl, body.theme-casino .scr, body.theme-casino { background: #4a0d0d !important; }
-body.theme-dark #tbl, body.theme-dark .scr, body.theme-dark { background: #0f172a !important; }
-body.theme-gold #tbl, body.theme-gold .scr, body.theme-gold { background: #2d2006 !important; }
+/* تم‌های میز بازی - اصلاح کامل برای پوشش کل صفحه */
+body.theme-classic, body.theme-classic #tbl, body.theme-classic .scr { background: #0b1f1e !important; }
+body.theme-casino, body.theme-casino #tbl, body.theme-casino .scr { background: #4a0d0d !important; }
+body.theme-dark, body.theme-dark #tbl, body.theme-dark .scr { background: #0f172a !important; }
+body.theme-gold, body.theme-gold #tbl, body.theme-gold .scr { background: #2d2006 !important; }
 
-/* استایل کارت‌ها */
-body.card-style-joker .cd { border: 2px solid #ff4444 !important; box-shadow: 0 0 10px rgba(255,68,68,0.6) !important; }
+/* اصلاح فرش شطرنجی سبزرنگ اصلی */
+#tbl { background-size: cover !important; transition: background 0.3s ease !important; }
+
+/* طرح کارت‌ها */
+body.card-style-joker .cd { border: 2px solid #ff4444 !important; box-shadow: 0 0 8px rgba(255,68,68,0.5) !important; }
 body.card-style-floral .cd { border: 2px solid #44ffaa !important; }
 body.card-style-dark .cd { background: #1e1e1e !important; color: #fff !important; }
 
-/* استایل ایموجی‌ها */
-.reaction-bar { display: flex !important; gap: 8px !important; justify-content: center !important; margin: 8px 0 !important; }
-.react-btn { background: rgba(0,0,0,0.6) !important; border: 1px solid #f0b64a !important; font-size: 18px !important; padding: 4px 8px !important; border-radius: 12px !important; cursor: pointer !important; }
-.pop-emoji { position: absolute !important; font-size: 32px !important; top: -40px !important; left: 50% !important; transform: translateX(-50%) !important; animation: popUp 2s forwards !important; z-index: 1000 !important; }
-@keyframes popUp {
-  0% { opacity: 0; transform: translate(-50%, 0); }
-  30% { opacity: 1; transform: translate(-50%, -20px); }
-  100% { opacity: 0; transform: translate(-50%, -40px); }
+/* اصلاح کادر بازی نیمه‌کاره در صفحه اصلی */
+#resumeBox {
+  width: 90% !important;
+  max-width: 320px !important;
+  margin: 12px auto !important;
+  padding: 10px !important;
+  box-sizing: border-box !important;
+}
+#resumeBox > div {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+#resumeBox button {
+  width: 100% !important;
+  margin: 0 !important;
 }
