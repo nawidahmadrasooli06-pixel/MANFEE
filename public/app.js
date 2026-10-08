@@ -2,35 +2,6 @@ const $ = q => document.querySelector(q), sk = io();
 const tok = localStorage.tok || (localStorage.tok = Math.random().toString(36).slice(2) + Date.now());
 let st = null, BOT = '', pend = null;
 const tg = window.Telegram && Telegram.WebApp;
-// Best-effort screenshot/screen-capture shield for the Mini App.
-// A normal Telegram WebView cannot receive a universal screenshot event, so
-// this shield also covers the board whenever the page loses visibility/focus.
-(function installScreenShield(){
-  const style = document.createElement('style');
-  style.textContent = `
-    #screenShield{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;
-      background:#000;color:#fff;text-align:center;padding:28px;direction:rtl;font-family:inherit}
-    #screenShield.on{display:flex}
-    #screenShield .box{max-width:340px}
-    #screenShield .lock{font-size:58px;margin-bottom:12px}
-    #screenShield h2{margin:0 0 8px;font-size:22px}
-    #screenShield p{margin:0;opacity:.85;line-height:1.8;font-size:14px}
-  `;
-  document.head.appendChild(style);
-  const shield = document.createElement('div');
-  shield.id = 'screenShield';
-  shield.innerHTML = '<div class="box"><div class="lock">🔒</div><h2>اسکرین قفل شد</h2><p>لطفاً از میز بازی عکس نگیرید.<br>برای ادامه، به بازی برگرد.</p></div>';
-  document.body.appendChild(shield);
-  const gameOpen = () => { const g = document.querySelector('#game'); return !!(g && g.classList.contains('on')); };
-  const showShield = () => { if (gameOpen()) shield.classList.add('on'); };
-  const hideShield = () => shield.classList.remove('on');
-  document.addEventListener('visibilitychange', () => document.hidden ? showShield() : hideShield());
-  window.addEventListener('pagehide', showShield);
-  window.addEventListener('pageshow', hideShield);
-  window.addEventListener('blur', () => { if (gameOpen()) setTimeout(() => { if (document.hidden) showShield(); }, 60); });
-  window.addEventListener('focus', hideShield);
-})();
-
 if (tg) { tg.ready(); tg.expand(); tg.disableVerticalSwipes && tg.disableVerticalSwipes(); }
 fetch('/config').then(r => r.json()).then(c => BOT = c.bot).catch(() => { });
 V.init(sk);
@@ -105,3 +76,62 @@ sk.on('connect', () => {
   const r = localStorage.room;
   if (r) { $('#rs').textContent = r; show('resume'); }
 });
+
+
+/* MANFEE_PRIVACY_SHIELD_V2 */
+(function () {
+  if (window.__MANFEE_PRIVACY_SHIELD_V2) return;
+  window.__MANFEE_PRIVACY_SHIELD_V2 = true;
+
+  function installPrivacyShield() {
+    if (document.getElementById('manfee-privacy-shield')) return;
+
+    const shield = document.createElement('div');
+    shield.id = 'manfee-privacy-shield';
+    shield.innerHTML =
+      '<div class="manfee-privacy-box">' +
+        '<div class="manfee-privacy-lock">🔒</div>' +
+        '<div class="manfee-privacy-title">میز بازی خصوصی است</div>' +
+        '<div class="manfee-privacy-sub">هنگام خروج از صفحه، کارت‌ها پنهان می‌شوند.</div>' +
+      '</div>';
+
+    const style = document.createElement('style');
+    style.id = 'manfee-privacy-shield-style';
+    style.textContent = `
+      #manfee-privacy-shield{
+        position:fixed; inset:0; z-index:2147483647; display:none;
+        align-items:center; justify-content:center;
+        background:#000; color:#fff; text-align:center;
+        user-select:none; -webkit-user-select:none;
+      }
+      #manfee-privacy-shield .manfee-privacy-box{padding:24px}
+      #manfee-privacy-shield .manfee-privacy-lock{font-size:48px}
+      #manfee-privacy-shield .manfee-privacy-title{margin-top:12px;font-size:22px;font-weight:800}
+      #manfee-privacy-shield .manfee-privacy-sub{margin-top:8px;font-size:14px;opacity:.86}
+    `;
+    (document.head || document.documentElement).appendChild(style);
+    document.body.appendChild(shield);
+
+    const show = () => { shield.style.display = 'flex'; };
+    const hide = () => { shield.style.display = 'none'; };
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) show();
+      else hide();
+    }, {passive:true});
+
+    window.addEventListener('pagehide', show, {passive:true});
+    window.addEventListener('blur', show, {passive:true});
+    window.addEventListener('focus', hide, {passive:true});
+
+    document.addEventListener('copy', e => e.preventDefault(), {capture:true});
+    document.addEventListener('cut', e => e.preventDefault(), {capture:true});
+    document.addEventListener('contextmenu', e => e.preventDefault(), {capture:true});
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', installPrivacyShield, {once:true});
+  } else {
+    installPrivacyShield();
+  }
+})();
