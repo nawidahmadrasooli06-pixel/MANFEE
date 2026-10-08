@@ -3,7 +3,7 @@ const bot = require('./bot');
 // seats 0..3 ; play order goes seat -> seat+1 (to the right) ; teams = seat%2
 class Game {
   constructor(cb, bots, names) {
-    Object.assign(this, { cb, bot: bots, names, ser: [0, 0], dealer: -1, rid: 0, nid: 0, timers: [], phase: 'lobby', win: -1, dl: 0, dls: -1, stopped: false, mirWait: 0 });
+    Object.assign(this, { cb, bot: bots, names, ser: [0, 0], dealer: -1, rid: 0, nid: 0, timers: [], phase: 'lobby', win: -1, dl: 0, dls: -1, stopped: false });
   }
   later(f, ms) { const t = setTimeout(f, ms); this.timers.push(t); return t; }
   emit() { this.cb(); }
@@ -69,30 +69,35 @@ class Game {
   }
   mir(s, a) {
     if (this.phase != 'mir' || s != this.dealer) return;
-    if (a == 'swap') return this.prepareSwap();
-    this.go();
-  }
-  prepareSwap() {
-    if (this.phase != 'mir') return;
-    this.disarm();
-    this.phase = 'mirWait';
-    this.mirWait = 10;
-    this.emit();
-    const tick = () => {
-      if (this.phase != 'mirWait') return;
-      if (this.mirWait <= 0) return this.swap();
-      this.mirWait--;
-      this.emit();
-      this.later(tick, 1000);
-    };
-    this.later(tick, 1000);
+    a == 'swap' ? this.swap() : this.go();
   }
   swap() {
-    const h = [], c = [];
-    for (let i = 0; i < 4; i++) { h[(i + 1) % 4] = this.hands[i]; c[(i + 1) % 4] = this.claim[i]; }
-    this.hands = h; this.claim = c; this.mirWait = 0; this.nid++;
-    this.note = this.names[this.dealer] + ' ادعا را رد کرد — کارت‌ها و ادعاها چرخید!';
-    this.go();
+    if (this.phase != 'mir') return;
+    this.disarm();
+    this.phase = 'mirReview';
+    this.mirReview = 15;
+    this.note = this.names[this.dealer] + ' ادعا را رد کرد — کارت‌ها قرار است بچرخد.';
+    this.emit();
+    this.mirReviewStep();
+  }
+  mirReviewStep() {
+    if (this.phase != 'mirReview') return;
+    if (this.mirReview <= 0) {
+      const h = [], c = [];
+      for (let i = 0; i < 4; i++) { h[(i + 1) % 4] = this.hands[i]; c[(i + 1) % 4] = this.claim[i]; }
+      this.hands = h; this.claim = c; this.nid++;
+      this.note = this.names[this.dealer] + ' ادعا را رد کرد — کارت‌ها و ادعاها چرخید!';
+      this.go();
+      return;
+    }
+    const n = this.mirReview;
+    this.emit();
+    this.later(() => {
+      if (this.phase === 'mirReview' && this.mirReview === n) {
+        this.mirReview--;
+        this.mirReviewStep();
+      }
+    }, 1000);
   }
   go() {
     this.disarm(); this.phase = 'play'; this.turn = this.order[0]; this.emit();
@@ -142,6 +147,7 @@ class Game {
     else if (P == 'deal') this.later(() => { this.phase = 'bid'; this.bidStep(); }, 1000);
     else if (P == 'bid') this.bidStep();
     else if (P == 'mir') this.mirStep();
+    else if (P == 'mirReview') this.mirReviewStep();
     else if (P == 'play') this.turnStep();
     else if (P == 'trick') this.later(() => this.resolve(), 500);
     else if (P == 'over') this.later(() => this.newHand(), 2000);
@@ -150,7 +156,7 @@ class Game {
     const P = this.phase, k = i => P == 'bid' ? this.order.indexOf(i) < this.bi : P != 'deal';
     const sum = this.claim.reduce((a, b) => a + b, 0), pl = P != 'bid' && P != 'deal';
     return {
-      phase: P, countdown: this.countdown || 0, mirWait: this.mirWait || 0, dealer: this.dealer, turn: this.turn, rid: this.rid, nid: this.nid, note: this.note, res: this.res,
+      phase: P, countdown: this.countdown || 0, mirReview: P == 'mirReview' ? (this.mirReview || 0) : 0, dealer: this.dealer, turn: this.turn, rid: this.rid, nid: this.nid, note: this.note, res: this.res,
       teams: [[this.names[0], this.names[2]], [this.names[1], this.names[3]]],
       ser: this.ser, seriesWinner: this.ser[0] >= 5 ? 0 : this.ser[1] >= 5 ? 1 : -1,
       win: this.win, trick: this.trick, last: this.last, taken: this.taken, hand: this.hands[m],
