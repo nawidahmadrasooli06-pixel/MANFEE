@@ -1,42 +1,20 @@
-/* تنظیمات تم‌های میز بازی با اولویت بالا */
-body.theme-classic #tbl, body.theme-classic .scr { background: #0b1f1e !important; }
-body.theme-casino #tbl, body.theme-casino .scr { background: #3b0a0a !important; }
-body.theme-dark #tbl, body.theme-dark .scr { background: #0a111e !important; }
-body.theme-gold #tbl, body.theme-gold .scr { background: #2a2208 !important; }
+/* تم‌های مختلف میز بازی */
+body.theme-classic #tbl, body.theme-classic .scr, body.theme-classic { background: #0b1f1e !important; }
+body.theme-casino #tbl, body.theme-casino .scr, body.theme-casino { background: #4a0d0d !important; }
+body.theme-dark #tbl, body.theme-dark .scr, body.theme-dark { background: #0f172a !important; }
+body.theme-gold #tbl, body.theme-gold .scr, body.theme-gold { background: #2d2006 !important; }
 
-/* تنظیمات استایل کارت‌ها */
-body.card-style-joker .cd { border: 2px solid #ff4444 !important; box-shadow: 0 0 8px rgba(255,68,68,0.5) !important; }
+/* استایل کارت‌ها */
+body.card-style-joker .cd { border: 2px solid #ff4444 !important; box-shadow: 0 0 10px rgba(255,68,68,0.6) !important; }
 body.card-style-floral .cd { border: 2px solid #44ffaa !important; }
-body.card-style-dark .cd { background: #222 !important; color: #fff !important; }
+body.card-style-dark .cd { background: #1e1e1e !important; color: #fff !important; }
 
-/* استایل نوار ایموجی روی میز */
-.reaction-bar {
-  display: flex !important;
-  gap: 8px !important;
-  justify-content: center !important;
-  margin: 8px 0 !important;
-}
-.react-btn {
-  background: rgba(0,0,0,0.6) !important;
-  border: 1px solid #f0b64a !important;
-  font-size: 18px !important;
-  padding: 4px 8px !important;
-  border-radius: 12px !important;
-  cursor: pointer !important;
-}
-
-/* انیمیشن پرتاب ایموجی */
-.pop-emoji {
-  position: absolute !important;
-  font-size: 32px !important;
-  top: -40px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  animation: popUp 2s forwards !important;
-  z-index: 1000 !important;
-}
+/* استایل ایموجی‌ها */
+.reaction-bar { display: flex !important; gap: 8px !important; justify-content: center !important; margin: 8px 0 !important; }
+.react-btn { background: rgba(0,0,0,0.6) !important; border: 1px solid #f0b64a !important; font-size: 18px !important; padding: 4px 8px !important; border-radius: 12px !important; cursor: pointer !important; }
+.pop-emoji { position: absolute !important; font-size: 32px !important; top: -40px !important; left: 50% !important; transform: translateX(-50%) !important; animation: popUp 2s forwards !important; z-index: 1000 !important; }
 @keyframes popUp {
-  0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
-  30% { opacity: 1; transform: translate(-50%, -20px) scale(1.2); }
-  100% { opacity: 0; transform: translate(-50%, -50px) scale(1); }
+  0% { opacity: 0; transform: translate(-50%, 0); }
+  30% { opacity: 1; transform: translate(-50%, -20px); }
+  100% { opacity: 0; transform: translate(-50%, -40px); }
 }
