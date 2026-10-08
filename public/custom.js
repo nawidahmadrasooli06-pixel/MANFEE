@@ -1,7 +1,6 @@
 const TOTAL_TRACKS = 21;
 let playlist = [];
 let currentTrackIndex = -1;
-let startIndex = -1;
 let tracksPlayedCount = 0;
 
 let bgAudio = new Audio();
@@ -28,14 +27,13 @@ document.addEventListener("DOMContentLoaded", () => {
   if (volRange) volRange.value = savedVol;
 });
 
-// وقتی یک آهنگ تمام می‌شود
+// مدیریت پخش متوالی موزیک‌ها
 bgAudio.onended = () => {
   tracksPlayedCount++;
   if (tracksPlayedCount >= TOTAL_TRACKS) {
     stopMusic();
     return;
   }
-  // رفتن به آهنگ بعدی به صورت چرخشی
   currentTrackIndex = (currentTrackIndex + 1) % TOTAL_TRACKS;
   playTrackAtIndex(currentTrackIndex);
 };
@@ -55,7 +53,6 @@ function startMusicFrom(index) {
     stopMusic();
     return;
   }
-  startIndex = index;
   tracksPlayedCount = 0;
   playTrackAtIndex(index);
 }
@@ -112,7 +109,10 @@ function changeVolume(val) {
   localStorage.setItem("manfee_vol", val);
 }
 
+// ساخت پنجره تنظیمات
 function createSettingsModal() {
+  if (document.getElementById("customSettingsModal")) return;
+
   let musicOptions = '<option value="-1">خاموش</option>';
   playlist.forEach((item, idx) => {
     musicOptions += `<option value="${idx}">${item.name}</option>`;
@@ -144,7 +144,7 @@ function createSettingsModal() {
         </div>
 
         <div class="setting-row">
-          <span>🎵 انتخاب موزیک (۲۱ آهنگ):</span>
+          <span>🎵 انتخاب موزیک:</span>
           <select id="musicSelect" onchange="startMusicFrom(parseInt(this.value))">
             ${musicOptions}
           </select>
@@ -155,15 +155,27 @@ function createSettingsModal() {
           <input type="range" id="volRange" min="0" max="100" value="20" oninput="changeVolume(this.value)">
         </div>
 
-        <button class="btn go" style="min-width:auto; padding:8px;" onclick="closeSettings()">بستن</button>
+        <button class="btn go" style="min-width:auto; padding:10px; margin-top:10px;" onclick="closeSettings()">بستن</button>
       </div>
     </div>
   `;
   document.body.insertAdjacentHTML("beforeend", modalHTML);
 }
 
-function openSettings() { document.getElementById("customSettingsModal").classList.add("open"); }
-function closeSettings() { document.getElementById("customSettingsModal").classList.remove("open"); }
+function openSettings() {
+  const modal = document.getElementById("customSettingsModal");
+  if (modal) {
+    modal.classList.add("open");
+  } else {
+    createSettingsModal();
+    document.getElementById("customSettingsModal").classList.add("open");
+  }
+}
+
+function closeSettings() {
+  const modal = document.getElementById("customSettingsModal");
+  if (modal) modal.classList.remove("open");
+}
 
 function changeTheme(themeName) {
   document.body.classList.remove("theme-classic", "theme-casino", "theme-dark", "theme-gold");
@@ -177,13 +189,15 @@ function changeCardStyle(cardStyle) {
   localStorage.setItem("manfee_card", cardStyle);
 }
 
-// مینی پلیر روی میز بازی
+// مینی پلیر جدید در پایین سمت چپ صفحه
 function injectMiniPlayer() {
+  if (document.getElementById("miniPlayer")) return;
+
   const miniPlayerHTML = `
-    <div id="miniPlayer" style="position:fixed; top:10px; left:10px; z-index:90; display:flex; gap:6px; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:20px; border:1px solid #f0b64a;">
-      <button onclick="prevTrack()" style="background:none; border:none; color:#fff; font-size:14px; cursor:pointer;">⏮️</button>
-      <button id="playPauseBtn" onclick="togglePlay()" style="background:none; border:none; color:#fff; font-size:14px; cursor:pointer;">▶️</button>
-      <button onclick="nextTrack()" style="background:none; border:none; color:#fff; font-size:14px; cursor:pointer;">⏭️</button>
+    <div id="miniPlayer" style="position:fixed; bottom:20px; left:15px; z-index:999; display:flex; gap:8px; background:rgba(11,31,30,0.9); padding:6px 12px; border-radius:25px; border:1px solid #f0b64a; box-shadow:0 4px 10px rgba(0,0,0,0.5);">
+      <button onclick="prevTrack()" style="background:none; border:none; color:#fff; font-size:16px; cursor:pointer;">⏮️</button>
+      <button id="playPauseBtn" onclick="togglePlay()" style="background:none; border:none; color:#fff; font-size:16px; cursor:pointer;">▶️</button>
+      <button onclick="nextTrack()" style="background:none; border:none; color:#fff; font-size:16px; cursor:pointer;">⏭️</button>
     </div>
   `;
   document.body.insertAdjacentHTML("beforeend", miniPlayerHTML);
