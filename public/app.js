@@ -1,6 +1,6 @@
 const $ = q => document.querySelector(q), sk = io();
 const tok = localStorage.tok || (localStorage.tok = Math.random().toString(36).slice(2) + Date.now());
-let st = null, BOT = '', pend = null;
+let st = null, BOT = '', pend = null, menuMode = false;
 const tg = window.Telegram && Telegram.WebApp;
 if (tg) { tg.ready(); tg.expand(); tg.disableVerticalSwipes && tg.disableVerticalSwipes(); }
 fetch('/config').then(r => r.json()).then(c => BOT = c.bot).catch(() => { });
@@ -15,11 +15,14 @@ $('#nm').value = localStorage.nm || (tg && tg.initDataUnsafe && tg.initDataUnsaf
 $('#invNm').value = $('#nm').value;
 const qr = new URLSearchParams(location.search).get('r');
 if (qr) show('invite');
-function mk() { sk.emit('create', { name: nm(), token: tok }); }
+function mk() { sk.emit('create', { name: nm(), token: tok, look: typeof prefLook === 'function' ? prefLook() : undefined }); }
 function jn() { sk.emit('join', { code: $('#cd').value, name: nm(), token: tok }); }
 function acceptInvite() { $('#nm').value = $('#invNm').value; sk.emit('join', { code: qr || $('#invCode').textContent, name: nm(), token: tok }); }
-function resume() { sk.emit('join', { code: localStorage.room, name: localStorage.nm || 'بازیکن', token: tok }); }
-function fresh() { localStorage.removeItem('room'); pend = null; history.replaceState(0, '', '/'); $('#cd').value = ''; show('join'); }
+function backToMenu() { menuMode = true; show('menu'); }
+function resume() {
+  if (st && st.g) { menuMode = false; show('game'); T.render(st); return; }
+  sk.emit('join', { code: localStorage.room, name: localStorage.nm || 'بازیکن', token: tok }); }
+function fresh() { menuMode = false; localStorage.removeItem('room'); pend = null; history.replaceState(0, '', '/'); $('#cd').value = ''; show('join'); }
 function take(i) { sk.emit('take', { ...pend, seat: i }); }
 function startGame() { sk.emit('start', { forceBots: false }); }
 function startWithBots() { sk.emit('start', { forceBots: true }); }
@@ -48,7 +51,9 @@ function lobby() {
 }
 sk.on('state', s => {
   st = s; localStorage.room = s.code; history.replaceState(0, '', '?r=' + s.code);
-  if (s.g) { show('game'); T.render(s); } else { show('lobby'); lobby(); }
+  if (typeof applyLook === 'function' && s.look) applyLook(s.look);
+  if (typeof syncTrackFromState === 'function') syncTrackFromState(s.track);
+  if (s.g) { if (!menuMode) show('game'); T.render(s); } else { menuMode = false; show('lobby'); lobby(); }
 });
 sk.on('inviteInfo', info => {
   if (info.expired) { $('#expiredMsg').textContent = info.message || 'این دعوت منقضی شده است.'; show('expired'); return; }
