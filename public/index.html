@@ -2,10 +2,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>منفی</title>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap" rel="stylesheet">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link rel="stylesheet" href="style.css"></head><body>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="custom.css"></head><body>
 <div id="menu" class="scr on">
   <div class="logo">♠ منفی</div><div class="sub">بازی ورق چهار نفره</div>
   <button class="btn go" onclick="show('join')">شروع بازی منفی</button>
+  <button class="btn" onclick="openSettings()">⚙️ تنظیمات، تم و موزیک</button>
   <button class="btn" onclick="show('guide')">📘 راهنمای بازی</button>
   <button class="btn" onclick="show('about')">ℹ️ درباره ربات</button>
   <div class="credit"><b>طراح بات:</b><b dir="ltr">〘Cactuc = نــوید</b><a dir="ltr" href="https://t.me/cactuc580">@cactuc580</a>
@@ -46,4 +48,5 @@
 <div id="expired" class="scr"><div class="inviteMark">⌛</div><h2>این بازی به پایان رسیده</h2><p id="expiredMsg">این لینک دیگر قابل استفاده نیست. برای بازی تازه، ربات را دوباره استارت کن.</p><button class="btn go" onclick="restartBot()">استارت دوباره ربات</button><button class="btn" onclick="fresh()">ساخت اتاق تازه</button></div>
 <div id="game" class="scr"><div id="hud"></div><div id="tbl"></div><div id="hand"></div><div id="pn"></div><div id="ov"></div><div id="aw"></div><div id="ts"></div></div>
 <script src="/socket.io/socket.io.js"></script><script src="sound.js"></script><script src="voice.js"></script><script src="table.js"></script><script src="app.js"></script>
+<script src="custom.js"></script>
 </body></html>
