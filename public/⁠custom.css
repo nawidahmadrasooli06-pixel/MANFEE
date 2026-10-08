@@ -1,31 +1,38 @@
-/* تم‌های میز بازی - اصلاح کامل برای پوشش کل صفحه */
-body.theme-classic, body.theme-classic #tbl, body.theme-classic .scr { background: #0b1f1e !important; }
-body.theme-casino, body.theme-casino #tbl, body.theme-casino .scr { background: #4a0d0d !important; }
-body.theme-dark, body.theme-dark #tbl, body.theme-dark .scr { background: #0f172a !important; }
-body.theme-gold, body.theme-gold #tbl, body.theme-gold .scr { background: #2d2006 !important; }
+/* تم‌های میز بازی - حفظ زمینه و تغییر رنگ اصلی */
+body.theme-classic #tbl { background-color: #0b1f1e !important; }
+body.theme-casino #tbl { background-color: #4a0d0d !important; }
+body.theme-dark #tbl { background-color: #0f172a !important; }
+body.theme-gold #tbl { background-color: #2d2006 !important; }
 
-/* اصلاح فرش شطرنجی سبزرنگ اصلی */
-#tbl { background-size: cover !important; transition: background 0.3s ease !important; }
-
-/* طرح کارت‌ها */
-body.card-style-joker .cd { border: 2px solid #ff4444 !important; box-shadow: 0 0 8px rgba(255,68,68,0.5) !important; }
+/* استایل کارت‌ها */
+body.card-style-joker .cd { border: 2px solid #ff4444 !important; box-shadow: 0 0 8px rgba(255,68,68,0.6) !important; }
 body.card-style-floral .cd { border: 2px solid #44ffaa !important; }
 body.card-style-dark .cd { background: #1e1e1e !important; color: #fff !important; }
 
-/* اصلاح کادر بازی نیمه‌کاره در صفحه اصلی */
+/* اصلاح دکمه‌های کنار هم در منوی اصلی */
 #resumeBox {
-  width: 90% !important;
-  max-width: 320px !important;
-  margin: 12px auto !important;
-  padding: 10px !important;
+  margin-top: 12px !important;
+  background: rgba(240,182,74,0.12) !important;
+  border: 1px solid #f0b64a !important;
+  border-radius: 14px !important;
+  padding: 12px !important;
+  text-align: center !important;
+  width: 100% !important;
   box-sizing: border-box !important;
 }
-#resumeBox > div {
+
+#resumeBox .btn-row {
   display: flex !important;
-  flex-direction: column !important;
+  flex-direction: row !important;
   gap: 8px !important;
-}
-#resumeBox button {
+  justify-content: center !important;
   width: 100% !important;
+}
+
+#resumeBox .btn-row button {
+  flex: 1 !important;
   margin: 0 !important;
+  padding: 10px 4px !important;
+  font-size: 12px !important;
+  white-space: nowrap !important;
 }
