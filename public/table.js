@@ -16,9 +16,9 @@ const T = (() => {
       style.textContent = `
         #manfee-mir-review-overlay{position:fixed;inset:0;z-index:2147483000;display:none;align-items:center;justify-content:center;pointer-events:none;font-family:system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;}
         #manfee-mir-review-overlay .manfee-mir-review-card{min-width:245px;max-width:88vw;text-align:center;padding:20px 24px;border-radius:22px;background:rgba(0,0,0,.66);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);color:#fff;box-shadow:0 12px 45px rgba(0,0,0,.38);}
-        #manfee-mir-review-overlay .manfee-mir-review-title{font-size:78px;line-height:.95;font-weight:900;font-variant-numeric:tabular-nums;}
-        #manfee-mir-review-overlay .manfee-mir-review-sub{margin-top:12px;font-size:21px;font-weight:900;}
-        #manfee-mir-review-overlay .manfee-mir-review-note{margin-top:7px;font-size:16px;font-weight:600;opacity:.94;}
+        #manfee-mir-review-overlay .manfee-mir-review-title{font-size:68px;line-height:.95;font-weight:900;font-variant-numeric:tabular-nums;}
+        #manfee-mir-review-overlay .manfee-mir-review-sub{margin-top:12px;font-size:19px;font-weight:900;}
+        #manfee-mir-review-overlay .manfee-mir-review-note{margin-top:7px;font-size:15px;font-weight:600;opacity:.94;}
       `;
       (document.head || document.documentElement).appendChild(style);
       document.body.appendChild(el);
