@@ -19,7 +19,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const savedCard = localStorage.getItem("manfee_card") || "card-style-default";
   const savedVol = localStorage.getItem("manfee_vol") || "20";
   
-  document.body.classList.add(savedTheme, savedCard);
+  changeTheme(savedTheme);
+  changeCardStyle(savedCard);
   bgAudio.volume = savedVol / 100;
   
   const volRange = document.getElementById("volRange");
@@ -116,11 +117,11 @@ function createSettingsModal() {
   });
 
   const modalHTML = `
-    <div id="customSettingsModal" class="custom-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
-      <div class="modal-box" style="background:#0b1f1e; border:2px solid #f0b64a; border-radius:18px; padding:20px; width:100%; max-width:320px; color:#fff; text-align:center; display:flex; flex-direction:column; gap:12px;">
-        <h3 style="margin:0; color:#f0b64a;">⚙️ تنظیمات و موزیک</h3>
+    <div id="customSettingsModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
+      <div style="background:#0b1f1e; border:2px solid #f0b64a; border-radius:18px; padding:20px; width:100%; max-width:320px; color:#fff; text-align:center; display:flex; flex-direction:column; gap:12px;">
+        <h3 style="margin:0; color:#f0b64a;">⚙️ تنظیمات، تم و موزیک</h3>
         
-        <div class="setting-row" style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
           <span>🎨 تم میز:</span>
           <select id="themeSelect" onchange="changeTheme(this.value)" style="background:#0f2a28; color:#fff; border:1px solid #f0b64a; border-radius:8px; padding:5px;">
             <option value="theme-classic">سبز کلاسیک</option>
@@ -130,7 +131,7 @@ function createSettingsModal() {
           </select>
         </div>
 
-        <div class="setting-row" style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
           <span>🃏 طرح کارت‌ها:</span>
           <select id="cardSelect" onchange="changeCardStyle(this.value)" style="background:#0f2a28; color:#fff; border:1px solid #f0b64a; border-radius:8px; padding:5px;">
             <option value="card-style-default">کلاسیک</option>
@@ -140,19 +141,19 @@ function createSettingsModal() {
           </select>
         </div>
 
-        <div class="setting-row" style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
           <span>🎵 انتخاب موزیک:</span>
           <select id="musicSelect" onchange="startMusicFrom(parseInt(this.value))" style="background:#0f2a28; color:#fff; border:1px solid #f0b64a; border-radius:8px; padding:5px;">
             ${musicOptions}
           </select>
         </div>
 
-        <div class="setting-row" style="display:flex; justify-content:space-between; align-items:center;">
-          <span>🔊 ولوم زیرصدا (۱ تا ۱۰۰):</span>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span>🔊 ولوم زیرصدا:</span>
           <input type="range" id="volRange" min="0" max="100" value="20" oninput="changeVolume(this.value)">
         </div>
 
-        <button class="btn go" style="min-width:auto; padding:10px; margin-top:10px; background:#f0b64a; color:#000; font-weight:bold; border:none; border-radius:10px; cursor:pointer;" onclick="closeSettingsModal()">بستن</button>
+        <button style="min-width:auto; padding:10px; margin-top:10px; background:#f0b64a; color:#000; font-weight:bold; border:none; border-radius:10px; cursor:pointer;" onclick="closeSettingsModal()">بستن</button>
       </div>
     </div>
   `;
@@ -177,12 +178,16 @@ function changeTheme(themeName) {
   document.body.classList.remove("theme-classic", "theme-casino", "theme-dark", "theme-gold");
   document.body.classList.add(themeName);
   localStorage.setItem("manfee_theme", themeName);
+  const sel = document.getElementById("themeSelect");
+  if (sel) sel.value = themeName;
 }
 
 function changeCardStyle(cardStyle) {
   document.body.classList.remove("card-style-default", "card-style-joker", "card-style-floral", "card-style-dark");
   document.body.classList.add(cardStyle);
   localStorage.setItem("manfee_card", cardStyle);
+  const sel = document.getElementById("cardSelect");
+  if (sel) sel.value = cardStyle;
 }
 
 function injectMiniPlayer() {
