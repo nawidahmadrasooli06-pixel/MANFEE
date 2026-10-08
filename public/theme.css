@@ -1,0 +1,35 @@
+/* تم‌های میز بازی (پس‌زمینه‌ی صفحه‌ی بازی) */
+body.theme-classic #game.on{
+  background:radial-gradient(ellipse at center,#0000 35%,#000a 100%),
+  conic-gradient(from 45deg at 50% 50%,#0000 0 25%,#ffffff14 0 50%,#0000 0 75%,#ffffff14 0) 0 0/46px 46px,
+  radial-gradient(circle at 50% 45%,#23605a,#0e2b29);
+}
+body.theme-casino #game.on{
+  background:radial-gradient(ellipse at center,#0000 35%,#000a 100%),
+  conic-gradient(from 45deg at 50% 50%,#0000 0 25%,#ffffff14 0 50%,#0000 0 75%,#ffffff14 0) 0 0/46px 46px,
+  radial-gradient(circle at 50% 45%,#8a2020,#2e0808);
+}
+body.theme-dark #game.on{
+  background:radial-gradient(ellipse at center,#0000 35%,#000a 100%),
+  conic-gradient(from 45deg at 50% 50%,#0000 0 25%,#ffffff10 0 50%,#0000 0 75%,#ffffff10 0) 0 0/46px 46px,
+  radial-gradient(circle at 50% 45%,#27406b,#0b1226);
+}
+body.theme-gold #game.on{
+  background:radial-gradient(ellipse at center,#0000 35%,#000a 100%),
+  conic-gradient(from 45deg at 50% 50%,#0000 0 25%,#ffffff14 0 50%,#0000 0 75%,#ffffff14 0) 0 0/46px 46px,
+  radial-gradient(circle at 50% 45%,#7a5a1a,#2a1d06);
+}
+
+/* طرح کارت‌ها (کارت‌های واقعی کلاس .c دارند) */
+body.card-style-joker .c{border:2px solid #ff4444 !important;box-shadow:0 0 8px rgba(255,68,68,.6) !important}
+body.card-style-floral .c{border:2px solid #44ffaa !important;box-shadow:0 0 8px rgba(68,255,170,.45) !important}
+body.card-style-dark .c{background:#1e1e1e !important;color:#fff !important;border:1px solid #555 !important}
+body.card-style-dark .c.r{color:#ff6b61 !important}
+
+/* کادر دکمه‌های ادامه بازی و بازی جدید در منو */
+#resumeBox{
+  margin-top:12px;background:rgba(240,182,74,.12);border:1px solid #f0b64a;border-radius:14px;
+  padding:12px;text-align:center;width:100%;max-width:300px;box-sizing:border-box;
+}
+#resumeBox .btn-row{display:flex;flex-direction:row;gap:8px;justify-content:center;width:100%}
+#resumeBox .btn-row button{flex:1;margin:0;padding:10px 4px;font-size:12px;min-width:0}
