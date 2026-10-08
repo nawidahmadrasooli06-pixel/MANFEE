@@ -73,9 +73,9 @@ class Game {
   }
   swap() {
     if (this.phase !== 'mir') return;
-    // Give every player a shared 15-second review period before the cards rotate.
+    // Give every player a shared 20-second review period before the cards rotate.
     this.phase = 'mirReview';
-    this.mirReview = 15;
+    this.mirReview = 20;
     this.emit();
     this.mirReviewStep();
   }
