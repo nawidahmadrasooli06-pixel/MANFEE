@@ -6,26 +6,34 @@
 <link rel="stylesheet" href="custom.css"></head><body>
 <div id="menu" class="scr on">
   <div class="logo">♠ منفی</div><div class="sub">بازی ورق چهار نفره</div>
+  
+  <div id="resumeBox" style="display:none; background:rgba(240,182,74,0.15); border:1px solid #f0b64a; border-radius:12px; padding:10px; margin-bottom:10px; text-align:center;">
+    <p style="margin:0 0 8px 0; font-size:13px; color:#f0b64a;">شما یک بازی نیمه‌کاره دارید (کد: <b id="rsCode" dir="ltr"></b>)</p>
+    <div style="display:flex; gap:8px;">
+      <button class="btn go" style="flex:1; margin:0; padding:8px;" onclick="resume()">ادامه همان بازی</button>
+      <button class="btn" style="flex:1; margin:0; padding:8px; background:#aa3333;" onclick="fresh()">بازی جدید</button>
+    </div>
+  </div>
+
   <button class="btn go" onclick="show('join')">شروع بازی منفی</button>
-  <button class="btn" onclick="openSettings()">⚙️ تنظیمات، تم و موزیک</button>
+  <button class="btn" onclick="openSettingsModal()">⚙️ تنظیمات، تم و موزیک</button>
   <button class="btn" onclick="show('guide')">📘 راهنمای بازی</button>
   <button class="btn" onclick="show('about')">ℹ️ درباره ربات</button>
+  
   <div class="credit"><b>طراح بات:</b><b dir="ltr">〘Cactuc = نــوید</b><a dir="ltr" href="https://t.me/cactuc580">@cactuc580</a>
   <span>ربات برای خوشگذرونی و ساعت تیری ساخته شده امید که لذت ببرین❤️</span></div>
 </div>
+
 <div id="about" class="scr scroll"><h2>درباره ربات</h2><p>🃏 ربات بازی منفی؛ بازی ورق چهار نفره با دوستان یا ربات‌ها.</p><p>طراح: 〘Cactuc = نــوید</p><button class="lnk" onclick="show('menu')">بازگشت</button></div>
+
 <div id="guide" class="scr scroll"><h2>📘 راهنمای بازی منفی</h2><div class="guideText">
   <b>۱) شروع بازی</b><p>از منوی ربات «شروع بازی منفی» را بزن و وارد مینی‌اپ شو. نامت را بنویس.</p>
   <b>۲) ساخت اتاق</b><p>«ساخت اتاق جدید» را بزن. یک کد چهارحرفی برای اتاقت ساخته می‌شود.</p>
-  <b>۳) دعوت دوست</b><p>در لابی «دعوت دوستان» را بزن و لینک را برای دوستت بفرست. دوستت لینک را باز می‌کند، نام تو را به‌عنوان دعوت‌کننده می‌بیند و با زدن «قبول دعوت و ورود» وارد اتاق می‌شود. اتاق تا ورود دوستت منتظر می‌ماند.</p>
+  <b>۳) دعوت دوست</b><p>در لابی «دعوت دوستان» را بزن و لینک را برای دوستت بفرست.</p>
   <b>۴) ورود با کد</b><p>اگر لینک نداری، نامت را بنویس، کد چهارحرفی دوستت را وارد کن و «ورود با کد» را بزن.</p>
-  <b>۵) شروع بازی</b><p>در لابی صندلی‌ها و نام بازیکنان را می‌بینی. پس از ورود دوستت، میزبان «شروع بازی» را می‌زند؛ شمارش ۳، ۲، ۱ انجام می‌شود. صندلی‌های خالی با ربات پر می‌شوند. اگر دوستت هنوز نیامده، می‌توانی منتظر بمانی یا خودت «شروع با ربات‌ها» را انتخاب کنی.</p>
-  <b>۶) ادعا و میر</b><p>در مرحله ادعا تعداد دست‌هایی را که فکر می‌کنی می‌گیری انتخاب و ثبت کن. بازیکن میر می‌تواند ادعا را قبول کند یا بچرخاند. برای بازیکنان انسانی تایمر اجباری وجود ندارد.</p>
-  <b>۷) انداختن کارت</b><p>وقتی نوبت تو شد، یک کارت قانونی را به سمت میز بکش. اگر از خال شروع‌شده کارت داری، باید همان خال را بازی کنی. پیک ♠ حکم است.</p>
-  <b>۸) قطع اتصال</b><p>اگر بازیکنی قطع شود، می‌توانی منتظرش بمانی یا اجازه بدهی ربات موقتاً بازی کند. اگر بازیکن برگردد و بازی هنوز ادامه داشته باشد، می‌تواند به همان صندلی و بازی برگردد.</p>
-  <b>۹) پایان و بازی دوباره</b><p>وقتی یکی از تیم‌ها به پنج امتیاز برسد، نام هر دو هم‌تیمی برنده نمایش داده می‌شود. «بازی مجدد» یک سری تازه در همان اتاق شروع می‌کند. لینک بازی تمام‌شده یا منقضی‌شده دیگر قابل ادامه نیست؛ ربات را دوباره استارت کن و اتاق تازه بساز.</p>
-  <b>🎙️ صدا و میکروفون</b><p>دکمه میکروفون برای گفت‌وگوی صوتی و دکمه بلندگو برای روشن/خاموش کردن صداست.</p>
+  <b>۵) شروع بازی</b><p>در لابی صندلی‌ها و نام بازیکنان را می‌بینی. صندلی‌های خالی با ربات پر می‌شوند.</p>
 </div><button class="lnk" onclick="show('menu')">بازگشت به منو</button></div>
+
 <div id="join" class="scr">
   <h2>ورود به میز</h2><input id="nm" maxlength="14" placeholder="اسمت را بنویس">
   <button class="btn go" onclick="mk()">ساخت اتاق جدید</button>
@@ -34,7 +42,9 @@
   <button class="btn" onclick="jn()">ورود با کد</button>
   <button class="lnk" onclick="show('menu')">بازگشت</button>
 </div>
+
 <div id="invite" class="scr"><div class="inviteMark">✉️</div><h2>دعوت به بازی منفی</h2><p>دوستت <b id="inviter" class="inviter">در حال شناسایی…</b> تو را به بازی دعوت کرده است.</p><p class="or">کد اتاق: <b id="invCode" dir="ltr"></b></p><input id="invNm" maxlength="14" placeholder="اسمت را بنویس"><button class="btn go" onclick="acceptInvite()">قبول دعوت و ورود</button><button class="lnk" onclick="show('menu')">فعلاً نه</button></div>
+
 <div id="lobby" class="scr">
   <h2>اتاق <span id="code" style="direction:ltr;display:inline-block;color:var(--gold)"></span></h2>
   <button class="btn" onclick="share()">دعوت دوستان</button>
@@ -43,10 +53,30 @@
   <button id="go" class="btn go" onclick="startGame()">شروع بازی</button>
   <button id="force" class="btn" onclick="startWithBots()" style="display:none">شروع با ربات‌ها</button>
 </div>
-<div id="resume" class="scr"><h2>بازی قبلی</h2><p>با کد <b id="rs" style="color:var(--gold);direction:ltr;display:inline-block"></b> قبلاً وارد این بازی بودی.<br>اگر بازی هنوز ادامه دارد، می‌توانی برگردی یا بازی تازه بسازی.</p><button class="btn go" onclick="resume()">ادامه همان بازی</button><button class="btn" onclick="fresh()">بازی جدید</button></div>
+
+<div id="resume" class="scr" style="display:none;"></div>
+
 <div id="pick" class="scr"><h2>جای کدام ربات بنشینی؟</h2><div id="pk" style="display:flex;flex-direction:column;gap:8px;width:100%;max-width:320px"></div><button class="lnk" onclick="fresh()">بازگشت</button></div>
+
 <div id="expired" class="scr"><div class="inviteMark">⌛</div><h2>این بازی به پایان رسیده</h2><p id="expiredMsg">این لینک دیگر قابل استفاده نیست. برای بازی تازه، ربات را دوباره استارت کن.</p><button class="btn go" onclick="restartBot()">استارت دوباره ربات</button><button class="btn" onclick="fresh()">ساخت اتاق تازه</button></div>
+
 <div id="game" class="scr"><div id="hud"></div><div id="tbl"></div><div id="hand"></div><div id="pn"></div><div id="ov"></div><div id="aw"></div><div id="ts"></div></div>
-<script src="/socket.io/socket.io.js"></script><script src="sound.js"></script><script src="voice.js"></script><script src="table.js"></script><script src="app.js"></script>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="sound.js"></script>
+<script src="voice.js"></script>
+<script src="table.js"></script>
+<script src="app.js"></script>
 <script src="custom.js"></script>
+
+<script>
+  // انتقال اتوماتیک باکس ادامه بازی به صفحه اصلی
+  window.addEventListener('load', () => {
+    const rs = document.getElementById('rs');
+    if (rs && rs.innerText.trim() !== '') {
+      document.getElementById('rsCode').innerText = rs.innerText;
+      document.getElementById('resumeBox').style.display = 'block';
+    }
+  });
+</script>
 </body></html>
