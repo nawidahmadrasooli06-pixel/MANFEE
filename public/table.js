@@ -10,7 +10,7 @@ const T = (() => {
     if (!el) {
       el = document.createElement('div');
       el.id = 'manfee-mir-review-overlay';
-      el.innerHTML = '<div class=\"manfee-mir-review-card\"><div class=\"manfee-mir-review-title\"></div><div class=\"manfee-mir-review-sub\">پرت‌های خودت را مرور کن</div><div class=\"manfee-mir-review-note\">خوب به خاطر بسپار؛ دست قرار است بچرخد</div></div>';
+      el.innerHTML = '<div class=\"manfee-mir-review-card\"><div class=\"manfee-mir-review-title\"></div><div class=\"manfee-mir-review-sub\">دستتو بخون</div><div class=\"manfee-mir-review-note\">دست قرار است بچرخد</div></div>';
       const style = document.createElement('style');
       style.id = 'manfee-mir-review-style';
       style.textContent = `
