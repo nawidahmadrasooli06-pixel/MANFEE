@@ -32,7 +32,6 @@ const T = (() => {
     if (g.phase == 'bid' && g.bidTurn == me) { v = Math.min(2, g.bidMax); p = `ادعای تو:<button onclick="T.ch(-1)">−</button><span class="big" id="bv">${v}</span><button onclick="T.ch(1)">+</button><br><button class="go" onclick="act('bid',T.val())">ثبت ادعا</button>`; }
     else if (g.phase == 'bid') p = `نوبت ادعای ${name(g.bidTurn)}…`;
     else if (g.phase == 'mir' && g.dealer == me) p = `تو میر هستی؛ ادعای باقی‌مانده برای تو: <span class="big">${g.claims[me]}</span><br><button class="go" onclick="act('mir','ok')">قبول</button><button onclick="act('mir','swap')">بچرخون</button>`;
-    else if (g.phase == 'mirWait') p = `<div class="mirWaitBox"><b>دست در حال چرخیدن است</b><span>${g.mirWait}</span><small>۱۰ ثانیه فرصت داری پرهای خودت را مرور کنی.</small></div>`;
     else if (g.phase == 'mir') p = `${name(g.dealer)} (میر) تصمیم می‌گیرد: قبول یا چرخاندن…`;
     else if (g.phase == 'play' || g.phase == 'trick') p = my ? 'نوبت توست' : `نوبت ${name(g.turn)}`;
     $('#pn').innerHTML = p;
@@ -69,5 +68,83 @@ const T = (() => {
   return {
     render, val: () => v, ch: d => { v = Math.max(0, Math.min(S.g.bidMax, v + d)); $('#bv').textContent = v; },
     hold: i => { const els = document.querySelectorAll('#aw .aw'); els.forEach(e => { if (e.textContent.includes((S.seats[i] || {}).name || '')) e.remove(); }); }, mic: () => S && draw(S), snd: () => { SND.toggle(); S && draw(S); }
+  };
+})();
+
+
+/* MANFEE_MIR_REVIEW_V2 */
+(function () {
+  if (window.__MANFEE_MIR_REVIEW_V2) return;
+  window.__MANFEE_MIR_REVIEW_V2 = true;
+
+  function ensureMirReviewOverlay() {
+    let el = document.getElementById('manfee-mir-review-overlay');
+    if (el) return el;
+
+    el = document.createElement('div');
+    el.id = 'manfee-mir-review-overlay';
+    el.setAttribute('aria-live', 'polite');
+    el.innerHTML =
+      '<div class="manfee-mir-review-card">' +
+        '<div class="manfee-mir-review-title">15</div>' +
+        '<div class="manfee-mir-review-sub">پرت‌های تو را مرور کن</div>' +
+        '<div class="manfee-mir-review-note">دست قرار است بچرخد</div>' +
+      '</div>';
+
+    const style = document.createElement('style');
+    style.id = 'manfee-mir-review-style';
+    style.textContent = `
+      #manfee-mir-review-overlay{
+        position:fixed; inset:0; z-index:2147483000;
+        display:none; align-items:center; justify-content:center;
+        pointer-events:none; font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      }
+      #manfee-mir-review-overlay .manfee-mir-review-card{
+        text-align:center; padding:18px 22px; border-radius:20px;
+        background:rgba(0,0,0,.48); backdrop-filter:blur(5px);
+        -webkit-backdrop-filter:blur(5px);
+        color:#fff; min-width:210px;
+        box-shadow:0 10px 40px rgba(0,0,0,.28);
+      }
+      #manfee-mir-review-overlay .manfee-mir-review-title{
+        font-size:52px; line-height:1; font-weight:800;
+        font-variant-numeric:tabular-nums;
+      }
+      #manfee-mir-review-overlay .manfee-mir-review-sub{
+        margin-top:12px; font-size:20px; font-weight:800;
+      }
+      #manfee-mir-review-overlay .manfee-mir-review-note{
+        margin-top:5px; font-size:15px; opacity:.92;
+      }
+    `;
+    (document.head || document.documentElement).appendChild(style);
+    document.body.appendChild(el);
+    return el;
+  }
+
+  window.MANFEE_startMirReview = function (seconds) {
+    seconds = Math.max(1, Number(seconds) || 15);
+    const el = ensureMirReviewOverlay();
+    const num = el.querySelector('.manfee-mir-review-title');
+    el.style.display = 'flex';
+    let left = seconds;
+    num.textContent = String(left);
+
+    clearInterval(window.__MANFEE_MIR_REVIEW_TIMER);
+    window.__MANFEE_MIR_REVIEW_TIMER = setInterval(() => {
+      left -= 1;
+      if (left <= 0) {
+        clearInterval(window.__MANFEE_MIR_REVIEW_TIMER);
+        el.style.display = 'none';
+        return;
+      }
+      num.textContent = String(left);
+    }, 1000);
+  };
+
+  window.MANFEE_stopMirReview = function () {
+    clearInterval(window.__MANFEE_MIR_REVIEW_TIMER);
+    const el = document.getElementById('manfee-mir-review-overlay');
+    if (el) el.style.display = 'none';
   };
 })();
