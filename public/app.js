@@ -4,9 +4,6 @@ let st = null, BOT = '', pend = null;
 const tg = window.Telegram && Telegram.WebApp;
 if (tg) { tg.ready(); tg.expand(); tg.disableVerticalSwipes && tg.disableVerticalSwipes(); }
 fetch('/config').then(r => r.json()).then(c => BOT = c.bot).catch(() => { });
-V.init(sk);
-document.addEventListener('touchstart', () => SND.unlock(), { once: true });
-document.addEventListener('click', () => document.querySelectorAll('audio').forEach(a => a.play().catch(() => { })));
 const show = id => document.querySelectorAll('.scr').forEach(e => e.classList.toggle('on', e.id == id));
 const nm = () => {
   const el = $('#invite').classList.contains('on') ? $('#invNm') : $('#nm');
@@ -52,7 +49,6 @@ function lobby() {
 sk.on('state', s => {
   st = s; localStorage.room = s.code; history.replaceState(0, '', '?r=' + s.code);
   if (s.g) { show('game'); T.render(s); } else { show('lobby'); lobby(); }
-  V.sync(s);
 });
 sk.on('inviteInfo', info => {
   if (info.expired) { $('#expiredMsg').textContent = info.message || 'این دعوت منقضی شده است.'; show('expired'); return; }
@@ -60,7 +56,6 @@ sk.on('inviteInfo', info => {
   $('#invNm').value = localStorage.nm || $('#invNm').value;
   show('invite');
 });
-sk.on('sig', m => V.sig(m));
 sk.on('pick', p => {
   pend = { code: p.code, name: nm(), token: tok };
   $('#pk').innerHTML = p.list.map(x => `<button class="sb f" onclick="take(${x.i})">جای «${x.name}» بنشین<br><small>هم‌تیمی: ${x.mate}</small></button>`).join('');
@@ -73,8 +68,6 @@ sk.on('expired', m => {
 sk.on('connect', () => {
   if (qr) { sk.emit('preview', qr); return; }
   if (st) { sk.emit('join', { code: st.code, name: localStorage.nm || 'بازیکن', token: tok }); return; }
-  const r = localStorage.room;
-  if (r) { $('#rs').textContent = r; show('resume'); }
 });
 
 
