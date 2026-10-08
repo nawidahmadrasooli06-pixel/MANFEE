@@ -32,6 +32,7 @@ const T = (() => {
     if (g.phase == 'bid' && g.bidTurn == me) { v = Math.min(2, g.bidMax); p = `ادعای تو:<button onclick="T.ch(-1)">−</button><span class="big" id="bv">${v}</span><button onclick="T.ch(1)">+</button><br><button class="go" onclick="act('bid',T.val())">ثبت ادعا</button>`; }
     else if (g.phase == 'bid') p = `نوبت ادعای ${name(g.bidTurn)}…`;
     else if (g.phase == 'mir' && g.dealer == me) p = `تو میر هستی؛ ادعای باقی‌مانده برای تو: <span class="big">${g.claims[me]}</span><br><button class="go" onclick="act('mir','ok')">قبول</button><button onclick="act('mir','swap')">بچرخون</button>`;
+    else if (g.phase == 'mirWait') p = `<div class="mirWaitBox"><b>دست در حال چرخیدن است</b><span>${g.mirWait}</span><small>۱۰ ثانیه فرصت داری پرهای خودت را مرور کنی.</small></div>`;
     else if (g.phase == 'mir') p = `${name(g.dealer)} (میر) تصمیم می‌گیرد: قبول یا چرخاندن…`;
     else if (g.phase == 'play' || g.phase == 'trick') p = my ? 'نوبت توست' : `نوبت ${name(g.turn)}`;
     $('#pn').innerHTML = p;
