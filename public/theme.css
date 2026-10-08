@@ -1,35 +1,72 @@
-/* تم‌های میز بازی (پس‌زمینه‌ی صفحه‌ی بازی) */
-body.theme-classic #game.on{
-  background:radial-gradient(ellipse at center,#0000 35%,#000a 100%),
-  conic-gradient(from 45deg at 50% 50%,#0000 0 25%,#ffffff14 0 50%,#0000 0 75%,#ffffff14 0) 0 0/46px 46px,
-  radial-gradient(circle at 50% 45%,#23605a,#0e2b29);
+/* ===== فرش‌ها (۵ طرح): صفحه‌ی بازی و پیش‌نمایش ===== */
+body.carpet-c1 #game.on, .pv.carpet-c1 {
+  background: radial-gradient(ellipse at center,#0000 35%,#000a 100%),
+    conic-gradient(from 45deg at 50% 50%,#0000 0 25%,#ffffff14 0 50%,#0000 0 75%,#ffffff14 0) 0 0/46px 46px,
+    radial-gradient(circle at 50% 45%,#23605a,#0e2b29);
 }
-body.theme-casino #game.on{
-  background:radial-gradient(ellipse at center,#0000 35%,#000a 100%),
-  conic-gradient(from 45deg at 50% 50%,#0000 0 25%,#ffffff14 0 50%,#0000 0 75%,#ffffff14 0) 0 0/46px 46px,
-  radial-gradient(circle at 50% 45%,#8a2020,#2e0808);
+body.carpet-c2 #game.on, .pv.carpet-c2 {
+  background: radial-gradient(ellipse at center,#0000 35%,#000a 100%),
+    radial-gradient(circle at 25% 25%,#ffffff22 0 5px,#0000 6px) 0 0/44px 44px,
+    radial-gradient(circle at 75% 75%,#ffffff22 0 5px,#0000 6px) 0 0/44px 44px,
+    radial-gradient(circle at 75% 25%,#f0b64a2e 0 3px,#0000 4px) 0 0/44px 44px,
+    radial-gradient(circle at 25% 75%,#f0b64a2e 0 3px,#0000 4px) 0 0/44px 44px,
+    radial-gradient(circle at 50% 45%,#8a2020,#2e0808);
 }
-body.theme-dark #game.on{
-  background:radial-gradient(ellipse at center,#0000 35%,#000a 100%),
-  conic-gradient(from 45deg at 50% 50%,#0000 0 25%,#ffffff10 0 50%,#0000 0 75%,#ffffff10 0) 0 0/46px 46px,
-  radial-gradient(circle at 50% 45%,#27406b,#0b1226);
+body.carpet-c3 #game.on, .pv.carpet-c3 {
+  background: radial-gradient(ellipse at center,#0000 35%,#000a 100%),
+    repeating-linear-gradient(45deg,#ffffff12 0 2px,#0000 2px 16px),
+    repeating-linear-gradient(-45deg,#ffffff0c 0 2px,#0000 2px 16px),
+    radial-gradient(circle at 50% 45%,#27406b,#0b1226);
 }
-body.theme-gold #game.on{
-  background:radial-gradient(ellipse at center,#0000 35%,#000a 100%),
-  conic-gradient(from 45deg at 50% 50%,#0000 0 25%,#ffffff14 0 50%,#0000 0 75%,#ffffff14 0) 0 0/46px 46px,
-  radial-gradient(circle at 50% 45%,#7a5a1a,#2a1d06);
+body.carpet-c4 #game.on, .pv.carpet-c4 {
+  background: radial-gradient(ellipse at center,#0000 35%,#000a 100%),
+    radial-gradient(circle at 50% 50%,#0000 0 9px,#f0b64a33 10px 11px,#0000 12px 19px,#f0b64a26 20px 21px,#0000 22px) 0 0/64px 64px,
+    conic-gradient(from 45deg at 50% 50%,#0000 0 25%,#ffffff10 0 50%,#0000 0 75%,#ffffff10 0) 0 0/64px 64px,
+    radial-gradient(circle at 50% 45%,#7a5a1a,#2a1d06);
 }
+body.carpet-c5 #game.on, .pv.carpet-c5 {
+  background: radial-gradient(ellipse at center,#0000 35%,#000a 100%),
+    repeating-linear-gradient(0deg,#ffffff0a 0 1px,#0000 1px 7px),
+    radial-gradient(circle at 50% 45%,#2a2a2a,#0a0a0a);
+}
+body.carpet-c5 #game.on { box-shadow: inset 0 0 0 7px #f0b64acc, inset 0 0 0 11px #0008; }
 
-/* طرح کارت‌ها (کارت‌های واقعی کلاس .c دارند) */
-body.card-style-joker .c{border:2px solid #ff4444 !important;box-shadow:0 0 8px rgba(255,68,68,.6) !important}
-body.card-style-floral .c{border:2px solid #44ffaa !important;box-shadow:0 0 8px rgba(68,255,170,.45) !important}
-body.card-style-dark .c{background:#1e1e1e !important;color:#fff !important;border:1px solid #555 !important}
-body.card-style-dark .c.r{color:#ff6b61 !important}
+/* ===== طرح پرها (۵ طرح) ===== */
+body.cards-k1 .c, .pv.cards-k1 .c { background:#f7f4ea; color:#1b1b1b; border:0; box-shadow:0 2px 6px #0009; }
+body.cards-k1 .c.r, .pv.cards-k1 .c.r { color:#c8352f; }
 
-/* کادر دکمه‌های ادامه بازی و بازی جدید در منو */
-#resumeBox{
-  margin-top:12px;background:rgba(240,182,74,.12);border:1px solid #f0b64a;border-radius:14px;
-  padding:12px;text-align:center;width:100%;max-width:300px;box-sizing:border-box;
-}
-#resumeBox .btn-row{display:flex;flex-direction:row;gap:8px;justify-content:center;width:100%}
-#resumeBox .btn-row button{flex:1;margin:0;padding:10px 4px;font-size:12px;min-width:0}
+body.cards-k2 .c, .pv.cards-k2 .c { background:#1e1e1e; color:#fff; border:1px solid #555; box-shadow:0 2px 6px #0009; }
+body.cards-k2 .c.r, .pv.cards-k2 .c.r { color:#ff6b61; }
+
+body.cards-k3 .c, .pv.cards-k3 .c { background:#f7f4ea; color:#1b1b1b; border:2px solid #ff4444; box-shadow:0 0 8px rgba(255,68,68,.6); }
+body.cards-k3 .c.r, .pv.cards-k3 .c.r { color:#c8352f; }
+
+body.cards-k4 .c, .pv.cards-k4 .c { background:#f7f4ea; color:#1b1b1b; border:2px solid #44ffaa; box-shadow:0 0 8px rgba(68,255,170,.45); }
+body.cards-k4 .c.r, .pv.cards-k4 .c.r { color:#c8352f; }
+
+body.cards-k5 .c, .pv.cards-k5 .c { background:#141414; color:#f5e6b8; border:2px solid #f0b64a; box-shadow:0 0 10px #f0b64a66; }
+body.cards-k5 .c.r, .pv.cards-k5 .c.r { color:#ff8a7a; }
+
+/* ===== پیش‌نمایش و انتخاب‌گرها در تنظیمات ===== */
+.pvbig { position:relative; height:96px; border-radius:12px; overflow:hidden; display:flex; align-items:center; justify-content:center; --k:34px; box-shadow:inset 0 0 0 3px #c79a4a55; }
+.pvbig.carpet-c5 { box-shadow:inset 0 0 0 3px #f0b64acc; }
+.pvmark { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:34px; font-weight:900; letter-spacing:.12em; color:#fff; opacity:.08; direction:ltr; pointer-events:none; }
+.pvrow { position:relative; display:flex; gap:6px; direction:ltr; }
+.lkTitle { font-size:13px; color:#f0b64a; font-weight:700; text-align:right; }
+.lkNote { font-size:12px; opacity:.85; }
+.swrow { display:flex; gap:5px; justify-content:center; direction:rtl; }
+.sw { position:relative; width:50px; height:62px; padding:0; border-radius:10px; border:2px solid transparent; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; overflow:hidden; color:#fff; font:inherit; }
+.sw span { width:100%; background:#000a; font-size:8px; padding:2px 0; line-height:1.2; }
+.sw.sel { border-color:#f0b64a; box-shadow:0 0 8px #f0b64a99; }
+.sw:disabled { opacity:.7; }
+.swc { background:#123c38; justify-content:space-between; padding-top:5px; --k:24px; }
+
+/* ===== نوار کوچک موزیک ===== */
+#musicBar { position:fixed; left:12px; bottom:calc(env(safe-area-inset-bottom,0px) + 12px); display:flex; gap:5px; align-items:center; z-index:50; direction:ltr; }
+#musicBar button { width:30px; height:30px; border-radius:50%; border:1px solid #f0b64a88; background:#0b1f1ecc; color:#fff; font-size:13px; padding:0; line-height:1; }
+#musicBar span { font-size:11px; color:#f0b64a; min-width:14px; text-align:center; }
+
+/* ===== کادر ادامه بازی و بازی جدید در منو ===== */
+#resumeBox { margin-top:12px; background:rgba(240,182,74,.12); border:1px solid #f0b64a; border-radius:14px; padding:12px; text-align:center; width:100%; max-width:300px; box-sizing:border-box; }
+#resumeBox .btn-row { display:flex; flex-direction:row; gap:8px; justify-content:center; width:100%; }
+#resumeBox .btn-row button { flex:1; margin:0; padding:10px 4px; font-size:12px; min-width:0; }
