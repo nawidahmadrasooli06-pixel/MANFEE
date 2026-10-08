@@ -7,19 +7,19 @@
 <div id="menu" class="scr on">
   <div class="logo">♠ منفی</div><div class="sub">بازی ورق چهار نفره</div>
   
-  <div id="resumeBox" style="display:none; background:rgba(240,182,74,0.15); border:1px solid #f0b64a; border-radius:12px; padding:10px; margin-bottom:10px; text-align:center;">
-    <p style="margin:0 0 8px 0; font-size:13px; color:#f0b64a;">شما یک بازی نیمه‌کاره دارید (کد: <b id="rsCode" dir="ltr"></b>)</p>
-    <div style="display:flex; gap:8px;">
-      <button class="btn go" style="flex:1; margin:0; padding:8px;" onclick="resume()">ادامه همان بازی</button>
-      <button class="btn" style="flex:1; margin:0; padding:8px; background:#aa3333;" onclick="fresh()">بازی جدید</button>
-    </div>
-  </div>
-
   <button class="btn go" onclick="show('join')">شروع بازی منفی</button>
   <button class="btn" onclick="openSettingsModal()">⚙️ تنظیمات، تم و موزیک</button>
   <button class="btn" onclick="show('guide')">📘 راهنمای بازی</button>
   <button class="btn" onclick="show('about')">ℹ️ درباره ربات</button>
   
+  <div id="resumeBox" style="margin-top:12px; background:rgba(240,182,74,0.1); border:1px solid #f0b64a; border-radius:12px; padding:10px; text-align:center; width:100%; max-width:320px;">
+    <p style="margin:0 0 8px 0; font-size:12px; color:#f0b64a;">بازگشت به بازی نیمه‌کاره:</p>
+    <div style="display:flex; gap:8px;">
+      <button class="btn go" style="flex:1; margin:0; padding:8px; font-size:13px;" onclick="resume()">ادامه همان بازی</button>
+      <button class="btn" style="flex:1; margin:0; padding:8px; font-size:13px; background:#882222;" onclick="fresh()">بازی جدید</button>
+    </div>
+  </div>
+
   <div class="credit"><b>طراح بات:</b><b dir="ltr">〘Cactuc = نــوید</b><a dir="ltr" href="https://t.me/cactuc580">@cactuc580</a>
   <span>ربات برای خوشگذرونی و ساعت تیری ساخته شده امید که لذت ببرین❤️</span></div>
 </div>
@@ -68,15 +68,4 @@
 <script src="table.js"></script>
 <script src="app.js"></script>
 <script src="custom.js"></script>
-
-<script>
-  // انتقال اتوماتیک باکس ادامه بازی به صفحه اصلی
-  window.addEventListener('load', () => {
-    const rs = document.getElementById('rs');
-    if (rs && rs.innerText.trim() !== '') {
-      document.getElementById('rsCode').innerText = rs.innerText;
-      document.getElementById('resumeBox').style.display = 'block';
-    }
-  });
-</script>
 </body></html>
