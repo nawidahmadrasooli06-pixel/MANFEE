@@ -13,8 +13,7 @@ function playMusicTrack(trackNum) {
 }
 
 function changeVolume(val) {
-  let volumeValue = parseFloat(val) / 100;
-  bgAudio.volume = volumeValue;
+  bgAudio.volume = parseFloat(val) / 100;
 }
 
 function openSettingsModal() {
@@ -23,12 +22,18 @@ function openSettingsModal() {
     createSettingsModal();
     modal = document.getElementById('customSettingsModal');
   }
-  if (modal) modal.style.display = 'flex';
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.style.pointerEvents = 'auto';
+  }
 }
 
 function closeSettingsModal() {
   const modal = document.getElementById('customSettingsModal');
-  if (modal) modal.style.display = 'none';
+  if (modal) {
+    modal.style.display = 'none';
+    modal.style.pointerEvents = 'none';
+  }
 }
 
 function createSettingsModal() {
@@ -40,14 +45,14 @@ function createSettingsModal() {
   }
 
   const modalHTML = `
-    <div id="customSettingsModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
-      <div style="background:#0b1f1e; border:2px solid #f0b64a; border-radius:18px; padding:20px; width:100%; max-width:320px; color:#fff; text-align:center; display:flex; flex-direction:column; gap:12px;">
+    <div id="customSettingsModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; flex-direction:column; align-items:center; justify-content:center; padding:20px; pointer-events:none;">
+      <div style="background:#0b1f1e; border:2px solid #f0b64a; border-radius:18px; padding:20px; width:100%; max-width:320px; color:#fff; text-align:center; display:flex; flex-direction:column; gap:12px; pointer-events:auto;">
         <h3 style="margin:0; color:#f0b64a;">⚙️ تنظیمات، تم و موزیک</h3>
         
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <span>🎨 تم میز:</span>
           <select id="themeSelect" onchange="changeTheme(this.value)" style="background:#0f2a28; color:#fff; border:1px solid #f0b64a; border-radius:8px; padding:5px;">
-            <option value="theme-classic">سبز کلاسیک</option>
+            <option value="theme-classic">سبز کلاسیک (اصلی)</option>
             <option value="theme-casino">قرمز کازینویی</option>
             <option value="theme-dark">سرمه‌ای دارک</option>
             <option value="theme-gold">طلایی لاکچری</option>
@@ -73,7 +78,7 @@ function createSettingsModal() {
 
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <span>🔊 ولوم زیرصدا:</span>
-          <input type="range" id="volRange" min="0" max="100" value="50" oninput="changeVolume(this.value)" onchange="changeVolume(this.value)">
+          <input type="range" id="volRange" min="0" max="100" value="50" oninput="changeVolume(this.value)">
         </div>
 
         <button style="padding:10px; margin-top:10px; background:#f0b64a; color:#000; font-weight:bold; border:none; border-radius:10px; cursor:pointer;" onclick="closeSettingsModal()">بستن</button>
