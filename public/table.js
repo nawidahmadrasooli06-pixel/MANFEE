@@ -72,25 +72,23 @@ const T = (() => {
 })();
 
 
-/* MANFEE_MIR_REVIEW_V2 */
+/* MANFEE_MIR_REVIEW_V3_SHARED_15S */
 (function () {
-  if (window.__MANFEE_MIR_REVIEW_V2) return;
-  window.__MANFEE_MIR_REVIEW_V2 = true;
+  if (window.__MANFEE_MIR_REVIEW_V3_SHARED_15S) return;
+  window.__MANFEE_MIR_REVIEW_V3_SHARED_15S = true;
 
   function ensureMirReviewOverlay() {
     let el = document.getElementById('manfee-mir-review-overlay');
     if (el) return el;
-
     el = document.createElement('div');
     el.id = 'manfee-mir-review-overlay';
     el.setAttribute('aria-live', 'polite');
     el.innerHTML =
       '<div class="manfee-mir-review-card">' +
         '<div class="manfee-mir-review-title">15</div>' +
-        '<div class="manfee-mir-review-sub">پرت‌های تو را مرور کن</div>' +
-        '<div class="manfee-mir-review-note">دست قرار است بچرخد</div>' +
+        '<div class="manfee-mir-review-sub">پرت‌های خودت را خوب مرور و به خاطر بسپار</div>' +
+        '<div class="manfee-mir-review-note">دست تا ۱۵ ثانیه دیگر می‌چرخد</div>' +
       '</div>';
-
     const style = document.createElement('style');
     style.id = 'manfee-mir-review-style';
     style.textContent = `
@@ -100,21 +98,20 @@ const T = (() => {
         pointer-events:none; font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       }
       #manfee-mir-review-overlay .manfee-mir-review-card{
-        text-align:center; padding:18px 22px; border-radius:20px;
-        background:rgba(0,0,0,.48); backdrop-filter:blur(5px);
-        -webkit-backdrop-filter:blur(5px);
-        color:#fff; min-width:210px;
-        box-shadow:0 10px 40px rgba(0,0,0,.28);
+        text-align:center; padding:20px 24px; border-radius:22px;
+        background:rgba(0,0,0,.56); backdrop-filter:blur(5px);
+        -webkit-backdrop-filter:blur(5px); color:#fff; min-width:270px;
+        box-shadow:0 10px 40px rgba(0,0,0,.30);
       }
       #manfee-mir-review-overlay .manfee-mir-review-title{
-        font-size:52px; line-height:1; font-weight:800;
-        font-variant-numeric:tabular-nums;
+        font-size:82px; line-height:.95; font-weight:900;
+        font-variant-numeric:tabular-nums; letter-spacing:-2px;
       }
       #manfee-mir-review-overlay .manfee-mir-review-sub{
-        margin-top:12px; font-size:20px; font-weight:800;
+        margin-top:13px; font-size:19px; line-height:1.35; font-weight:850;
       }
       #manfee-mir-review-overlay .manfee-mir-review-note{
-        margin-top:5px; font-size:15px; opacity:.92;
+        margin-top:7px; font-size:15px; line-height:1.4; opacity:.94;
       }
     `;
     (document.head || document.documentElement).appendChild(style);
@@ -123,28 +120,39 @@ const T = (() => {
   }
 
   window.MANFEE_startMirReview = function (seconds) {
-    seconds = Math.max(1, Number(seconds) || 15);
     const el = ensureMirReviewOverlay();
     const num = el.querySelector('.manfee-mir-review-title');
-    el.style.display = 'flex';
-    let left = seconds;
+    const sub = el.querySelector('.manfee-mir-review-sub');
+    const note = el.querySelector('.manfee-mir-review-note');
+    let left = Math.max(1, Number(seconds) || 15);
     num.textContent = String(left);
-
-    clearInterval(window.__MANFEE_MIR_REVIEW_TIMER);
-    window.__MANFEE_MIR_REVIEW_TIMER = setInterval(() => {
-      left -= 1;
-      if (left <= 0) {
-        clearInterval(window.__MANFEE_MIR_REVIEW_TIMER);
-        el.style.display = 'none';
-        return;
-      }
-      num.textContent = String(left);
-    }, 1000);
+    sub.textContent = 'پرت‌های خودت را خوب مرور و به خاطر بسپار';
+    note.textContent = 'دست تا ' + left + ' ثانیه دیگر می‌چرخد';
+    el.style.display = 'flex';
   };
 
   window.MANFEE_stopMirReview = function () {
-    clearInterval(window.__MANFEE_MIR_REVIEW_TIMER);
     const el = document.getElementById('manfee-mir-review-overlay');
     if (el) el.style.display = 'none';
   };
+
+  // The server is authoritative: every state update contains the same shared counter.
+  // Rendering from state keeps all connected players synchronized and does not hide cards.
+  window.MANFEE_syncMirReview = function (game) {
+    if (!game || game.phase !== 'mirReview') {
+      window.MANFEE_stopMirReview();
+      return;
+    }
+    const left = Math.max(1, Number(game.mirReview) || 15);
+    window.MANFEE_startMirReview(left);
+  };
+
+  // Patch the table render once so every connected client shows the same server timer.
+  const originalRender = window.T && window.T.render;
+  if (typeof originalRender === 'function') {
+    window.T.render = function (st) {
+      originalRender(st);
+      window.MANFEE_syncMirReview(st && st.g);
+    };
+  }
 })();
