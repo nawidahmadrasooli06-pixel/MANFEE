@@ -7,6 +7,8 @@ app.get('/health', (q, r) => r.send('ok'));
 app.get('/config', (q, r) => r.json({ bot: tgbot.info.username || '' }));
 const srv = http.createServer(app), io = new Server(srv), rooms = {};
 const L = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+const CARPETS = ['c1', 'c2', 'c3', 'c4', 'c5'], CARDSETS = ['k1', 'k2', 'k3', 'k4', 'k5'];
+const cleanLook = l => ({ carpet: CARPETS.includes(l && l.carpet) ? l.carpet : 'c1', cards: CARDSETS.includes(l && l.cards) ? l.cards : 'k1' });
 const cl = n => String(n || 'بازیکن').slice(0, 14);
 const ended = r => !!(r && r.g && r.g.phase === 'series');
 const expiredMessage = 'این بازی قبلاً به پایان رسیده یا لینک آن منقضی شده است. لطفاً ربات منفی را دوباره استارت کن و بازی تازه بساز.';
@@ -26,9 +28,9 @@ io.on('connection', s => {
     if (!r || ended(r)) return s.emit('inviteInfo', { expired: true, message: expiredMessage });
     s.emit('inviteInfo', r.inviteInfo());
   });
-  s.on('create', ({ name, token } = {}) => {
+  s.on('create', ({ name, token, look } = {}) => {
     let c; do c = [0, 1, 2, 3].map(() => L[Math.random() * 24 | 0]).join(''); while (rooms[c]);
-    rooms[c] = new Room(c, io); enter(c, name, token);
+    rooms[c] = new Room(c, io); rooms[c].look = cleanLook(look); enter(c, name, token);
   });
   s.on('join', ({ code, name, token } = {}) => {
     code = String(code || '').toUpperCase().trim();
@@ -39,6 +41,8 @@ io.on('connection', s => {
     if (ended(r)) return s.emit('expired', expiredMessage);
     if (r && r.take(s.id, cl(name), token, seat | 0)) s.data.code = code; else s.emit('err', 'این صندلی دیگر خالی نیست');
   });
+  s.on('look', l => { const r = R(), i = r ? r.seatOf(s.id) : -1; if (r && i >= 0 && r.seats[i].token == r.host) { r.look = cleanLook(l); r.send(); } });
+  s.on('track', n => { const r = R(); n = n | 0; if (r && r.seatOf(s.id) >= 0 && n >= 1 && n <= 21) r.setTrack(n); });
   s.on('invite', () => R() && R().invite(s.id));
   s.on('sit', i => R() && R().sit(s.id, i | 0));
   s.on('sub', i => R() && R().sub(s.id, i | 0));
