@@ -72,16 +72,15 @@ class Game {
     a == 'swap' ? this.swap() : this.go();
   }
   swap() {
-    if (this.phase != 'mir') return;
-    this.disarm();
+    if (this.phase !== 'mir') return;
+    // Give every player a shared 15-second review period before the cards rotate.
     this.phase = 'mirReview';
     this.mirReview = 15;
-    this.note = this.names[this.dealer] + ' ادعا را رد کرد — کارت‌ها قرار است بچرخد.';
     this.emit();
     this.mirReviewStep();
   }
   mirReviewStep() {
-    if (this.phase != 'mirReview') return;
+    if (this.phase !== 'mirReview') return;
     if (this.mirReview <= 0) {
       const h = [], c = [];
       for (let i = 0; i < 4; i++) { h[(i + 1) % 4] = this.hands[i]; c[(i + 1) % 4] = this.claim[i]; }
