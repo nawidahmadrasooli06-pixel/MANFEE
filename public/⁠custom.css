@@ -1,4 +1,4 @@
-/* تم‌های میز بازی - حفظ زمینه و تغییر رنگ اصلی */
+/* تم‌های میز بازی - حفظ الگوی اصلی فرش میز */
 body.theme-classic #tbl { background-color: #0b1f1e !important; }
 body.theme-casino #tbl { background-color: #4a0d0d !important; }
 body.theme-dark #tbl { background-color: #0f172a !important; }
@@ -9,7 +9,7 @@ body.card-style-joker .cd { border: 2px solid #ff4444 !important; box-shadow: 0 
 body.card-style-floral .cd { border: 2px solid #44ffaa !important; }
 body.card-style-dark .cd { background: #1e1e1e !important; color: #fff !important; }
 
-/* اصلاح دکمه‌های کنار هم در منوی اصلی */
+/* تنظیم کادر دکمه‌های منو */
 #resumeBox {
   margin-top: 12px !important;
   background: rgba(240,182,74,0.12) !important;
@@ -34,5 +34,4 @@ body.card-style-dark .cd { background: #1e1e1e !important; color: #fff !importan
   margin: 0 !important;
   padding: 10px 4px !important;
   font-size: 12px !important;
-  white-space: nowrap !important;
 }
