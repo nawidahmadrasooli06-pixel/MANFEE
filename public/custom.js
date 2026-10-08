@@ -1,69 +1,94 @@
-// سیستم پخش موزیک اصلاح شده
 let bgAudio = new Audio();
 bgAudio.loop = true;
+bgAudio.volume = 0.5;
 
 function playMusicTrack(trackNum) {
-  if (!trackNum || trackNum === 'off') {
+  if (!trackNum || trackNum === '-1' || trackNum === 'off') {
     bgAudio.pause();
     return;
   }
-  
-  // پشتیبانی از mp3 و m4a
   let ext = (trackNum == 1 || trackNum == 21) ? 'm4a' : 'mp3';
   bgAudio.src = `music${trackNum}.${ext}`;
-  
-  let promise = bgAudio.play();
-  if (promise !== undefined) {
-    promise.catch(error => {
-      console.log("پخش خودکار مسدود شد. نیاز به تعامل کاربر دارد.");
-    });
-  }
+  bgAudio.play().catch(e => console.log("Audio play error:", e));
 }
 
-function setVolume(val) {
-  bgAudio.volume = val / 100;
+function changeVolume(val) {
+  let volumeValue = parseFloat(val) / 100;
+  bgAudio.volume = volumeValue;
 }
 
 function openSettingsModal() {
-  let modal = document.getElementById('settingsModal');
-  if(!modal) {
-    modal = document.createElement('div');
-    modal.id = 'settingsModal';
-    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;';
-    modal.innerHTML = `
-      <div style="background:#132a28;border:1px solid #f0b64a;padding:20px;border-radius:16px;width:280px;text-align:center;color:#fff;">
-        <h3 style="color:#f0b64a;margin-top:0;">⚙️ تنظیمات، تم و موزیک</h3>
-        <label>🎨 تم میز:</label>
-        <select id="themeSelect" onchange="applyTheme(this.value)" style="width:100%;margin:5px 0 15px;padding:8px;border-radius:8px;">
-          <option value="classic">سبز کلاسیک (اصلی)</option>
-          <option value="casino">قرمز کازینویی</option>
-          <option value="dark">تاریک شیک</option>
-          <option value="gold">طلایی سنگین</option>
-        </select>
-        <label>🎵 انتخاب موزیک:</label>
-        <select id="musicSelect" onchange="playMusicTrack(this.value)" style="width:100%;margin:5px 0 15px;padding:8px;border-radius:8px;">
-          <option value="off">خاموش</option>
-          ${Array.from({length: 21}, (_, i) => `<option value="${i+1}">موزیک شماره ${i+1}</option>`).join('')}
-        </select>
-        <label>🔊 ولوم صدا:</label>
-        <input type="range" min="0" max="100" value="80" oninput="setVolume(this.value)" style="width:100%;margin:5px 0 15px;">
-        <button onclick="document.getElementById('settingsModal').style.display='none'" style="background:#f0b64a;color:#000;border:none;padding:8px 20px;border-radius:8px;font-weight:bold;cursor:pointer;width:100%;">بستن</button>
+  let modal = document.getElementById('customSettingsModal');
+  if (!modal) {
+    createSettingsModal();
+    modal = document.getElementById('customSettingsModal');
+  }
+  if (modal) modal.style.display = 'flex';
+}
+
+function closeSettingsModal() {
+  const modal = document.getElementById('customSettingsModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function createSettingsModal() {
+  if (document.getElementById('customSettingsModal')) return;
+
+  let musicOptions = '<option value="-1">خاموش</option>';
+  for (let i = 1; i <= 21; i++) {
+    musicOptions += `<option value="${i}">موزیک شماره ${i}</option>`;
+  }
+
+  const modalHTML = `
+    <div id="customSettingsModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
+      <div style="background:#0b1f1e; border:2px solid #f0b64a; border-radius:18px; padding:20px; width:100%; max-width:320px; color:#fff; text-align:center; display:flex; flex-direction:column; gap:12px;">
+        <h3 style="margin:0; color:#f0b64a;">⚙️ تنظیمات، تم و موزیک</h3>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span>🎨 تم میز:</span>
+          <select id="themeSelect" onchange="changeTheme(this.value)" style="background:#0f2a28; color:#fff; border:1px solid #f0b64a; border-radius:8px; padding:5px;">
+            <option value="theme-classic">سبز کلاسیک</option>
+            <option value="theme-casino">قرمز کازینویی</option>
+            <option value="theme-dark">سرمه‌ای دارک</option>
+            <option value="theme-gold">طلایی لاکچری</option>
+          </select>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span>🃏 طرح کارت‌ها:</span>
+          <select id="cardSelect" onchange="changeCardStyle(this.value)" style="background:#0f2a28; color:#fff; border:1px solid #f0b64a; border-radius:8px; padding:5px;">
+            <option value="card-style-default">کلاسیک</option>
+            <option value="card-style-joker">طرح جوکر</option>
+            <option value="card-style-floral">طرح گل‌گلی</option>
+            <option value="card-style-dark">سنگین / خفن</option>
+          </select>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span>🎵 انتخاب موزیک:</span>
+          <select id="musicSelect" onchange="playMusicTrack(this.value)" style="background:#0f2a28; color:#fff; border:1px solid #f0b64a; border-radius:8px; padding:5px;">
+            ${musicOptions}
+          </select>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span>🔊 ولوم زیرصدا:</span>
+          <input type="range" id="volRange" min="0" max="100" value="50" oninput="changeVolume(this.value)" onchange="changeVolume(this.value)">
+        </div>
+
+        <button style="padding:10px; margin-top:10px; background:#f0b64a; color:#000; font-weight:bold; border:none; border-radius:10px; cursor:pointer;" onclick="closeSettingsModal()">بستن</button>
       </div>
-    `;
-    document.body.appendChild(modal);
-  } else {
-    modal.style.display = 'flex';
-  }
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
 }
 
-function applyTheme(theme) {
-  document.body.className = '';
-  document.body.classList.add(`theme-${theme}`);
+function changeTheme(themeName) {
+  document.body.classList.remove('theme-classic', 'theme-casino', 'theme-dark', 'theme-gold');
+  document.body.classList.add(themeName);
 }
 
-// فعال‌سازی پخش صدا با اولین لمس صفحه توسط کاربر
-document.addEventListener('click', function() {
-  if (bgAudio.src && bgAudio.paused && bgAudio.currentTime === 0) {
-    bgAudio.play().catch(()=>{});
-  }
-}, { once: true });
+function changeCardStyle(cardStyle) {
+  document.body.classList.remove('card-style-default', 'card-style-joker', 'card-style-floral', 'card-style-dark');
+  document.body.classList.add(cardStyle);
+}
