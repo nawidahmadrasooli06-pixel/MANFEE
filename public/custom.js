@@ -1,32 +1,122 @@
-let bgAudio = new Audio();
-bgAudio.loop = true;
-bgAudio.volume = 0.2; // میزان صدای پیش‌فرض روی ۲۰٪ (مناسب برای زیرصدا)
+const TOTAL_TRACKS = 21;
+let playlist = [];
+let currentTrackIndex = -1;
+let startIndex = -1;
+let tracksPlayedCount = 0;
 
-// ۲۰ موزیک انتخابی شما
-const musicTracks = { off: "" };
-for (let i = 1; i <= 20; i++) {
-  musicTracks[`track${i}`] = `music${i}.mp3`;
+let bgAudio = new Audio();
+bgAudio.volume = 0.2; // ولوم پیش‌فرض ۲۰٪
+
+// ساخت لیست ۲۱ موزیک
+for (let i = 1; i <= TOTAL_TRACKS; i++) {
+  playlist.push({ name: `موزیک شماره ${i}`, file: `music${i}.mp3` });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   createSettingsModal();
+  injectMiniPlayer();
   injectEmojiBar();
 
   const savedTheme = localStorage.getItem("manfee_theme") || "theme-classic";
   const savedCard = localStorage.getItem("manfee_card") || "card-style-default";
   const savedVol = localStorage.getItem("manfee_vol") || "20";
   
-  document.body.classList.add(savedTheme);
-  document.body.classList.add(savedCard);
-  
+  document.body.classList.add(savedTheme, savedCard);
   bgAudio.volume = savedVol / 100;
+  
+  const volRange = document.getElementById("volRange");
+  if (volRange) volRange.value = savedVol;
 });
 
-function createSettingsModal() {
-  let musicOptions = '<option value="off">خاموش</option>';
-  for (let i = 1; i <= 20; i++) {
-    musicOptions += `<option value="track${i}">موزیک ${i}</option>`;
+// وقتی یک آهنگ تمام می‌شود
+bgAudio.onended = () => {
+  tracksPlayedCount++;
+  if (tracksPlayedCount >= TOTAL_TRACKS) {
+    stopMusic();
+    return;
   }
+  // رفتن به آهنگ بعدی به صورت چرخشی
+  currentTrackIndex = (currentTrackIndex + 1) % TOTAL_TRACKS;
+  playTrackAtIndex(currentTrackIndex);
+};
+
+function playTrackAtIndex(index) {
+  currentTrackIndex = index;
+  bgAudio.src = playlist[index].file;
+  bgAudio.play().catch(e => console.log("Music play issue"));
+  updateMiniPlayerUI(true);
+  
+  const musicSelect = document.getElementById("musicSelect");
+  if (musicSelect) musicSelect.value = index;
+}
+
+function startMusicFrom(index) {
+  if (index === -1) {
+    stopMusic();
+    return;
+  }
+  startIndex = index;
+  tracksPlayedCount = 0;
+  playTrackAtIndex(index);
+}
+
+function togglePlay() {
+  if (bgAudio.paused) {
+    if (currentTrackIndex === -1) {
+      startMusicFrom(0);
+    } else {
+      bgAudio.play();
+      updateMiniPlayerUI(true);
+    }
+  } else {
+    bgAudio.pause();
+    updateMiniPlayerUI(false);
+  }
+}
+
+function nextTrack() {
+  if (currentTrackIndex === -1) {
+    startMusicFrom(0);
+  } else {
+    tracksPlayedCount++;
+    if (tracksPlayedCount >= TOTAL_TRACKS) {
+      stopMusic();
+      return;
+    }
+    currentTrackIndex = (currentTrackIndex + 1) % TOTAL_TRACKS;
+    playTrackAtIndex(currentTrackIndex);
+  }
+}
+
+function prevTrack() {
+  if (currentTrackIndex === -1) {
+    startMusicFrom(0);
+  } else {
+    currentTrackIndex = (currentTrackIndex - 1 + TOTAL_TRACKS) % TOTAL_TRACKS;
+    playTrackAtIndex(currentTrackIndex);
+  }
+}
+
+function stopMusic() {
+  bgAudio.pause();
+  bgAudio.currentTime = 0;
+  currentTrackIndex = -1;
+  tracksPlayedCount = 0;
+  updateMiniPlayerUI(false);
+  const musicSelect = document.getElementById("musicSelect");
+  if (musicSelect) musicSelect.value = -1;
+}
+
+function changeVolume(val) {
+  bgAudio.volume = val / 100;
+  localStorage.setItem("manfee_vol", val);
+}
+
+function createSettingsModal() {
+  let musicOptions = '<option value="-1">خاموش</option>';
+  playlist.forEach((item, idx) => {
+    musicOptions += `<option value="${idx}">${item.name}</option>`;
+  });
 
   const modalHTML = `
     <div id="customSettingsModal" class="custom-modal">
@@ -54,22 +144,15 @@ function createSettingsModal() {
         </div>
 
         <div class="setting-row">
-          <span>🎵 انتخاب موزیک:</span>
-          <select id="musicSelect" onchange="playMusic(this.value)">
+          <span>🎵 انتخاب موزیک (۲۱ آهنگ):</span>
+          <select id="musicSelect" onchange="startMusicFrom(parseInt(this.value))">
             ${musicOptions}
           </select>
         </div>
 
         <div class="setting-row">
-          <span>🔊 ولوم صدا (۱ تا ۱۰۰):</span>
+          <span>🔊 ولوم زیرصدا (۱ تا ۱۰۰):</span>
           <input type="range" id="volRange" min="0" max="100" value="20" oninput="changeVolume(this.value)">
-        </div>
-
-        <hr style="border-color:#2b5a55; width:100%;">
-        <div style="font-size:13px; text-align:right;">
-          <b style="color:#f0b64a;">📊 آمار شخصی شما:</b><br>
-          بازی‌های انجام شده: <span id="statGames">۰</span><br>
-          بردها: <span id="statWins">۰</span>
         </div>
 
         <button class="btn go" style="min-width:auto; padding:8px;" onclick="closeSettings()">بستن</button>
@@ -94,18 +177,21 @@ function changeCardStyle(cardStyle) {
   localStorage.setItem("manfee_card", cardStyle);
 }
 
-function playMusic(trackKey) {
-  if (trackKey === "off" || !musicTracks[trackKey]) {
-    bgAudio.pause();
-  } else {
-    bgAudio.src = musicTracks[trackKey];
-    bgAudio.play().catch(e => console.log("Music play issue"));
-  }
+// مینی پلیر روی میز بازی
+function injectMiniPlayer() {
+  const miniPlayerHTML = `
+    <div id="miniPlayer" style="position:fixed; top:10px; left:10px; z-index:90; display:flex; gap:6px; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:20px; border:1px solid #f0b64a;">
+      <button onclick="prevTrack()" style="background:none; border:none; color:#fff; font-size:14px; cursor:pointer;">⏮️</button>
+      <button id="playPauseBtn" onclick="togglePlay()" style="background:none; border:none; color:#fff; font-size:14px; cursor:pointer;">▶️</button>
+      <button onclick="nextTrack()" style="background:none; border:none; color:#fff; font-size:14px; cursor:pointer;">⏭️</button>
+    </div>
+  `;
+  document.body.insertAdjacentHTML("beforeend", miniPlayerHTML);
 }
 
-function changeVolume(val) {
-  bgAudio.volume = val / 100;
-  localStorage.setItem("manfee_vol", val);
+function updateMiniPlayerUI(isPlaying) {
+  const btn = document.getElementById("playPauseBtn");
+  if (btn) btn.innerText = isPlaying ? "⏸️" : "▶️";
 }
 
 function injectEmojiBar() {
