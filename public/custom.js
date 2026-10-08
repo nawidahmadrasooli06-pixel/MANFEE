@@ -1,19 +1,17 @@
 const TOTAL_TRACKS = 21;
 let playlist = [];
 let currentTrackIndex = -1;
-let tracksPlayedCount = 0;
 
 let bgAudio = new Audio();
 bgAudio.volume = 0.2;
 
 for (let i = 1; i <= TOTAL_TRACKS; i++) {
-  playlist.push({ name: `موزیک شماره ${i}`, file: `music${i}.mp3` });
+  playlist.push({ name: `موزیک شماره ${i}`, file: `./music${i}.mp3` });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   createSettingsModal();
   injectMiniPlayer();
-  injectEmojiBar();
 
   const savedTheme = localStorage.getItem("manfee_theme") || "theme-classic";
   const savedCard = localStorage.getItem("manfee_card") || "card-style-default";
@@ -28,19 +26,13 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 bgAudio.onended = () => {
-  tracksPlayedCount++;
-  if (tracksPlayedCount >= TOTAL_TRACKS) {
-    stopMusic();
-    return;
-  }
-  currentTrackIndex = (currentTrackIndex + 1) % TOTAL_TRACKS;
-  playTrackAtIndex(currentTrackIndex);
+  nextTrack();
 };
 
 function playTrackAtIndex(index) {
   currentTrackIndex = index;
   bgAudio.src = playlist[index].file;
-  bgAudio.play().catch(e => console.log("Music play issue"));
+  bgAudio.play().catch(e => console.log("Audio play error:", e));
   updateMiniPlayerUI(true);
   
   const musicSelect = document.getElementById("musicSelect");
@@ -52,7 +44,6 @@ function startMusicFrom(index) {
     stopMusic();
     return;
   }
-  tracksPlayedCount = 0;
   playTrackAtIndex(index);
 }
 
@@ -71,33 +62,19 @@ function togglePlay() {
 }
 
 function nextTrack() {
-  if (currentTrackIndex === -1) {
-    startMusicFrom(0);
-  } else {
-    tracksPlayedCount++;
-    if (tracksPlayedCount >= TOTAL_TRACKS) {
-      stopMusic();
-      return;
-    }
-    currentTrackIndex = (currentTrackIndex + 1) % TOTAL_TRACKS;
-    playTrackAtIndex(currentTrackIndex);
-  }
+  currentTrackIndex = (currentTrackIndex + 1) % TOTAL_TRACKS;
+  playTrackAtIndex(currentTrackIndex);
 }
 
 function prevTrack() {
-  if (currentTrackIndex === -1) {
-    startMusicFrom(0);
-  } else {
-    currentTrackIndex = (currentTrackIndex - 1 + TOTAL_TRACKS) % TOTAL_TRACKS;
-    playTrackAtIndex(currentTrackIndex);
-  }
+  currentTrackIndex = (currentTrackIndex - 1 + TOTAL_TRACKS) % TOTAL_TRACKS;
+  playTrackAtIndex(currentTrackIndex);
 }
 
 function stopMusic() {
   bgAudio.pause();
   bgAudio.currentTime = 0;
   currentTrackIndex = -1;
-  tracksPlayedCount = 0;
   updateMiniPlayerUI(false);
   const musicSelect = document.getElementById("musicSelect");
   if (musicSelect) musicSelect.value = -1;
@@ -175,15 +152,24 @@ function closeSettingsModal() {
 }
 
 function changeTheme(themeName) {
-  document.body.classList.remove("theme-classic", "theme-casino", "theme-dark", "theme-gold");
+  document.body.className = document.body.className.replace(/theme-\S+/g, '');
   document.body.classList.add(themeName);
+  
+  const gameTbl = document.getElementById("tbl");
+  if (gameTbl) {
+    if (themeName === "theme-casino") gameTbl.style.background = "#4a0d0d";
+    else if (themeName === "theme-dark") gameTbl.style.background = "#0f172a";
+    else if (themeName === "theme-gold") gameTbl.style.background = "#2d2006";
+    else gameTbl.style.background = "#0b1f1e";
+  }
+
   localStorage.setItem("manfee_theme", themeName);
   const sel = document.getElementById("themeSelect");
   if (sel) sel.value = themeName;
 }
 
 function changeCardStyle(cardStyle) {
-  document.body.classList.remove("card-style-default", "card-style-joker", "card-style-floral", "card-style-dark");
+  document.body.className = document.body.className.replace(/card-style-\S+/g, '');
   document.body.classList.add(cardStyle);
   localStorage.setItem("manfee_card", cardStyle);
   const sel = document.getElementById("cardSelect");
@@ -194,7 +180,7 @@ function injectMiniPlayer() {
   if (document.getElementById("miniPlayer")) return;
 
   const miniPlayerHTML = `
-    <div id="miniPlayer" style="position:fixed; bottom:20px; left:15px; z-index:999; display:flex; gap:8px; background:rgba(11,31,30,0.9); padding:6px 12px; border-radius:25px; border:1px solid #f0b64a; box-shadow:0 4px 10px rgba(0,0,0,0.5);">
+    <div id="miniPlayer" style="position:fixed; bottom:15px; left:15px; z-index:999; display:flex; gap:8px; background:rgba(11,31,30,0.9); padding:6px 12px; border-radius:25px; border:1px solid #f0b64a;">
       <button onclick="prevTrack()" style="background:none; border:none; color:#fff; font-size:16px; cursor:pointer;">⏮️</button>
       <button id="playPauseBtn" onclick="togglePlay()" style="background:none; border:none; color:#fff; font-size:16px; cursor:pointer;">▶️</button>
       <button onclick="nextTrack()" style="background:none; border:none; color:#fff; font-size:16px; cursor:pointer;">⏭️</button>
@@ -206,38 +192,4 @@ function injectMiniPlayer() {
 function updateMiniPlayerUI(isPlaying) {
   const btn = document.getElementById("playPauseBtn");
   if (btn) btn.innerText = isPlaying ? "⏸️" : "▶️";
-}
-
-function injectEmojiBar() {
-  const checkHand = setInterval(() => {
-    const handArea = document.getElementById("hand");
-    if (handArea && !document.getElementById("reactBar")) {
-      const reactBar = document.createElement("div");
-      reactBar.id = "reactBar";
-      reactBar.className = "reaction-bar";
-
-      const emojis = ["💣", "♠️", "🤣", "😭"];
-      emojis.forEach(emo => {
-        const btn = document.createElement("button");
-        btn.className = "react-btn";
-        btn.innerText = emo;
-        btn.onclick = () => sendEmoji(emo);
-        reactBar.appendChild(btn);
-      });
-
-      handArea.parentNode.insertBefore(reactBar, handArea);
-    }
-  }, 1000);
-}
-
-function sendEmoji(emoji) {
-  const mySeat = document.querySelector(".st.p0");
-  if (!mySeat) return;
-
-  const pop = document.createElement("div");
-  pop.className = "pop-emoji";
-  pop.innerText = emoji;
-  mySeat.appendChild(pop);
-
-  setTimeout(() => pop.remove(), 2200);
 }
