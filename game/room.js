@@ -3,10 +3,10 @@ class Room {
   constructor(code, io) {
     this.code = code; this.io = io; this.seats = [null, null, null, null];
     this.g = null; this.host = null; this.t = Date.now();
-    this.look = { carpet: 'c1', cards: 'k1' }; this.track = 1;
+    this.look = { carpet: 'c1', cards: 'k1' }; this.track = 1; this.playing = false;
     this.invitePending = false; this.inviteAccepted = false; this.starting = 0; this.startTimer = null;
   }
-  setTrack(n) { this.track = n; this.seats.forEach(s => { if (s && s.sid) this.io.to(s.sid).emit('track', n); }); }
+  setTrack(n) { this.track = n; this.playing = true; this.seats.forEach(s => { if (s && s.sid) this.io.to(s.sid).emit('track', n); }); }
   seatOf(sid) { return this.seats.findIndex(x => x && x.sid == sid); }
   free() { return this.g ? [0, 1, 2, 3].filter(i => this.g.bot[i]) : []; }
   pickList() { return this.free().map(i => ({ i, name: this.seats[i].name, mate: this.seats[(i + 2) % 4].name })); }
@@ -81,7 +81,7 @@ class Room {
     this.seats.forEach((s, i) => {
       if (s && s.sid) this.io.to(s.sid).emit('state', {
         code: this.code, me: i, host: s.token == this.host, seats, away, g: g ? g.view(i) : null,
-        look: this.look, track: this.track, starting: this.starting, invitePending: this.invitePending, inviteAccepted: this.inviteAccepted
+        look: this.look, track: this.track, playing: this.playing, starting: this.starting, invitePending: this.invitePending, inviteAccepted: this.inviteAccepted
       });
     });
   }
