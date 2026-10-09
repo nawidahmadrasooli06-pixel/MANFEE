@@ -65,6 +65,9 @@ function refreshLookPicker() {
 }
 
 /* ---------- موزیک ---------- */
+const SILENT = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+let roomPlaying = false, userStopped = false, needTap = false, unlocked = false;
+
 function savedVol() {
   const v = parseInt(lsGet('mvol', '50'), 10);
   return isNaN(v) ? 50 : Math.max(0, Math.min(100, v));
@@ -94,8 +97,26 @@ function playLocal(n) {
   if (actx && actx.state === 'suspended') actx.resume();
   const ext = (n == 1 || n == 21) ? 'm4a' : 'mp3';
   bgAudio.src = `music${n}.${ext}`;
-  bgAudio.play().catch(e => console.log('Music play error:', e));
+  const p = bgAudio.play();
+  if (p && p.catch) p.catch(e => { needTap = true; console.log('Music play blocked, waiting for a tap:', e); });
 }
+
+/* اولین لمس صفحه، صدا را آماده می‌کند تا آهنگ میزبان برای همه خودکار پخش شود */
+function unlockAudio() {
+  if (needTap && musicOn && bgAudio.paused) { needTap = false; playLocal(roomTrack); return; }
+  if (unlocked) return;
+  unlocked = true;
+  if (musicOn && !bgAudio.paused) return;
+  try {
+    setupAudioGraph();
+    if (actx && actx.state === 'suspended') actx.resume();
+    bgAudio.src = SILENT;
+    const p = bgAudio.play();
+    if (p && p.then) p.then(() => { if (bgAudio.getAttribute('src') === SILENT) bgAudio.pause(); }).catch(() => { });
+  } catch (e) { }
+}
+document.addEventListener('touchend', unlockAudio, true);
+document.addEventListener('click', unlockAudio, true);
 
 function updateMusicUI() {
   const b = document.getElementById('mbPlay');
@@ -104,40 +125,55 @@ function updateMusicUI() {
   if (num) num.textContent = roomTrack;
 }
 
-/* توقف و ادامه فقط برای خود شخص است */
+/* توقف و ادامه فقط برای خود شخص است.
+   فقط اگر هنوز هیچ‌کس موزیک را شروع نکرده باشد، شروعش برای همه است */
 function musicToggle() {
-  if (musicOn) { musicOn = false; bgAudio.pause(); }
-  else { musicOn = true; playLocal(roomTrack); }
+  if (musicOn) { userStopped = true; musicOn = false; bgAudio.pause(); }
+  else if (!roomPlaying) { goTrack(roomTrack); return; }
+  else { userStopped = false; musicOn = true; playLocal(roomTrack); }
   updateMusicUI();
 }
 
-/* قبلی، بعدی و انتخاب آهنگ برای همه‌ی بازیکنان اتاق است */
+/* شروع، قبلی، بعدی و انتخاب آهنگ برای همه‌ی بازیکنان اتاق است */
 function goTrack(n) {
-  roomTrack = n; musicOn = true; playLocal(n); updateMusicUI();
+  roomTrack = n; roomPlaying = true; userStopped = false; musicOn = true;
+  playLocal(n); updateMusicUI();
   if (inRoom()) sk.emit('track', n);
 }
 function musicNext() { goTrack(roomTrack % TRACKS + 1); }
 function musicPrev() { goTrack(roomTrack === 1 ? TRACKS : roomTrack - 1); }
 
+/* پیام آهنگ از طرف یکی از بازیکنان اتاق */
 function onRemoteTrack(n) {
   n = parseInt(n, 10);
-  if (!(n >= 1 && n <= TRACKS) || n === roomTrack) return;
-  roomTrack = n;
-  if (musicOn) playLocal(n);
+  if (!(n >= 1 && n <= TRACKS)) return;
+  const same = n === roomTrack;
+  roomTrack = n; roomPlaying = true;
+  if (userStopped) { updateMusicUI(); return; }
+  if (same && musicOn && !bgAudio.paused) return;
+  musicOn = true;
+  playLocal(n);
   updateMusicUI();
 }
-function syncTrackFromState(n) {
+
+/* کسی که بعد از شروع موزیک وارد اتاق می‌شود، آهنگ جاری را می‌شنود */
+function syncTrackFromState(n, playing) {
   if (trackSynced) return;
   trackSynced = true;
   n = parseInt(n, 10);
-  if (n >= 1 && n <= TRACKS) { roomTrack = n; updateMusicUI(); }
+  if (!(n >= 1 && n <= TRACKS)) return;
+  roomTrack = n;
+  if (playing) { roomPlaying = true; if (!userStopped) { musicOn = true; playLocal(n); } }
+  updateMusicUI();
 }
+
 function musicSelect(v) {
-  if (v === '-1') { musicOn = false; bgAudio.pause(); updateMusicUI(); }
+  if (v === '-1') { userStopped = true; musicOn = false; bgAudio.pause(); updateMusicUI(); }
   else goTrack(parseInt(v, 10));
 }
 
 bgAudio.addEventListener('ended', () => {
+  if (bgAudio.getAttribute('src') === SILENT) return;
   roomTrack = roomTrack % TRACKS + 1;
   if (musicOn) playLocal(roomTrack);
   updateMusicUI();
