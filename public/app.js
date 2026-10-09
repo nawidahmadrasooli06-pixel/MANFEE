@@ -52,7 +52,7 @@ function lobby() {
 sk.on('state', s => {
   st = s; localStorage.room = s.code; history.replaceState(0, '', '?r=' + s.code);
   if (typeof applyLook === 'function' && s.look) applyLook(s.look);
-  if (typeof syncTrackFromState === 'function') syncTrackFromState(s.track);
+  if (typeof syncTrackFromState === 'function') syncTrackFromState(s.track, s.playing);
   if (s.g) { if (!menuMode) show('game'); T.render(s); } else { menuMode = false; show('lobby'); lobby(); }
 });
 sk.on('inviteInfo', info => {
