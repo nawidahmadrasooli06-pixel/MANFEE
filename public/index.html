@@ -1,13 +1,21 @@
-<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>منفی</title>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap" rel="stylesheet">
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="theme.css"></head><body>
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>منفی</title>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap" rel="stylesheet">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="theme.css">
+</head>
+<body>
 <div id="menu" class="scr on">
-  <div class="logo">♠ منفی</div><div class="sub">بازی ورق چهار نفره</div>
+  <div class="logo">♠ منفی</div>
+  <div class="sub">بازی ورق چهار نفره</div>
   
   <button class="btn go" onclick="show('join')">شروع بازی منفی</button>
+  <button class="btn" onclick="location.href='/fiskoot.html'" style="border:3px solid #ffd76a;border-radius:14px">♠ بازی حکم (فیسکوت)</button>
   <button class="btn" onclick="openSettingsModal()">⚙️ تنظیمات، تم و موزیک</button>
   <button class="btn" onclick="show('guide')">📘 راهنمای بازی</button>
   <button class="btn" onclick="show('about')">ℹ️ درباره ربات</button>
@@ -20,22 +28,34 @@
     </div>
   </div>
 
-  <div class="credit"><b>طراح بات:</b><b dir="ltr">〘Cactuc = نــوید</b><a dir="ltr" href="https://t.me/cactuc580">@cactuc580</a>
-  <span>ربات برای خوشگذرونی و ساعت تیری ساخته شده امید که لذت ببرین❤️</span></div>
+  <div class="credit">
+    <b>طراح بات:</b><b dir="ltr">〘Cactuc = نــوید</b><a dir="ltr" href="https://t.me/cactuc580">@cactuc580</a>
+    <span>ربات برای خوشگذرونی و ساعت تیری ساخته شده امید که لذت ببرین❤️</span>
+  </div>
 </div>
 
-<div id="about" class="scr scroll"><h2>درباره ربات</h2><p>🃏 ربات بازی منفی؛ بازی ورق چهار نفره با دوستان یا ربات‌ها.</p><p>طراح: 〘Cactuc = نــوید</p><button class="lnk" onclick="show('menu')">بازگشت</button></div>
+<div id="about" class="scr scroll">
+  <h2>درباره ربات</h2>
+  <p>🃏 ربات بازی منفی؛ بازی ورق چهار نفره با دوستان یا ربات‌ها.</p>
+  <p>طراح: 〘Cactuc = نــوید</p>
+  <button class="lnk" onclick="show('menu')">بازگشت</button>
+</div>
 
-<div id="guide" class="scr scroll"><h2>📘 راهنمای بازی منفی</h2><div class="guideText">
-  <b>۱) شروع بازی</b><p>از منوی ربات «شروع بازی منفی» را بزن و وارد مینی‌اپ شو. نامت را بنویس.</p>
-  <b>۲) ساخت اتاق</b><p>«ساخت اتاق جدید» را بزن. یک کد چهارحرفی برای اتاقت ساخته می‌شود.</p>
-  <b>۳) دعوت دوست</b><p>در لابی «دعوت دوستان» را بزن و لینک را برای دوستت بفرست.</p>
-  <b>۴) ورود با کد</b><p>اگر لینک نداری، نامت را بنویس، کد چهارحرفی دوستت را وارد کن و «ورود با کد» را بزن.</p>
-  <b>۵) شروع بازی</b><p>در لابی صندلی‌ها و نام بازیکنان را می‌بینی. صندلی‌های خالی با ربات پر می‌شوند.</p>
-</div><button class="lnk" onclick="show('menu')">بازگشت به منو</button></div>
+<div id="guide" class="scr scroll">
+  <h2>📘 راهنمای بازی منفی</h2>
+  <div class="guideText">
+    <b>۱) شروع بازی</b><p>از منوی ربات «شروع بازی منفی» را بزن و وارد مینی‌اپ شو. نامت را بنویس.</p>
+    <b>۲) ساخت اتاق</b><p>«ساخت اتاق جدید» را بزن. یک کد چهارحرفی برای اتاقت ساخته می‌شود.</p>
+    <b>۳) دعوت دوست</b><p>در لابی «دعوت دوستان» را بزن و لینک را برای دوستت بفرست.</p>
+    <b>۴) ورود با کد</b><p>اگر لینک نداری، نامت را بنویس، کد چهارحرفی دوستت را وارد کن و «ورود با کد» را بزن.</p>
+    <b>۵) شروع بازی</b><p>در لابی صندلی‌ها و نام بازیکنان را می‌بینی. صندلی‌های خالی با ربات پر می‌شوند.</p>
+  </div>
+  <button class="lnk" onclick="show('menu')">بازگشت به منو</button>
+</div>
 
 <div id="join" class="scr">
-  <h2>ورود به میز</h2><input id="nm" maxlength="14" placeholder="اسمت را بنویس">
+  <h2>ورود به میز</h2>
+  <input id="nm" maxlength="14" placeholder="اسمت را بنویس">
   <button class="btn go" onclick="mk()">ساخت اتاق جدید</button>
   <div class="or">یا با کد دوستت وارد شو</div>
   <input id="cd" maxlength="4" placeholder="کد اتاق" style="text-transform:uppercase;direction:ltr;text-align:center">
@@ -43,13 +63,23 @@
   <button class="lnk" onclick="show('menu')">بازگشت</button>
 </div>
 
-<div id="invite" class="scr"><div class="inviteMark">✉️</div><h2>دعوت به بازی منفی</h2><p>دوستت <b id="inviter" class="inviter">در حال شناسایی…</b> تو را به بازی دعوت کرده است.</p><p class="or">کد اتاق: <b id="invCode" dir="ltr"></b></p><input id="invNm" maxlength="14" placeholder="اسمت را بنویس"><button class="btn go" onclick="acceptInvite()">قبول دعوت و ورود</button><button class="lnk" onclick="show('menu')">فعلاً نه</button></div>
+<div id="invite" class="scr">
+  <div class="inviteMark">✉️</div>
+  <h2>دعوت به بازی منفی</h2>
+  <p>دوستت <b id="inviter" class="inviter">در حال شناسایی…</b> تو را به بازی دعوت کرده است.</p>
+  <p class="or">کد اتاق: <b id="invCode" dir="ltr"></b></p>
+  <input id="invNm" maxlength="14" placeholder="اسمت را بنویس">
+  <button class="btn go" onclick="acceptInvite()">قبول دعوت و ورود</button>
+  <button class="lnk" onclick="show('menu')">فعلاً نه</button>
+</div>
 
 <div id="lobby" class="scr">
   <h2>اتاق <span id="code" style="direction:ltr;display:inline-block;color:var(--gold)"></span></h2>
   <button class="btn" onclick="share()">دعوت دوستان</button>
   <button class="btn" onclick="openSettingsModal()">🎨 فرش، پر و موزیک</button>
-  <div id="lb"></div><div id="waitMsg" class="waitMsg"></div><div id="startCount" class="startCount"></div>
+  <div id="lb"></div>
+  <div id="waitMsg" class="waitMsg"></div>
+  <div id="startCount" class="startCount"></div>
   <small>روی صندلی خالی بزن تا بنشینی. هم‌تیمی‌ها روبه‌روی هم‌اند. صندلی خالی = ربات.</small>
   <button id="go" class="btn go" onclick="startGame()">شروع بازی</button>
   <button id="force" class="btn" onclick="startWithBots()" style="display:none">شروع با ربات‌ها</button>
@@ -57,14 +87,33 @@
 
 <div id="resume" class="scr" style="display:none;"></div>
 
-<div id="pick" class="scr"><h2>جای کدام ربات بنشینی؟</h2><div id="pk" style="display:flex;flex-direction:column;gap:8px;width:100%;max-width:320px"></div><button class="lnk" onclick="fresh()">بازگشت</button></div>
+<div id="pick" class="scr">
+  <h2>جای کدام ربات بنشینی؟</h2>
+  <div id="pk" style="display:flex;flex-direction:column;gap:8px;width:100%;max-width:320px"></div>
+  <button class="lnk" onclick="fresh()">بازگشت</button>
+</div>
 
-<div id="expired" class="scr"><div class="inviteMark">⌛</div><h2>این بازی به پایان رسیده</h2><p id="expiredMsg">این لینک دیگر قابل استفاده نیست. برای بازی تازه، ربات را دوباره استارت کن.</p><button class="btn go" onclick="restartBot()">استارت دوباره ربات</button><button class="btn" onclick="fresh()">ساخت اتاق تازه</button></div>
+<div id="expired" class="scr">
+  <div class="inviteMark">⌛</div>
+  <h2>این بازی به پایان رسیده</h2>
+  <p id="expiredMsg">این لینک دیگر قابل استفاده نیست. برای بازی تازه، ربات را دوباره استارت کن.</p>
+  <button class="btn go" onclick="restartBot()">استارت دوباره ربات</button>
+  <button class="btn" onclick="fresh()">ساخت اتاق تازه</button>
+</div>
 
-<div id="game" class="scr"><div id="hud"></div><div id="tbl"></div><div id="hand"></div><div id="pn"></div><div id="ov"></div><div id="aw"></div><div id="ts"></div></div>
+<div id="game" class="scr">
+  <div id="hud"></div>
+  <div id="tbl"></div>
+  <div id="hand"></div>
+  <div id="pn"></div>
+  <div id="ov"></div>
+  <div id="aw"></div>
+  <div id="ts"></div>
+</div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="table.js"></script>
 <script src="app.js"></script>
 <script src="custom.js"></script>
-</body></html>
+</body>
+</html>
