@@ -9,6 +9,7 @@ function start(rooms) {
   if (!T || !URL_) return console.log('Telegram bot disabled: set BOT_TOKEN and PUBLIC_URL');
   const kb = code => ({ inline_keyboard: [
     [{ text: '🎮 شروع بازی منفی', web_app: { url: URL_ + (code ? '/?r=' + code + '&invite=1' : '') } }],
+    [{ text: '♠ بازی حکم (فیسکوت)', web_app: { url: URL_ + '/fiskoot.html' } }],
     [{ text: '📘 راهنمای بازی', callback_data: 'guide' }, { text: 'ℹ️ درباره ربات', callback_data: 'about' }]
   ] });
   const handle = async u => {
@@ -21,6 +22,12 @@ function start(rooms) {
     const m = u.message; if (!m || !m.text) return;
     const [cmd, arg] = m.text.trim().split(/\s+/);
     if (cmd == '/start') {
+      const fk = /^fk_([A-Za-z]{4})$/i.exec(arg || '');
+      if (fk) {
+        const c = fk[1].toUpperCase();
+        await api('sendMessage', { chat_id: m.chat.id, text: `♠ دوستت تو را به بازی حکم (فیسکوت) دعوت کرده!\nکد اتاق: ${c}\nبرای ورود به اتاق، دکمه را بزن.`, reply_markup: { inline_keyboard: [[{ text: '🎮 ورود به بازی حکم (فیسکوت)', web_app: { url: URL_ + '/fiskoot.html?room=' + c } }]] } });
+        return;
+      }
       const code = /^[A-Za-z]{4}$/.test(arg || '') ? arg.toUpperCase() : '';
       const text = code ? `🃏 دوستت تو را به اتاق ${code} دعوت کرده!\nبرای دیدن نام دعوت‌کننده و ورود، دکمه را بزن.` : '🃏 خوش آمدی به بازی منفی!\nچهار نفره، با دوستان یا با ربات.\nدکمه را بزن و شروع کن.';
       await api('sendMessage', { chat_id: m.chat.id, text, reply_markup: kb(code) });
