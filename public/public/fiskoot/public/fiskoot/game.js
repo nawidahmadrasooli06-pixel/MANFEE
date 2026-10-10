@@ -1,1 +1,80 @@
 
+const SU=['♠','♣','♦','♥'],SN=['پیک','گشنیز','خشت','دل'],$=id=>document.getElementById(id);
+let NM=["تو","","",""];const POOL=["احمد","حسین","مصطفی","رحیم","شفیق","نصیر","وحید","سمیر","جاوید","فرید","ذبیح","هارون"];
+let run=0,pend=null,aceLow=false,sc=[0,0],hand=[[],[],[],[]],hk=-1,dl=-1,trump=null,tw=[0,0],legalSet=null,turn=-1;
+const sleep=ms=>{const r=run;return new Promise((res,rej)=>setTimeout(()=>r===run?res():rej('x'),ms))};
+const ask=()=>new Promise(r=>pend=r);
+const give=v=>{if(pend){const p=pend;pend=null;p(v)}};
+const msg=t=>$('msg').textContent=t;
+const lab=r=>r==14||r==1?'A':r==13?'K':r==12?'Q':r==11?'J':r;
+const mk=()=>{let d=[];for(let s=0;s<4;s++)for(let r=2;r<=14;r++)d.push({s,r:(r==14&&aceLow)?1:r});for(let i=51;i>0;i--){const j=Math.random()*(i+1)|0;[d[i],d[j]]=[d[j],d[i]]}return d};
+const cel=(c,cls='')=>`<div class="c ${cls} ${c.s>1?'red':''}"><b>${lab(c.r)}</b><i>${SU[c.s]}</i></div>`;
+function seats(){for(let i=0;i<4;i++){const e=$('s'+i);e.classList.toggle('on',turn==i);e.innerHTML=`<div class="${i%2?'r':'g'}"><b>${NM[i]}</b></div><small>${i==2?'هم‌تیمی ':''}${hk==i?'🔑 حاکم ':''}${dl==i?'🃏 پخش ':''}${i&&hand[i].length?hand[i].length+' کارت':''}</small>`}}
+function renderHand(){const H=$('hand');H.innerHTML='';const sk=c=>c.s==trump?-1:c.s;const h=[...hand[0]].sort((a,b)=>sk(a)-sk(b)||b.r-a.r);
+ const n=h.length,W=H.clientWidth-8,ov=n>1?Math.min(34,Math.max(0,(n*52-W)/(n-1))):0;
+ h.forEach((c,i)=>{const t=document.createElement('div');t.innerHTML=cel(c);const e=t.firstChild;if(i)e.style.marginLeft=-ov+'px';if(legalSet&&!legalSet.includes(c))e.classList.add('dim');e.onclick=()=>give(c);H.appendChild(e)})}
+const sync=()=>{seats();renderHand()};
+function upd(){$('sa').textContent=sc[0];$('sb').textContent=sc[1]}
+function showTk(){$('ta').textContent=tw[0];$('tb').textContent=tw[1]}
+function setTrump(){$('tr').innerHTML=trump===null?'حکم: ؟':`حکم: <span class="${trump>1?'red':''}">${SU[trump]} ${SN[trump]}</span>`;$('tc').innerHTML=trump===null?'':`<span style="color:${trump>1?'#ff6b6b':'#fff'}">${SU[trump]}</span>`}
+function ov(html,btn){return new Promise(res=>{$('ovb').innerHTML=html+`<br><button onclick="give(1)">${btn}</button>`;$('ov').style.display='flex';pend=()=>{$('ov').style.display='none';res()}})}
+function rules(){$('rl').style.display='flex'}
+function exitG(){if(confirm('از بازی خارج می‌شوی؟')){run++;pend=null;$('menu').style.display='flex'}}
+function ann(t,ms){const a=$('ann');a.innerHTML=t;a.style.display='block';setTimeout(()=>a.style.display='none',ms)}
+function lastTrick(tr,w){const L=$('lt');L.style.display='block';L.innerHTML='دست قبلی<div class="row">'+tr.map(x=>`<div>${cel(x.c,x.p==w?'w':'l')}<small class="${x.p%2?'r':'g'}">${NM[x.p]}</small></div>`).join('')+'</div>'}
+function shuffleNames(){const p=[...POOL].sort(()=>Math.random()-.5);NM=[($('nm').value||'تو').trim(),p[0],p[1],p[2]];drawRoom()}
+function drawRoom(){NM[0]=($('nm').value||'تو').trim();$('room').innerHTML=`<div class="g">تیم ما: <b>${NM[0]}</b> + <b>${NM[2]}</b></div><div class="r">تیم حریف: <b>${NM[1]}</b> + <b>${NM[3]}</b></div>`}
+async function pickHakem(){
+ hk=-1;dl=-1;turn=0;hand=[[],[],[],[]];const d=mk(),P=$('pick'),g=$('pg');P.style.display='flex';g.innerHTML='';
+ d.forEach((c,i)=>{const e=document.createElement('div');e.className='c back sm';e.onclick=()=>give(i);g.appendChild(e)});
+ let cur=0,left=[...d.keys()];
+ while(true){turn=cur;seats();let i;
+  if(cur==0){msg('نوبت توست: یک کارت پشت‌ورو را بزن');i=await ask()}
+  else{msg(NM[cur]+' کارت برمی‌گرداند…');await sleep(650);i=left[Math.random()*left.length|0]}
+  left=left.filter(x=>x!=i);const c=d[i],e=g.children[i];e.onclick=null;e.className='c sm flip '+(c.s>1?'red':'');e.innerHTML=`<b>${lab(c.r)}</b><i>${SU[c.s]}</i>`;
+  $('pm').innerHTML=`${NM[cur]}: <span style="color:${c.s>1?'#ff6b6b':'#fff'}">${lab(c.r)}${SU[c.s]}</span>`;
+  if(lab(c.r)=='A'){hk=cur;dl=(hk+3)%4;seats();msg(`${NM[hk]} توس (آس) آورد و حاکم شد 🔑`);ann(`🔑 <b>${NM[hk]}</b> توس (آس) آورد<br>و حاکم شد<br><small>پخش‌کننده: ${NM[dl]}</small>`,2600);await sleep(2800);break}
+  await sleep(450);cur=(cur+1)%4}
+ P.style.display='none'}
+const botTrump=h=>{let b=0,bs=-1;for(let s=0;s<4;s++){const l=h.filter(c=>c.s==s);const v=l.length*100+l.reduce((a,c)=>a+c.r,0);if(v>bs){bs=v;b=s}}return b};
+async function deal(){
+ const d=mk();hand=[[],[],[],[]];trump=null;setTrump();turn=-1;sync();
+ msg(`${NM[dl]} کارت پخش می‌کند: ۵ کارت برای حاکم`);
+ for(let k=0;k<5;k++){hand[hk].push(d.pop());sync();await sleep(250)}
+ if(hk==0){msg('تو حاکمی (کسی که رنگ را می‌گوید): رنگ را بگو');const T=$('tp');T.innerHTML=SU.map((s,i)=>`<button style="color:${i>1?'#d11':'#111'}" onclick="give(${i})">${s}</button>`).join('');T.style.display='flex';trump=await ask();T.style.display='none'}
+ else{msg(NM[hk]+' رنگ را می‌گوید…');await sleep(1200);trump=botTrump(hand[hk])}
+ setTrump();msg(`حکم: ${SN[trump]} ${SU[trump]}`);sync();await sleep(900);
+ for(const r of [5,4,4])for(let o=0;o<4;o++){const p=(hk+o)%4,n=(r==5&&p==hk)?0:r;for(let k=0;k<n;k++){hand[p].push(d.pop());if(p==0||k==n-1)sync();await sleep(p==0?90:30)}}
+ sync();await sleep(500)}
+const beats=(c,w)=>c.s==w.s?c.r>w.r:(c.s==trump&&w.s!=trump);
+const win=tr=>{let b=tr[0];for(const x of tr)if(beats(x.c,b.c))b=x;return b};
+function botPick(p,L,tr){const key=c=>(c.s==trump?100:0)+c.r,asc=a=>[...a].sort((x,y)=>key(x)-key(y));
+ if(!tr.length)return [...L].sort((a,b)=>(b.s!=trump)-(a.s!=trump)||b.r-a.r)[0];
+ const b=win(tr);if(b.p%2==p%2)return asc(L)[0];
+ const w=asc(L.filter(c=>beats(c,b.c)));return w.length?w[0]:asc(L)[0]}
+const clearSlots=()=>[0,1,2,3].forEach(i=>$('p'+i).innerHTML='');
+async function playHand(){
+ tw=[0,0];showTk();let lead=hk;clearSlots();$('lt').style.display='none';
+ while(tw[0]<7&&tw[1]<7){const tr=[];let led=null;
+  for(let k=0;k<4;k++){const p=(lead+k)%4;turn=p;seats();let c;
+   const lg=hand[p].filter(x=>led===null||x.s===led),L=lg.length?lg:hand[p];
+   if(p==0){legalSet=L;renderHand();msg(led===null?'تو شروع می‌کنی':lg.length?`باید خال ${SN[led]} ${SU[led]} بازی کنی`:`خال ${SN[led]} نداری: هر کارتی`);
+    while(true){c=await ask();if(L.includes(c))break;msg(`مجاز نیست! باید ${SN[led]} ${SU[led]} بازی کنی`)}legalSet=null}
+   else{await sleep(700);c=botPick(p,L,tr)}
+   hand[p].splice(hand[p].indexOf(c),1);if(led===null)led=c.s;tr.push({p,c});$('p'+p).innerHTML=cel(c,'mid pop');sync()}
+  const w=win(tr).p;tr.forEach(x=>{const f=$('p'+x.p).firstChild;if(f)f.classList.add(x.p==w?'w':'l')});lastTrick(tr,w);turn=w;seats();tw[w%2]++;showTk();msg(`${NM[w]} دور را برد ✔`);await sleep(1400);clearSlots();lead=w}
+ turn=-1}
+async function main(){
+ const my=++run;pend=null;['menu','ov','rl','tp','pick'].forEach(i=>$(i).style.display='none');aceLow=$('al').checked;NM[0]=($('nm').value||'تو').trim();
+ try{sc=[0,0];upd();trump=null;setTrump();await pickHakem();
+  while(true){await deal();await playHand();
+   const ht=hk%2,w=tw[0]>=7?0:1,o=1-w;let pts=1,kind='برد عادی';
+   if(w==ht){if(tw[o]==0){pts=3;kind='کت‌فیسی 🔥'}}else if(tw[ht]==0){pts=7;kind='کدرنگ 💥'}
+   sc[w]+=pts;upd();const who=w?'تیم حریف':'تیم ما';
+   let t=`<h2>${kind}</h2>${who} دست را برد (${tw[0]}–${tw[1]})<br><b>+${pts} امتیاز</b><br>امتیاز کل: ما ${sc[0]} — آن‌ها ${sc[1]}`;
+   if(sc[0]>=13||sc[1]>=13){await ov(t+`<br><h2>${sc[0]>=13?'🏆 تیم ما برنده شد!':'تیم حریف برنده شد'}</h2>`,'بازی دوباره');return main()}
+   if(w!=ht){hk=(hk+1)%4}dl=(hk+3)%4;
+   t+=`<br>${w==ht?'حاکم همان می‌ماند':'حاکم عوض شد'}: <b>${NM[hk]}</b>`;
+   await ov(t,'دست بعدی');pend=null;sync();await sleep(300)}
+ }catch(e){if(e!=='x')console.error(e)}}
+$('nm').oninput=drawRoom;shuffleNames();seats();
