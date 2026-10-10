@@ -81,6 +81,10 @@ body{display:block}
 .bt{font-size:9px;color:#8fb;letter-spacing:1px;line-height:1}
 #ov,#wt{position:fixed;inset:0;z-index:25;background:#000b;display:none;align-items:center;justify-content:center;padding:16px}
 .box button{margin-top:10px}
+#hand .c{position:relative;width:52px;height:78px}#hand .c b{font-size:20px}#hand .c i{font-size:22px}
+#hand .c.dim,#hand .c.dim2{z-index:1}#hand .c:not(.dim):not(.dim2){z-index:2}#hand .c.lift{z-index:3}
+.mid{width:50px;height:72px}#tr{display:none}
+#s2{top:calc(8px + env(safe-area-inset-top,0px))!important}
 </style></head><body>
 <div id="top"><div class="chip">امتیاز (تا 13)<br><span class="g">تیم ما <b id="sa">0</b></span><br><span class="r">تیم حریف <b id="sb">0</b></span></div><div class="chip" id="tr">رنگ (حکم): —</div><div class="chip">دورها (تا 7)<br><span class="g">تیم ما <b id="ta">0</b></span><br><span class="r">تیم حریف <b id="tb">0</b></span></div></div>
 <div id="tbl"><div id="tc"></div><div id="lt"></div><div id="ann"></div><button id="ex" onclick="exitG()">خروج ✕</button>
@@ -90,14 +94,14 @@ body{display:block}
 <div id="msg"></div><div id="toast"></div><div id="hand"></div>
 <div class="scr" id="menu"><div style="font-size:32px;font-weight:900;color:#f0b64a">♠ بازی حکم</div><div style="color:#9fcfc0">(فیسکوت)</div>
 <div id="rsm" style="display:none;width:100%;max-width:320px;border:2px solid #f0b64a;border-radius:16px;padding:10px"><small>بازی قبلی شما با کد <b id="rcode" dir="ltr"></b> هنوز هست:</small><button class="btn go" style="margin-top:8px" onclick="resume()">ادامه بازی قبلی</button></div>
-<div id="inv" style="display:none;color:#ffd76a">دوستت تو را به بازی دعوت کرده است 💌</div>
+<div id="inv" style="display:none;color:#ffd76a">دوستت تو را به بازی دعوت کرده است 💌<br><button class="lnk" onclick="copyLink()">📋 کپی لینک (برای باز کردن در Safari/Chrome)</button></div>
 <h2>ورود به میز</h2><input id="nm" maxlength="14" placeholder="اسمت را بنویس">
 <button class="btn go" onclick="mkRoom()">بازی جدید (ساخت اتاق)</button><div style="color:#9fcfc0;font-size:13px">یا با کد دوستت وارد شو</div>
 <input id="cin" maxlength="4" placeholder="کد اتاق" style="text-transform:uppercase;direction:ltr;text-align:center;width:100%;max-width:320px;padding:14px;border-radius:16px;border:2px solid #2d5a55;background:#0f2a28;color:#fff;font:inherit"><button class="btn" onclick="joinCode()">ورود با کد</button><a class="lnk" href="/">⬅ بازگشت به انتخاب بازی</a></div>
 <div class="scr" id="lobby" style="display:none"><h2>اتاق <span id="rc" style="color:#f0b64a;direction:ltr;display:inline-block"></span></h2>
 <button class="btn" onclick="invite()">📨 دعوت دوستان</button><div id="room"></div>
 <label style="font-size:13px"><input type="checkbox" id="al" onchange="sk.emit('cfg',{low:this.checked})"> توس (آس) کمترین کارت باشد</label>
-<small id="lm" style="color:#9fcfc0"></small><button id="go" class="btn go" onclick="sk.emit('start')">شروع بازی</button><button class="btn" onclick="rules()">📘 قوانین بازی</button><a class="lnk" href="/">خروج</a></div>
+<small id="lm" style="color:#9fcfc0"></small><button id="go" class="btn go" onclick="sk.emit('start')">شروع بازی</button><button id="gob" class="btn" onclick="sk.emit('start',{bots:1})">شروع با ربات‌ها 🤖</button><button class="btn" onclick="rules()">📘 قوانین بازی</button><a class="lnk" href="/">خروج</a></div>
 <div class="ovl" id="rl" style="display:none"><div class="box"><h2>قوانین بازی حکم (فیسکوت)</h2><ul>
 <li>4 نفر، دو تیم؛ هم‌تیمی روبه‌روست. تیمی که به 13 امتیاز برسد برنده است.</li>
 <li>حاکم (کسی که رنگ را می‌گوید): اولین کسی که توس (آس) بیاورد. پخش‌کننده سمت چپ حاکم است.</li>
@@ -119,7 +123,8 @@ let st=null,pv=null,sel=null,drag=null,dis=null,hk0='',pvHand=[];
 const sk=io('/fiskoot');
 sk.on('connect',()=>{if(st&&st.code)sk.emit('rejoin',{code:st.code,token:tok})});
 sk.on('st',s=>{pv=st?st.ph:null;st=s;sv('fk_room',s.code);onSt()});
-sk.on('err',m=>toast(m));
+sk.on('err',m=>{toast(m);if(st){hk0='';rGame()}});
+sk.on('pick',d=>{pend={code:d.code};const W=$('wt');W.innerHTML='<div class="box"><h2>به کدام صندلی می‌نشینی؟</h2>بازی شروع شده؛ جای یکی از ربات‌ها می‌نشینی:'+d.list.map(x=>`<button class="btn go" style="margin-top:8px" onclick="takeSeat(${x.k})">تیم ${x.k%2?2:1} — صندلی ${x.k+1}: ${x.n} (bot)</button>`).join('')+'</div>';W.style.display='flex'});
 sk.on('gone',()=>{sv('fk_room',null);st=null;$('rsm').style.display='none';scr('menu');toast('این اتاق دیگر وجود ندارد')});
 function toast(t){const e=$('toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2800)}
 function ann(t,ms,tp){const a=$('ann');a.style.top=tp||'40%';a.innerHTML=t;a.style.display='block';clearTimeout(ann.t);ann.t=setTimeout(()=>a.style.display='none',ms)}
@@ -130,15 +135,15 @@ function mkRoom(){const n=nameV();if(n)sk.emit('create',{name:n,token:tok})}
 function joinCode(){const n=nameV(),c=$('cin').value.trim().toUpperCase();if(n&&c)sk.emit('join',{code:c,name:n,token:tok})}
 function resume(){sk.emit('rejoin',{code:ld('fk_room'),token:tok})}
 function sit(k){sk.emit('sit',k)}
-function invite(){const l=location.origin+'/fiskoot.html?room='+st.code,u='https://t.me/share/url?url='+encodeURIComponent(l)+'&text='+encodeURIComponent('بیا بازی حکم (فیسکوت)! کد اتاق: '+st.code);try{Telegram.WebApp.openTelegramLink(u)}catch(e){window.open(u,'_blank')}}
+function invite(){const go=l=>{const u='https://t.me/share/url?url='+encodeURIComponent(l)+'&text='+encodeURIComponent('بیا بازی حکم (فیسکوت)! کد اتاق: '+st.code);try{Telegram.WebApp.openTelegramLink(u)}catch(e){window.open(u,'_blank')}};fetch('/config').then(r=>r.json()).then(c=>go(c.bot?'https://t.me/'+c.bot+'?startapp=fk_'+st.code:location.origin+'/fiskoot.html?room='+st.code)).catch(()=>go(location.origin+'/fiskoot.html?room='+st.code))}
 function exitG(){if(confirm('از بازی خارج می‌شوی؟ بعداً با همان کد برمی‌گردی.'))location.href='/'}
 function onSt(){if(st.ph=='lobby'){scr('');scr('lobby');rLobby()}else{scr('');rGame()}}
 function rLobby(){['pick','tp','cd','ov','wt'].forEach(i=>$(i).style.display='none');$('hand').innerHTML='';hk0='';
  $('rc').textContent=st.code;
- const t=(h,ks)=>`<div class="th">${h}</div>`+ks.map(k=>{const s=st.seats[k];return s?`<div class="st ${k==st.me?'me':''}">${s.n}${k==st.me?' (تو)':''}</div>`:`<div class="st" onclick="sit(${k})">خالی ← ربات (بزن تا اینجا بنشینی)</div>`}).join('');
+ const t=(h,ks)=>`<div class="th">${h}</div>`+ks.map(k=>{const s=st.seats[k];return s?`<div class="st ${k==st.me?'me':''}">${s.n}${k==st.me?' (تو)':''}${!s.on?' ⚠ قطع شد':''}</div>`:`<div class="st" onclick="sit(${k})">خالی ← ربات (بزن تا اینجا بنشینی)</div>`}).join('');
  $('room').innerHTML=t('تیم 1 (روبه‌روی هم)',[0,2])+t('تیم 2 (روبه‌روی هم)',[1,3]);
- $('al').checked=st.low;$('al').disabled=!st.host;$('go').style.display=st.host?'block':'none';
- $('lm').textContent=st.host?'صندلی خالی = ربات. هر وقت آماده بودید شروع کن.':'منتظر شروع بازی توسط میزبان…'}
+ $('al').checked=st.low;$('al').disabled=!st.host;const full=st.seats.every(x=>x&&x.on);$('go').style.display=$('gob').style.display=st.host?'block':'none';$('go').disabled=!full;$('go').style.opacity=full?1:.4;
+ $('lm').textContent=st.host?(full?'همه آمده‌اند؛ شروع کن.':'تا همهٔ صندلی‌ها پر نشود «شروع بازی» فعال نمی‌شود. اگر نمی‌خواهی منتظر بمانی، با ربات شروع کن.'):'منتظر شروع بازی توسط میزبان…'}
 function sk0(c){return S(c)==st.tr?-1:S(c)}
 function rGame(){
  const me=st.me,rel=k=>(k-me+4)%4,mt=me%2,ph=st.ph;
@@ -154,7 +159,7 @@ function rGame(){
  const lt=$('lt');if(st.last){lt.style.display='block';const g=[-1,2,-1,3,-1,1,-1,0,-1],mm={};st.last.cards.forEach(x=>mm[rel(x.p)]=x);
   lt.innerHTML='دست قبلی<div class="x">'+g.map(q=>q<0?'<div></div>':cel(mm[q].c,mm[q].p==st.last.w?'w':'l')).join('')+'</div>'}else lt.style.display='none';
  const h=[...st.hand].sort((a,b)=>sk0(a)-sk0(b)||Rk(b)-Rk(a)),key=h.join()+'|'+(st.lg||[]).join();
- if(key!==hk0){hk0=key;const H=$('hand');H.innerHTML='';const W=H.clientWidth-8,n=h.length,ov=n>1?Math.min(34,Math.max(0,(n*51-W)/(n-1))):0;
+ if(key!==hk0){hk0=key;const H=$('hand');H.innerHTML='';const W=H.clientWidth-8,n=h.length,stp=n>1?Math.min(34,(W-52)/(n-1)):0,ov=n>1?52-stp:0;
   h.forEach((c,i)=>{const t=document.createElement('div');t.innerHTML=cel(c);const e=t.firstChild;if(i)e.style.marginLeft=-ov+'px';e._c=c;if(!pvHand.includes(c)&&(ph=='trump'||ph=='play'))e.classList.add('deal');paint(e);bindCard(e,c);H.appendChild(e)});
   if(!st.lg)sel=null}
  pvHand=h;
@@ -180,12 +185,16 @@ function rGame(){
   O.innerHTML=`<div class="box">${x}</div>`;O.style.display='flex'}else O.style.display='none';
  const W=$('wt');if(st.wait!=null&&dis!==st.wait){const s=st.seats[st.wait];W.innerHTML=`<div class="box"><h2>${s.n} قطع شد</h2>اینترنتش قطع شده است. بازی منتظر او می‌ماند.<br><button onclick="dis=st.wait;$('wt').style.display='none'">منتظر می‌مانیم</button><button class="btn go" style="margin-top:8px" onclick="sk.emit('replace')">جایگزینش ربات</button></div>`;W.style.display='flex'}else{W.style.display='none';if(st.wait==null)dis=null}
 }
+function dropCard(e,c,rc){const el=$('p0'),t=el.getBoundingClientRect();el.innerHTML=cel(c,'mid slide');el.dataset.c=c;el.firstChild.style.setProperty('--f',`translate(${rc.left+rc.width/2-t.left}px,${rc.top+rc.height/2-t.top}px)`);e.style.visibility='hidden'}
+let pend=null;
+function takeSeat(k){$('wt').style.display='none';sk.emit('take',{code:pend.code,name:nameV()||'بازیکن',token:tok,seat:k})}
+function copyLink(){try{navigator.clipboard.writeText(location.href).then(()=>toast('لینک کپی شد؛ در Safari یا Chrome بچسبان'))}catch(e){toast(location.href)}}
 function paint(el){const c=el._c,L=st&&st.lg;el.classList.remove('dim','dim2','lift');if(!L)return;if(sel===c)el.classList.add('lift');else if(!L.includes(c))el.classList.add('dim');else if(sel!=null)el.classList.add('dim2')}
 function bindCard(e,c){
  e.onpointerdown=ev=>{if(!st.lg)return;ev.preventDefault();drag={c,e,x:ev.clientX,y:ev.clientY,m:false,was:sel===c};sel=c;try{e.setPointerCapture(ev.pointerId)}catch(_){}[...$('hand').children].forEach(paint)};
  e.onpointermove=ev=>{if(!drag||drag.e!==e)return;const dx=ev.clientX-drag.x,dy=ev.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>8)drag.m=true;if(drag.m){e.style.transition='none';e.style.zIndex=50;e.style.transform=`translate(${dx}px,${dy-18}px)`}};
- e.onpointerup=ev=>{if(!drag||drag.e!==e)return;const d=drag,dy=ev.clientY-d.y;drag=null;e.style.transition='';e.style.zIndex='';e.style.transform='';
-  if(d.m&&dy<-70){if(st.lg.includes(c)){sel=null;sk.emit('play',c)}else toast('نمی‌توانی از آن خال بازی کنی! باید از همان خالی که بازی شده بازی کنی')}
+ e.onpointerup=ev=>{if(!drag||drag.e!==e)return;const d=drag,dy=ev.clientY-d.y,rc=e.getBoundingClientRect();drag=null;e.style.transition='';e.style.zIndex='';e.style.transform='';
+  if(d.m&&dy<-70){if(st.lg.includes(c)){sel=null;dropCard(e,c,rc);sk.emit('play',c)}else toast('نمی‌توانی از آن خال بازی کنی! باید از همان خالی که بازی شده بازی کنی')}
   else if(!d.m&&d.was){sel=null;[...$('hand').children].forEach(paint)}};
  e.onpointercancel=()=>{drag=null;e.style.transform=''}}
 try{Telegram.WebApp.ready();Telegram.WebApp.expand()}catch(e){}
