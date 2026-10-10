@@ -12,7 +12,7 @@ module.exports = function (io) {
   const view = (r, i) => ({
     code: r.code, ph: r.phase, me: i, host: r.seats[i].token === r.host, low: r.aceLow,
     seats: r.seats.map((s, k) => s && { n: s.name, b: s.bot, on: s.on, k: r.hands[k].length }),
-    hand: r.hands[i], tr: r.trump, hk: r.hk, dl: r.dl, turn: r.phase == 'play' ? r.turn : -1,
+    hand: r.phase == 'shuf' ? [] : r.hands[i], tr: r.trump, hk: r.hk, dl: r.dl, turn: r.phase == 'play' ? r.turn : -1,
     trick: r.trick, w: r.phase == 'tr' ? winner(r.trick, r.trump) : -1, last: r.last, tw: r.tw, sc: r.sc,
     pk: r.pick && { f: r.pick.f, t: r.pick.turn }, res: r.res, wait: r.wait, cnt: r.cnt,
     lg: (r.phase == 'play' && r.turn === i) ? legal(r, i) : null
@@ -34,6 +34,8 @@ module.exports = function (io) {
     if (p == 'count') at(1000, () => { if (--r.cnt <= 0) { r.phase = 'hint'; step(r); } else step(r); });
     else if (p == 'hint') at(5200, () => { r.phase = 'pick'; r.pick = { deck: r.pick.deck, f: [], turn: 0 }; step(r); });
     else if (p == 'hk') at(3000, () => startDeal(r));
+    else if (p == 'shuf') at(1800, () => { r.phase = 'trump'; step(r); });
+    else if (p == 'deal') at(2500, () => { r.phase = 'play'; r.turn = r.hk; step(r); });
     else if (p == 'tr') at(1500, () => endTrick(r));
     else if (p == 'res') at(7000, () => { r.hk = r.res.nhk; r.dl = (r.hk + 3) % 4; startDeal(r); });
     else {
@@ -56,11 +58,11 @@ module.exports = function (io) {
     if (Rk(c) == (r.aceLow ? 1 : 14)) { r.hk = seat; r.dl = (seat + 3) % 4; r.phase = 'hk'; } else r.pick.turn = (seat + 1) % 4;
     step(r);
   }
-  function startDeal(r) { r.deck = mk(r.aceLow); r.hands = [[], [], [], []]; r.hands[r.hk] = r.deck.splice(0, 5); r.trump = null; r.tw = [0, 0]; r.trick = []; r.last = null; r.res = null; r.phase = 'trump'; step(r); }
+  function startDeal(r) { r.deck = mk(r.aceLow); r.hands = [[], [], [], []]; r.hands[r.hk] = r.deck.splice(0, 5); r.trump = null; r.tw = [0, 0]; r.trick = []; r.last = null; r.res = null; r.phase = 'shuf'; step(r); }
   function setTrump(r, t) {
     if (r.phase != 'trump' || !(t >= 0 && t < 4)) return; r.trump = t;
     for (let p = 0; p < 4; p++) r.hands[p].push(...r.deck.splice(0, 13 - r.hands[p].length));
-    r.phase = 'play'; r.turn = r.hk; step(r);
+    r.phase = 'deal'; step(r);
   }
   function playCard(r, seat, c) {
     if (r.phase != 'play' || r.turn != seat || !r.hands[seat].includes(c) || !legal(r, seat).includes(c)) return false;
