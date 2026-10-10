@@ -60,5 +60,6 @@ setInterval(() => {
     if (!r.seats.some(x => x && x.sid) && Date.now() - r.t > 36e5) { r.g && r.g.stop(); clearTimeout(r.startTimer); delete rooms[c]; }
   }
 }, 6e5);
+require('./fiskoot-server')(io); // بازی حکم (فیسکوت) - کانال جداگانه
 srv.listen(process.env.PORT || 3000, () => console.log('Manfee server running'));
 tgbot(rooms);
