@@ -1,1 +1,33 @@
-
+<!DOCTYPE html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>بازی حکم (فیسکوت)</title>
+<link rel="stylesheet" href="style.css"></head><body>
+<div id="top"><div class="chip">امتیاز (تا ۱۳)<br><span class="g">تیم ما <b id="sa">0</b></span><br><span class="r">تیم حریف <b id="sb">0</b></span></div><div class="chip" id="tr">حکم: —</div><div class="chip">دورها (تا ۷)<br><span class="g">تیم ما <b id="ta">0</b></span><br><span class="r">تیم حریف <b id="tb">0</b></span></div></div>
+<div id="btns"><button onclick="main()">شروع مجدد</button><button onclick="rules()">قوانین</button><button onclick="exitG()">خروج</button></div>
+<div id="tbl">
+<div id="tc"></div><div id="lt"></div><div id="ann"></div>
+<div class="seat" id="s2" style="top:6px;left:50%;transform:translateX(-50%)"></div>
+<div class="seat" id="s3" style="left:4px;top:50%;transform:translateY(-50%)"></div>
+<div class="seat" id="s1" style="right:4px;top:50%;transform:translateY(-50%)"></div>
+<div class="seat" id="s0" style="bottom:4px;left:50%;transform:translateX(-50%)"></div>
+<div id="ctr"><div class="slot" id="p0"></div><div class="slot" id="p1"></div><div class="slot" id="p2"></div><div class="slot" id="p3"></div></div>
+<div id="pick"><div id="pm"></div><div id="pg"></div></div>
+<div id="tp"></div>
+</div>
+<div id="msg"></div><div id="hand"></div>
+<div class="ovl" id="menu"><div class="box"><h2>♠ بازی حکم (فیسکوت) ♥</h2>اتاق: بازی با ربات 🤖<br>
+<input id="nm" maxlength="12" value="تو" style="width:100%;font:inherit;padding:8px;border-radius:8px;border:0;text-align:center">
+<div id="room" style="margin:10px 0"></div>
+<label><input type="checkbox" id="al"> توس (آس) کمترین کارت باشد</label><br>
+<button onclick="shuffleNames()">🔀 تغییر اسم‌ها</button> <button onclick="main()">شروع بازی</button><br><button style="background:#ffffff22;color:#fff" onclick="rules()">قوانین</button></div></div>
+<div class="ovl" id="rl" style="display:none"><div class="box"><h2>قوانین بازی حکم (فیسکوت)</h2><ul>
+<li>۴ نفر، دو تیم؛ هم‌تیمی روبه‌روست. تیمی که به ۱۳ امتیاز برسد برنده است.</li>
+<li>حاکم (کسی که رنگ را می‌گوید): اولین کسی که توس (آس) بیاورد. پخش‌کننده سمت چپ حاکم است.</li>
+<li>حاکم ۵ کارت می‌گیرد و حکم را انتخاب می‌کند؛ بعد همه به ۱۳ کارت می‌رسند.</li>
+<li>باید از خال شروع‌شده بازی کنی؛ نداری، هر کارتی. حکم، بقیه را می‌برد.</li>
+<li>دست با ۷ دور برنده تمام می‌شود: برد عادی ۱ امتیاز.</li>
+<li>کت‌فیسی: تیم حاکم ۷–۰ ببرد = ۳ امتیاز.</li>
+<li>کدرنگ: تیم حاکم صفر دور بگیرد و حریف ۷ = ۷ امتیاز.</li>
+<li>اگر بازنده حتی یک دور بگیرد، فقط ۱ امتیاز.</li>
+<li>حاکم برد = همان حاکم؛ باخت = حاکم به سمت راست می‌رود.</li></ul>
+<button onclick="this.closest('.ovl').style.display='none'">بستن</button></div></div>
+<div class="ovl" id="ov" style="display:none"><div class="box" id="ovb"></div></div>
+<script src="game.js"></script></body></html>
