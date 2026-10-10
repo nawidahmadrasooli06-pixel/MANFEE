@@ -84,6 +84,7 @@ module.exports = function (io) {
   const back = (so, r, i, tok) => { const s = r.seats[i]; s.sid = so.id; s.on = true; if (s.rep) { s.bot = false; s.rep = false; } so.data = { code: r.code, tok }; step(r); };
   nsp.on('connection', so => {
     const R = () => rooms[so.data && so.data.code], tk = () => so.data && so.data.tok;
+    const takeSeat = (r, k, name, token) => { const s = r.seats[k]; if (!s || !s.auto || !s.bot) return so.emit('err', 'این صندلی دیگر ربات نیست؛ دوباره امتحان کن.'); r.seats[k] = mkSeat(name, token, so.id); so.data = { code: r.code, tok: token }; step(r); };
     so.on('create', ({ name, token } = {}) => {
       let c; do c = [0, 1, 2, 3].map(() => L[Math.random() * 24 | 0]).join(''); while (rooms[c]);
       const r = rooms[c] = { code: c, host: token, seats: [mkSeat(name, token, so.id), null, null, null], phase: 'lobby', aceLow: false, sc: [0, 0], hk: -1, dl: -1, trump: null, hands: [[], [], [], []], trick: [], last: null, tw: [0, 0], turn: -1, pick: null, res: null, wait: null, cnt: 0, t: null, at: Date.now() };
@@ -92,7 +93,7 @@ module.exports = function (io) {
     so.on('join', ({ code, name, token } = {}) => {
       const r = rooms[String(code || '').toUpperCase().trim()]; if (!r) return so.emit('err', 'اتاق پیدا نشد؛ کد را بررسی کن.');
       const i = seatOf(r, token); if (i >= 0) return back(so, r, i, token);
-      if (r.phase != 'lobby') return so.emit('err', 'بازی شروع شده و اتاق پر است.');
+      if (r.phase != 'lobby') { const bl = r.seats.map((x, k) => x && x.auto && x.bot ? { k, n: x.name } : null).filter(Boolean); if (!bl.length) return so.emit('err', 'همهٔ صندلی‌ها آدم هستند و اتاق پر است.'); if (bl.length == 1) return takeSeat(r, bl[0].k, name, token); return so.emit('pick', { code: r.code, list: bl }); }
       const p = place(r); if (p === undefined) return so.emit('err', 'اتاق پر است.');
       r.seats[p] = mkSeat(name, token, so.id); so.data = { code: r.code, tok: token }; send(r);
     });
@@ -100,10 +101,12 @@ module.exports = function (io) {
       const r = rooms[String(code || '').toUpperCase().trim()], i = r ? seatOf(r, token) : -1;
       if (i < 0) return so.emit('gone'); back(so, r, i, token);
     });
+    so.on('take', ({ code, name, token, seat } = {}) => { const r = rooms[String(code || '').toUpperCase().trim()]; if (r && r.phase != 'lobby') takeSeat(r, seat | 0, name, token); });
     so.on('sit', k => { const r = R(), i = r ? seatOf(r, tk()) : -1; k = k | 0; if (r && r.phase == 'lobby' && i >= 0 && k >= 0 && k < 4 && !r.seats[k]) { r.seats[k] = r.seats[i]; r.seats[i] = null; send(r); } });
     so.on('cfg', o => { const r = R(); if (r && r.phase == 'lobby' && tk() === r.host) { r.aceLow = !!(o && o.low); send(r); } });
-    so.on('start', () => {
+    so.on('start', o => {
       const r = R(); if (!r || r.phase != 'lobby' || tk() !== r.host) return;
+      if (!r.seats.every(x => x && x.on) && !(o && o.bots)) return so.emit('err', 'هنوز همهٔ صندلی‌ها پر نشده‌اند.');
       let n = 0; for (let i = 0; i < 4; i++) if (!r.seats[i]) r.seats[i] = { name: BOTS[n++], token: null, sid: null, bot: true, auto: true, on: true };
       r.sc = [0, 0]; r.phase = 'count'; r.cnt = 3; r.pick = { deck: mk(r.aceLow), f: [], turn: 0 }; step(r);
     });
@@ -117,9 +120,10 @@ module.exports = function (io) {
     });
     so.on('disconnect', () => {
       const r = R(); if (!r) return; const i = seatOf(r, tk()); if (i < 0 || r.seats[i].sid !== so.id) return;
-      if (r.phase == 'lobby') { r.seats[i] = null; const h = r.seats.find(s => s); if (h) r.host = h.token; else delete rooms[r.code]; if (rooms[r.code]) send(r); }
+      if (r.phase == 'lobby') { r.seats[i].on = false; r.seats[i].sid = null; r.seats[i].off = Date.now(); send(r); }
       else { r.seats[i].on = false; r.seats[i].sid = null; step(r); }
     });
   });
+  setInterval(() => { for (const c in rooms) { const r = rooms[c]; if (r.phase == 'lobby') { r.seats.forEach((x, k) => { if (x && !x.on && x.off && Date.now() - x.off > 12e4) r.seats[k] = null; }); if (!r.seats.some(x => x && x.token === r.host)) { const h = r.seats.find(x => x); if (h) r.host = h.token; } send(r); } } }, 3e4);
   setInterval(() => { for (const c in rooms) { const r = rooms[c]; if (!r.seats.some(s => s && s.on && !s.bot) && Date.now() - r.at > 36e5) { clearTimeout(r.t); delete rooms[c]; } } }, 6e5);
 };
