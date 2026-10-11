@@ -52,3 +52,6 @@ body.cards-g3 .c:not(.back)::after,.pv.cards-g3 .c::after,body.cards-g4 .c:not(.
 #musicBar{position:fixed;left:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);display:flex;gap:5px;align-items:center;z-index:50;direction:ltr}
 #musicBar button{width:30px;height:30px;border-radius:50%;border:1px solid #f0b64a88;background:#0b1f1ecc;color:#fff;font-size:13px;padding:0;line-height:1}
 #musicBar span{font-size:11px;color:#f0b64a;min-width:14px;text-align:center}
+#specBadge{position:fixed;left:150px;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);font-size:11px;color:#f0b64a;z-index:50;background:#0b1f1ecc;border-radius:10px;padding:2px 8px;direction:rtl}
+body.spectator #pn{display:none!important}
+.bks{display:flex;justify-content:center;direction:ltr;margin-top:3px}.bks i{width:6px;height:13px;background:#a22b3a;border:1px solid #fff;border-radius:2px;margin-left:-3px}
