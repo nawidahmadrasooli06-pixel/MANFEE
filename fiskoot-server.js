@@ -1,5 +1,6 @@
 // بازی حکم (فیسکوت) - سرور آنلاین (مستقل از منفی؛ کانال /fiskoot)
 const L = 'ABCDEFGHJKLMNPQRSTUVWXYZ', BOTS = ['احمد', 'محمد', 'محمود'];
+const smart = require('./game/smartplay');
 const S = c => c / 20 | 0, Rk = c => c % 20;
 const sh = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const mk = low => { const d = []; for (let s = 0; s < 4; s++) for (let r = 2; r <= 14; r++) d.push(s * 20 + (r == 14 && low ? 1 : r)); return sh(d); };
@@ -25,7 +26,13 @@ module.exports = function (io) {
   };
   const seatOf = (r, tok) => r.seats.findIndex(s => s && s.token === tok);
   const botTrump = h => { let b = 0, bs = -1; for (let s = 0; s < 4; s++) { const l = h.filter(c => S(c) == s); const v = l.length * 100 + l.reduce((a, c) => a + Rk(c), 0); if (v > bs) { bs = v; b = s; } } return b; };
+  const newMem = () => ({ played: new Set(), voids: [new Set(), new Set(), new Set(), new Set()] });
   const botPlay = (r, p) => {
+    if (!r.mem) r.mem = newMem();
+    const all = s => { const a = []; for (let k = 2; k <= 13; k++) a.push(s * 20 + k); a.push(s * 20 + (r.aceLow ? 1 : 14)); return a; };
+    return smart.choose({ legal: legal(r, p), hand: r.hands[p], trick: r.trick, me: p, trump: r.trump, S, R: Rk, all, played: r.mem.played, voids: r.mem.voids, mustWin: r.tw[p % 2] >= 6 || r.tw[1 - p % 2] >= 6 });
+  };
+  const botPlayOld = (r, p) => {
     const t = r.trump, Lg = legal(r, p), key = c => (S(c) == t ? 100 : 0) + Rk(c), asc = a => [...a].sort((x, y) => key(x) - key(y));
     if (!r.trick.length) return [...Lg].sort((a, b) => ((S(b) != t) - (S(a) != t)) || Rk(b) - Rk(a))[0];
     let b = r.trick[0]; for (const x of r.trick) if (beats(x.c, b.c, t)) b = x;
@@ -64,7 +71,7 @@ module.exports = function (io) {
     if (Rk(c) == (r.aceLow ? 1 : 14)) { r.hk = seat; r.dl = (seat + 3) % 4; r.phase = 'hk'; } else r.pick.turn = (seat + 1) % 4;
     step(r);
   }
-  function startDeal(r) { r.deck = mk(r.aceLow); r.hands = [[], [], [], []]; r.hands[r.hk] = r.deck.splice(0, 5); r.trump = null; r.tw = [0, 0]; r.trick = []; r.last = null; r.res = null; r.phase = 'shuf'; step(r); }
+  function startDeal(r) { r.deck = mk(r.aceLow); r.hands = [[], [], [], []]; r.mem = newMem(); r.hands[r.hk] = r.deck.splice(0, 5); r.trump = null; r.tw = [0, 0]; r.trick = []; r.last = null; r.res = null; r.phase = 'shuf'; step(r); }
   function setTrump(r, t) {
     if (r.paused || r.phase != 'trump' || !(t >= 0 && t < 4)) return; r.trump = t;
     for (let p = 0; p < 4; p++) r.hands[p].push(...r.deck.splice(0, 13 - r.hands[p].length));
@@ -72,6 +79,9 @@ module.exports = function (io) {
   }
   function playCard(r, seat, c) {
     if (r.paused || r.phase != 'play' || r.turn != seat || !r.hands[seat].includes(c) || !legal(r, seat).includes(c)) return false;
+    if (!r.mem) r.mem = newMem();
+    if (r.trick.length && S(c) != S(r.trick[0].c)) r.mem.voids[seat].add(S(r.trick[0].c));
+    r.mem.played.add(c);
     r.hands[seat].splice(r.hands[seat].indexOf(c), 1); r.trick.push({ p: seat, c });
     if (r.trick.length == 4) r.phase = 'tr'; else r.turn = (seat + 1) % 4;
     step(r); return true;
