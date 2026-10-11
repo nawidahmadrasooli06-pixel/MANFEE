@@ -5,6 +5,8 @@ const sh = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random
 const mk = low => { const d = []; for (let s = 0; s < 4; s++) for (let r = 2; r <= 14; r++) d.push(s * 20 + (r == 14 && low ? 1 : r)); return sh(d); };
 const beats = (a, b, t) => S(a) == S(b) ? Rk(a) > Rk(b) : (S(a) == t && S(b) != t);
 const winner = (tr, t) => { let b = tr[0]; for (const x of tr) if (beats(x.c, b.c, t)) b = x; return b.p; };
+const FC = ['f1','f2','f3','f4','f5','f6','f7','f8','f9','f10'], GC = ['g1','g2','g3','g4','g5','g6','g7','g8','g9','g10'];
+const cleanLook = l => ({ carpet: FC.includes(l && l.carpet) ? l.carpet : 'f1', cards: GC.includes(l && l.cards) ? l.cards : 'g1' });
 module.exports = function (io) {
   const nsp = io.of('/fiskoot'), rooms = {};
   const legal = (r, p) => { const h = r.hands[p], led = r.trick.length ? S(r.trick[0].c) : null; const lg = led !== null ? h.filter(c => S(c) == led) : []; return lg.length ? lg : h; };
@@ -14,7 +16,7 @@ module.exports = function (io) {
     seats: r.seats.map((s, k) => s && { n: s.name, b: s.bot, on: s.on, k: r.hands[k].length }),
     hand: r.phase == 'shuf' ? [] : r.hands[i], tr: r.trump, hk: r.hk, dl: r.dl, turn: r.phase == 'play' ? r.turn : -1,
     trick: r.trick, w: r.phase == 'tr' ? winner(r.trick, r.trump) : -1, last: r.last, tw: r.tw, sc: r.sc,
-    pk: r.pick && { f: r.pick.f, t: r.pick.turn }, res: r.res, wait: r.wait, cnt: r.cnt,
+    pk: r.pick && { f: r.pick.f, t: r.pick.turn }, look: r.look, track: r.track, playing: !!r.playing, paused: !!r.paused, res: r.res, wait: r.wait, cnt: r.cnt,
     lg: (r.phase == 'play' && r.turn === i) ? legal(r, i) : null
   });
   const send = r => r.seats.forEach((s, i) => { if (s && s.sid && s.on) { const so = nsp.sockets.get(s.sid); if (so) so.emit('st', view(r, i)); } });
@@ -29,6 +31,7 @@ module.exports = function (io) {
   };
   function step(r) {
     clearTimeout(r.t); r.wait = null; r.at = Date.now();
+    if (r.paused) return send(r);
     const at = (ms, f) => { r.t = setTimeout(f, ms); };
     const p = r.phase;
     if (p == 'count') at(1000, () => { if (--r.cnt <= 0) { r.phase = 'hint'; step(r); } else step(r); });
@@ -53,19 +56,19 @@ module.exports = function (io) {
     send(r);
   }
   function flip(r, seat, i) {
-    if (r.phase != 'pick' || r.pick.turn != seat || !(i >= 0 && i < 52) || r.pick.f.some(f => f[0] == i)) return;
+    if (r.paused || r.phase != 'pick' || r.pick.turn != seat || !(i >= 0 && i < 52) || r.pick.f.some(f => f[0] == i)) return;
     const c = r.pick.deck[i]; r.pick.f.push([i, c, seat]);
     if (Rk(c) == (r.aceLow ? 1 : 14)) { r.hk = seat; r.dl = (seat + 3) % 4; r.phase = 'hk'; } else r.pick.turn = (seat + 1) % 4;
     step(r);
   }
   function startDeal(r) { r.deck = mk(r.aceLow); r.hands = [[], [], [], []]; r.hands[r.hk] = r.deck.splice(0, 5); r.trump = null; r.tw = [0, 0]; r.trick = []; r.last = null; r.res = null; r.phase = 'shuf'; step(r); }
   function setTrump(r, t) {
-    if (r.phase != 'trump' || !(t >= 0 && t < 4)) return; r.trump = t;
+    if (r.paused || r.phase != 'trump' || !(t >= 0 && t < 4)) return; r.trump = t;
     for (let p = 0; p < 4; p++) r.hands[p].push(...r.deck.splice(0, 13 - r.hands[p].length));
     r.phase = 'deal'; step(r);
   }
   function playCard(r, seat, c) {
-    if (r.phase != 'play' || r.turn != seat || !r.hands[seat].includes(c) || !legal(r, seat).includes(c)) return false;
+    if (r.paused || r.phase != 'play' || r.turn != seat || !r.hands[seat].includes(c) || !legal(r, seat).includes(c)) return false;
     r.hands[seat].splice(r.hands[seat].indexOf(c), 1); r.trick.push({ p: seat, c });
     if (r.trick.length == 4) r.phase = 'tr'; else r.turn = (seat + 1) % 4;
     step(r); return true;
@@ -87,9 +90,9 @@ module.exports = function (io) {
   nsp.on('connection', so => {
     const R = () => rooms[so.data && so.data.code], tk = () => so.data && so.data.tok;
     const takeSeat = (r, k, name, token) => { const s = r.seats[k]; if (!s || !s.auto || !s.bot) return so.emit('err', 'این صندلی دیگر ربات نیست؛ دوباره امتحان کن.'); r.seats[k] = mkSeat(name, token, so.id); so.data = { code: r.code, tok: token }; step(r); };
-    so.on('create', ({ name, token } = {}) => {
+    so.on('create', ({ name, token, look } = {}) => {
       let c; do c = [0, 1, 2, 3].map(() => L[Math.random() * 24 | 0]).join(''); while (rooms[c]);
-      const r = rooms[c] = { code: c, host: token, seats: [mkSeat(name, token, so.id), null, null, null], phase: 'lobby', aceLow: false, sc: [0, 0], hk: -1, dl: -1, trump: null, hands: [[], [], [], []], trick: [], last: null, tw: [0, 0], turn: -1, pick: null, res: null, wait: null, cnt: 0, t: null, at: Date.now() };
+      const r = rooms[c] = { code: c, host: token, seats: [mkSeat(name, token, so.id), null, null, null], phase: 'lobby', aceLow: false, sc: [0, 0], hk: -1, dl: -1, trump: null, hands: [[], [], [], []], trick: [], last: null, tw: [0, 0], turn: -1, pick: null, res: null, wait: null, cnt: 0, t: null, at: Date.now(), look: cleanLook(look), track: 1, playing: false, paused: false };
       so.data = { code: c, tok: token }; send(r);
     });
     so.on('join', ({ code, name, token } = {}) => {
@@ -114,11 +117,15 @@ module.exports = function (io) {
     });
     so.on('flip', i => { const r = R(), s = r ? seatOf(r, tk()) : -1; if (s >= 0) flip(r, s, i | 0); });
     so.on('trump', t => { const r = R(), s = r ? seatOf(r, tk()) : -1; if (s >= 0 && s == r.hk) setTrump(r, t | 0); });
-    so.on('play', c => { const r = R(), s = r ? seatOf(r, tk()) : -1; if (s >= 0 && !playCard(r, s, c | 0) && r.phase == 'play') so.emit('err', 'بازی این کارت مجاز نیست؛ باید از همان خالی که بازی شده بازی کنی.'); });
+    so.on('play', c => { const r = R(), s = r ? seatOf(r, tk()) : -1; if (s >= 0 && !playCard(r, s, c | 0) && r.phase == 'play' && !r.paused) so.emit('err', 'بازی این کارت مجاز نیست؛ باید از همان خالی که بازی شده بازی کنی.'); });
+    so.on('look', l => { const r = R(); if (r && tk() === r.host) { r.look = cleanLook(l); send(r); } });
+    so.on('track', n => { const r = R(); n = n | 0; if (r && seatOf(r, tk()) >= 0 && n >= 1 && n <= 21) { r.track = n; r.playing = true; r.seats.forEach(x => { if (x && x.sid && x.on && x.sid !== so.id) { const o = nsp.sockets.get(x.sid); if (o) o.emit('track', n); } }); } });
+    so.on('pause', () => { const r = R(); if (r && tk() === r.host && r.phase != 'lobby' && r.phase != 'over') { r.paused = true; step(r); } });
+    so.on('resume', () => { const r = R(); if (r && tk() === r.host && r.paused) { r.paused = false; step(r); } });
     so.on('replace', () => { const r = R(); if (r && r.wait != null && seatOf(r, tk()) >= 0) { const s = r.seats[r.wait]; s.bot = true; s.rep = true; step(r); } });
     so.on('again', () => {
       const r = R(); if (!r || r.phase != 'over' || tk() !== r.host) return; clearTimeout(r.t);
-      r.seats = r.seats.map(s => (s && !s.auto && !s.rep && s.on) ? s : null); r.phase = 'lobby'; r.sc = [0, 0]; r.hands = [[], [], [], []]; r.trick = []; r.last = null; r.res = null; r.hk = r.dl = -1; r.trump = null; send(r);
+      r.seats = r.seats.map(s => (s && !s.auto && !s.rep && s.on) ? s : null); r.paused = false; r.phase = 'lobby'; r.sc = [0, 0]; r.hands = [[], [], [], []]; r.trick = []; r.last = null; r.res = null; r.hk = r.dl = -1; r.trump = null; send(r);
     });
     so.on('disconnect', () => {
       const r = R(); if (!r) return; const i = seatOf(r, tk()); if (i < 0 || r.seats[i].sid !== so.id) return;
