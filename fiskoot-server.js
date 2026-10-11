@@ -1,6 +1,7 @@
 // بازی حکم (فیسکوت) - سرور آنلاین (مستقل از منفی؛ کانال /fiskoot)
 const L = 'ABCDEFGHJKLMNPQRSTUVWXYZ', BOTS = ['احمد', 'محمد', 'محمود'];
-const smart = require('./game/smartplay');
+let smart;
+try { smart = require('./game/smartplay'); } catch (e1) { try { smart = require('./game/game/smartplay'); } catch (e2) { console.log('smartplay.js not found; using simple bot'); smart = { choose: o => o.legal[0] }; } }
 const S = c => c / 20 | 0, Rk = c => c % 20;
 const sh = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const mk = low => { const d = []; for (let s = 0; s < 4; s++) for (let r = 2; r <= 14; r++) d.push(s * 20 + (r == 14 && low ? 1 : r)); return sh(d); };
