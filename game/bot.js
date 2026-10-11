@@ -1,5 +1,6 @@
 const { suit, rank, deck } = require('./cards');
-const smart = require('./smartplay');
+let smart;
+try { smart = require('./smartplay'); } catch (e1) { try { smart = require('./game/smartplay'); } catch (e2) { console.log('smartplay.js not found; using simple bot'); smart = { choose: o => o.legal[0] }; } }
 const ALLS = [0, 1, 2, 3].map(s => Array.from({ length: 13 }, (_, i) => s * 13 + i));
 const all = s => ALLS[s];
 const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
