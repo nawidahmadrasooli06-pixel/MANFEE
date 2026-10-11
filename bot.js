@@ -22,6 +22,12 @@ function start(rooms) {
     const m = u.message; if (!m || !m.text) return;
     const [cmd, arg] = m.text.trim().split(/\s+/);
     if (cmd == '/start') {
+      const wf = /^(fkw|w)_([A-Za-z]{4})$/i.exec(arg || '');
+      if (wf) {
+        const c = wf[2].toUpperCase(), hok = wf[1].toLowerCase() == 'fkw';
+        await api('sendMessage', { chat_id: m.chat.id, text: `👁 دوستت تو را به تماشای زندهٔ ${hok ? 'بازی حکم (فیسکوت)' : 'بازی منفی'} دعوت کرده!\nکد اتاق: ${c}\nدست‌ها دیده نمی‌شوند؛ فقط میز را می‌بینی. برای تماشا دکمه را بزن.`, reply_markup: { inline_keyboard: [[{ text: '👁 تماشای بازی', web_app: { url: URL_ + (hok ? '/fiskoot.html?watch=' : '/?w=') + c } }]] } });
+        return;
+      }
       const fk = /^fk_([A-Za-z]{4})$/i.exec(arg || '');
       if (fk) {
         const c = fk[1].toUpperCase();
