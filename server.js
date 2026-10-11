@@ -7,7 +7,7 @@ app.get('/health', (q, r) => r.send('ok'));
 app.get('/config', (q, r) => r.json({ bot: tgbot.info.username || '' }));
 const srv = http.createServer(app), io = new Server(srv), rooms = {};
 const L = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-const CARPETS = ['c1', 'c2', 'c3', 'c4', 'c5'], CARDSETS = ['k1', 'k2', 'k3', 'k4', 'k5'];
+const CARPETS = ['c1', 'c2', 'c3', 'c4', 'c5', 'f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'f10'], CARDSETS = ['k1', 'k2', 'k3', 'k4', 'k5', 'g1', 'g2', 'g3', 'g4', 'g5', 'g6', 'g7', 'g8', 'g9', 'g10'];
 const cleanLook = l => ({ carpet: CARPETS.includes(l && l.carpet) ? l.carpet : 'c1', cards: CARDSETS.includes(l && l.cards) ? l.cards : 'k1' });
 const cl = n => String(n || 'بازیکن').slice(0, 14);
 const ended = r => !!(r && r.g && r.g.phase === 'series');
