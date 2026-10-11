@@ -121,7 +121,7 @@ module.exports = function (io) {
     so.on('flip', i => { const r = R(), s = r ? seatOf(r, tk()) : -1; if (s >= 0) flip(r, s, i | 0); });
     so.on('trump', t => { const r = R(), s = r ? seatOf(r, tk()) : -1; if (s >= 0 && s == r.hk) setTrump(r, t | 0); });
     so.on('play', c => { const r = R(), s = r ? seatOf(r, tk()) : -1; if (s >= 0 && !playCard(r, s, c | 0) && r.phase == 'play' && !r.paused) so.emit('err', 'بازی این کارت مجاز نیست؛ باید از همان خالی که بازی شده بازی کنی.'); });
-    so.on('watch', ({ code } = {}) => { const r = rooms[String(code || '').toUpperCase().trim()]; if (!r) return so.emit('gone'); r.spec.add(so.id); so.data = { code: r.code, spec: true }; send(r); });
+    so.on('watch', ({ code } = {}) => { const r = rooms[String(code || '').toUpperCase().trim()]; if (!r) return so.emit('gone'); r.spec.add(so.id); so.data = { code: r.code, spec: true }; send(r); r.seats.forEach(x => { if (x && x.sid && x.on) { const o = nsp.sockets.get(x.sid); if (o) o.emit('specJoin'); } }); r.spec.forEach(id => { const o = nsp.sockets.get(id); if (o) o.emit('specJoin'); }); });
     so.on('look', l => { const r = R(); if (r && tk() === r.host) { r.look = cleanLook(l); send(r); } });
     so.on('track', n => { const r = R(); n = n | 0; if (r && seatOf(r, tk()) >= 0 && n >= 1 && n <= 21) { r.track = n; r.playing = true; r.seats.forEach(x => { if (x && x.sid && x.on && x.sid !== so.id) { const o = nsp.sockets.get(x.sid); if (o) o.emit('track', n); } }); r.spec.forEach(id => { const o = nsp.sockets.get(id); if (o) o.emit('track', n); }); } });
     so.on('pause', () => { const r = R(); if (r && tk() === r.host && r.phase != 'lobby' && r.phase != 'over') { r.paused = true; step(r); } });
