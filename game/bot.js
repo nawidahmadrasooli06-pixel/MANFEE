@@ -1,72 +1,45 @@
-const { suit, rank, beats, winner } = require('./cards');
+const { suit, rank, deck } = require('./cards');
+const smart = require('./smartplay');
+const ALLS = [0, 1, 2, 3].map(s => Array.from({ length: 13 }, (_, i) => s * 13 + i));
+const all = s => ALLS[s];
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
-// Estimate tricks from controls, trump length and useful side-suit length.
-function est(hand) {
-  const bySuit = [[], [], [], []];
-  hand.forEach(c => bySuit[suit(c)].push(rank(c)));
-  bySuit.forEach(a => a.sort((x, y) => y - x));
-  let expected = 0;
-  for (let s = 0; s < 4; s++) {
-    const a = bySuit[s], n = a.length;
-    if (!n) continue;
-    if (s === 0) {
-      const weights = [1.0, .78, .5, .3, .18];
-      a.slice(0, 5).forEach((r, i) => { if (r >= 8) expected += weights[i]; });
-      if (n > 3) expected += (n - 3) * .48;
-    } else {
-      if (a.includes(12)) expected += .92;
-      if (a.includes(11)) expected += n >= 2 ? .62 : .34;
-      if (a.includes(10)) expected += n >= 3 ? .42 : .18;
-      if (a.includes(9)) expected += n >= 4 ? .24 : .08;
-      if (a.includes(8) && n >= 5) expected += .12;
-      if (n >= 6 && a[0] >= 10) expected += .18;
+// یک دست کامل را با همان منطق بازی ربات شبیه‌سازی می‌کند و تعداد دست‌های صندلی ۰ را برمی‌گرداند
+function simulate(hands) {
+  const hs = hands.map(h => h.slice()), played = new Set(), voids = [new Set(), new Set(), new Set(), new Set()];
+  let lead = Math.random() * 4 | 0, mine = 0;
+  for (let t = 0; t < 13; t++) {
+    const trick = [];
+    for (let k = 0; k < 4; k++) {
+      const p = (lead + k) % 4, h = hs[p], led = trick.length ? suit(trick[0].c) : null;
+      const f = led !== null ? h.filter(c => suit(c) === led) : [], legal = f.length ? f : h;
+      const c = smart.choose({ legal, hand: h, trick, me: p, trump: 0, S: suit, R: rank, all, played, voids });
+      if (led !== null && suit(c) !== led) voids[p].add(led);
+      played.add(c); hs[p] = h.filter(x => x !== c); trick.push({ p, c });
     }
+    let b = trick[0]; for (const x of trick) if (suit(x.c) === suit(b.c) ? rank(x.c) > rank(b.c) : suit(x.c) === 0) b = x;
+    if (b.p === 0) mine++; lead = b.p;
   }
-  const trumps = bySuit[0].length;
-  const voids = bySuit.slice(1).filter(a => !a.length).length;
-  if (trumps >= 2) expected += Math.min(voids, 2) * .28;
-  if (trumps >= 4) expected += (trumps - 3) * .22;
-  return Math.max(0, Math.min(13, Math.round(expected)));
+  return mine;
 }
-
-const cost = c => rank(c) + (suit(c) === 0 ? 18 : 0);
+// ادعا = همان تعداد دستی که واقعاً انتظار دارد بگیرد (نه بیشتر، نه کمتر)
+function est(hand) {
+  const rest = [...Array(52).keys()].filter(c => !hand.includes(c)), N = 140;
+  let tot = 0;
+  for (let n = 0; n < N; n++) { shuffle(rest); tot += simulate([hand, rest.slice(0, 13), rest.slice(13, 26), rest.slice(26, 39)]); }
+  return Math.max(0, Math.min(13, Math.round(tot / N)));
+}
+function memory(g) {
+  if (!g.__m || g.__m.rid !== g.rid) g.__m = { rid: g.rid, played: new Set(), voids: [new Set(), new Set(), new Set(), new Set()] };
+  const m = g.__m, learn = list => list.forEach((x, i) => { m.played.add(x.c); if (i > 0 && suit(x.c) !== suit(list[0].c)) m.voids[x.s].add(suit(list[0].c)); });
+  learn(g.trick); if (g.last) learn(g.last.cards);
+  return m;
+}
 function pick(g, seat) {
   const legal = g.legal(seat).slice();
   if (legal.length <= 1) return legal[0];
-  const team = seat % 2;
-  const need = g.tc(team) - g.tt(team);
-  const cheap = (a, b) => cost(a) - cost(b);
-
-  // Leading: take a likely control when the partnership still needs tricks;
-  // otherwise shed a low side-suit card and preserve trumps.
-  if (!g.trick.length) {
-    if (need > 0) {
-      const sideControls = legal.filter(c => suit(c) !== 0 && rank(c) >= 10).sort((a, b) => rank(b) - rank(a));
-      if (sideControls.length) return sideControls[0];
-      const trumpControls = legal.filter(c => suit(c) === 0).sort((a, b) => rank(b) - rank(a));
-      if (trumpControls.length) return trumpControls[0];
-      return legal.sort((a, b) => rank(b) - rank(a))[0];
-    }
-    const side = legal.filter(c => suit(c) !== 0).sort(cheap);
-    return side[0] ?? legal.sort(cheap)[0];
-  }
-
-  const winningSeat = winner(g.trick);
-  const winningCard = g.trick.find(x => x.s === winningSeat).c;
-  const partnerWinning = winningSeat % 2 === team;
-  const winners = legal.filter(c => beats(c, winningCard)).sort(cheap);
-  const losers = legal.filter(c => !beats(c, winningCard)).sort(cheap);
-
-  if (partnerWinning) {
-    // Do not overtake a partner: discard cheaply if possible.
-    return losers[0] ?? winners[0] ?? legal.sort(cheap)[0];
-  }
-  if (need > 0) {
-    // The opponents currently take the trick; use the cheapest card that wins it.
-    return winners[0] ?? losers[losers.length - 1] ?? legal.sort(cheap)[0];
-  }
-  // No further trick is needed: avoid taking the trick and discard a high loser.
-  return losers[losers.length - 1] ?? winners[0] ?? legal.sort(cheap)[0];
+  const m = memory(g), team = seat % 2;
+  const need = g.tc(team) - g.tt(team), oppNeed = g.tc(1 - team) - g.tt(1 - team);
+  return smart.choose({ legal, hand: g.hands[seat], trick: g.trick.map(x => ({ p: x.s, c: x.c })), me: seat, trump: 0, S: suit, R: rank, all, played: m.played, voids: m.voids, mustWin: need <= 0 || oppNeed <= 0 });
 }
-
 module.exports = { est, pick };
