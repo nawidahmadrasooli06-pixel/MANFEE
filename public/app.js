@@ -13,7 +13,7 @@ const nm = () => {
 const act = (ev, a) => sk.emit(ev, a);
 $('#nm').value = localStorage.nm || (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.first_name) || '';
 $('#invNm').value = $('#nm').value;
-const qr = new URLSearchParams(location.search).get('r');
+const qr = new URLSearchParams(location.search).get('r'), wq = new URLSearchParams(location.search).get('w');
 if (qr) show('invite');
 function mk() { sk.emit('create', { name: nm(), token: tok, look: typeof prefLook === 'function' ? prefLook() : undefined }); }
 function jn() { sk.emit('join', { code: $('#cd').value, name: nm(), token: tok }); }
@@ -38,8 +38,15 @@ function share() {
   if (tg) tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(text));
   else navigator.share ? navigator.share({ title: 'منفی', text, url: link }).catch(() => { }) : navigator.clipboard.writeText(link).then(() => alert('لینک کپی شد'));
 }
+function shareWatch() {
+  const code = (st && st.code) || localStorage.room; if (!code) { alert('اول وارد یک اتاق شو'); return; }
+  const link = BOT ? `https://t.me/${BOT}?start=w_${code}` : location.origin + '/?w=' + code;
+  const text = 'بیا بازی منفی را زنده تماشا کن! 👁 کد اتاق: ' + code;
+  if (tg) tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(text));
+  else navigator.share ? navigator.share({ title: 'منفی', text, url: link }).catch(() => { }) : navigator.clipboard.writeText(link).then(() => alert('لینک کپی شد'));
+}
 function lobby() {
-  const cell = i => { const x = st.seats[i]; return `<button class="sb ${x ? 'f' : ''}" onclick="act('sit',${i})">${x ? x.name + (i == st.me ? ' (تو)' : '') : 'خالی ← ربات'}</button>`; };
+  const cell = i => { const x = st.seats[i]; return `<button class="sb ${x ? 'f' : ''}" onclick="act('sit',${i})">${x ? x.name + (i == st.me && !st.isSpec ? ' (تو)' : '') : 'خالی ← ربات'}</button>`; };
   $('#lb').innerHTML = `<h3>تیم ۱ (روبه‌روی هم)</h3>${cell(0)}${cell(2)}<h3>تیم ۲ (روبه‌روی هم)</h3>${cell(1)}${cell(3)}`;
   $('#code').textContent = st.code;
   $('#go').style.display = st.host ? '' : 'none';
@@ -50,7 +57,8 @@ function lobby() {
   $('#startCount').textContent = st.starting ? `شروع بازی تا ${st.starting}…` : '';
 }
 sk.on('state', s => {
-  st = s; localStorage.room = s.code; history.replaceState(0, '', '?r=' + s.code);
+  st = s; if (!s.isSpec) localStorage.room = s.code; history.replaceState(0, '', (s.isSpec ? '?w=' : '?r=') + s.code);
+  document.body.classList.toggle('spectator', !!s.isSpec); if (typeof setSpec === 'function') setSpec(s.spec || 0);
   if (typeof applyLook === 'function' && s.look) applyLook(s.look);
   if (typeof syncTrackFromState === 'function') syncTrackFromState(s.track, s.playing);
   if (s.g) { if (!menuMode) show('game'); T.render(s); } else { menuMode = false; show('lobby'); lobby(); }
@@ -71,6 +79,7 @@ sk.on('expired', m => {
   localStorage.removeItem('room'); $('#expiredMsg').textContent = m || 'این بازی به پایان رسیده یا لینک آن منقضی شده است. ربات را دوباره استارت کن.'; show('expired');
 });
 sk.on('connect', () => {
+  if (wq || (st && st.isSpec)) { sk.emit('watch', { code: st && st.isSpec ? st.code : wq }); return; }
   if (qr) { sk.emit('preview', qr); return; }
   if (st) { sk.emit('join', { code: st.code, name: localStorage.nm || 'بازیکن', token: tok }); return; }
 });
