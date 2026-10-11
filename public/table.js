@@ -2,7 +2,17 @@ const T = (() => {
   const SU = ['♠', '♥', '♦', '♣'], RK = '2 3 4 5 6 7 8 9 10 J Q K A'.split(' ');
   const $ = q => document.querySelector(q);
   const cd = (c, x = '') => { const s = c / 13 | 0; return `<div class="c ${s == 1 || s == 2 ? 'r' : ''} ${s == 1 ? 'heart' : ''} ${x}"><em>${RK[c % 13]}</em><b>${SU[s]}</b></div>`; };
-  let S, pl = 0, nid = 0, v = 2, tm, rid = -1, lastTk = 0, lastCount = -1, myTurn = false, drag = null, sel = null, pending = null;
+  let S, pl = 0, nid = 0, v = 2, tm, rid = -1, lastTk = 0, lastCount = -1, myTurn = false, drag = null, sel = null, pending = null, flyOwn = null;
+  function flyCard(el, c) {
+    const ic = el.querySelector('.c'), ctr = document.querySelector('#tbl .ctr'); if (!ic || !ctr) return;
+    const r = ic.getBoundingClientRect(), t = ctr.getBoundingClientRect(), k = ic.offsetWidth, cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const tx = t.left + t.width / 2, ty = t.bottom - k * 0.7;
+    const fl = document.createElement('div'); fl.innerHTML = cd(c); const cc = fl.firstChild;
+    cc.style.cssText = `position:fixed;left:${cx - k / 2}px;top:${cy - k * 0.7}px;--k:${k}px;margin:0;z-index:99999;pointer-events:none;transform:scale(1.1);transition:transform .4s cubic-bezier(.2,.8,.25,1)`;
+    document.body.appendChild(cc); flyOwn = { c, t: Date.now() };
+    requestAnimationFrame(() => requestAnimationFrame(() => { cc.style.transform = `translate(${tx - cx}px,${ty - cy}px) scale(1)`; }));
+    setTimeout(() => { cc.remove(); document.querySelectorAll('.q.hid').forEach(e => e.classList.remove('hid')); }, 460);
+  }
   function toast(m) { const t = $('#ts'); t.textContent = m; t.style.display = 'block'; clearTimeout(tm); tm = setTimeout(() => t.style.display = 'none', 2800); }
   function render(st) { pending = null; draw(st); }
   function mirReviewOverlay(st) {
@@ -45,7 +55,7 @@ const T = (() => {
       const tag = x.off ? '<i class="o">قطع</i>' : x.sub ? '<i class="o">ربات</i>' : '';
       h += `<div class="st p${rel(s)} ${on ? 'on' : ''} ${s % 2 == mt ? 'm' : 'e'}">${g.dealer == s ? '<i>میر</i>' : ''}${tag}<u>${x.name}</u><b>${g.taken[s]}/${c == null ? '؟' : c}</b></div>`;
     }
-    h += '<div class="ctr">' + g.trick.map((x, i) => `<div class="q q${rel(x.s)} ${i >= pl ? 'in' : ''} ${g.win == x.s ? 'w' : ''}">${cd(x.c)}</div>`).join('') + '</div>';
+    h += '<div class="ctr">' + g.trick.map((x, i) => `<div class="q q${rel(x.s)} ${i >= pl && !(flyOwn && x.s == me && x.c == flyOwn.c && Date.now() - flyOwn.t < 2000) ? 'in' : ''} ${flyOwn && x.s == me && x.c == flyOwn.c && Date.now() - flyOwn.t < 450 ? 'hid' : ''} ${g.win == x.s ? 'w' : ''}">${cd(x.c)}</div>`).join('') + '</div>';
     pl = g.trick.length;
     if (g.last) h += `<div class="lt"><small>دست قبل</small><div class="ctr2">${g.last.cards.map(x => `<div class="q q${rel(x.s)} ${g.last.w == x.s ? 'w' : ''}">${cd(x.c)}</div>`).join('')}</div></div>`;
     $('#tbl').innerHTML = h + '<div id="wm">CACTUC</div>';
@@ -85,7 +95,7 @@ const T = (() => {
     if (!d.mv) sel = sel == d.c ? null : d.c;
     else if (dy < -55) {
       const g = S.g;
-      if (g.phase == 'play' && g.turn == S.me && g.legal.includes(d.c)) { pending = d.c; sel = null; act('play', d.c); }
+      if (g.phase == 'play' && g.turn == S.me && g.legal.includes(d.c)) { flyCard(d.el, d.c); pending = d.c; sel = null; act('play', d.c); }
       else toast(g.phase == 'play' && g.turn == S.me ? 'این پر را نمی‌توانی بیندازی؛ باید هم‌خال بیندازی' : 'هنوز نوبت تو نیست');
     }
     draw(S);
