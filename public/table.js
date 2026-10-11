@@ -58,7 +58,7 @@ const T = (() => {
     h += '<div class="ctr">' + g.trick.map((x, i) => `<div class="q q${rel(x.s)} ${i >= pl && !(flyOwn && x.s == me && x.c == flyOwn.c && Date.now() - flyOwn.t < 2000) ? 'in' : ''} ${flyOwn && x.s == me && x.c == flyOwn.c && Date.now() - flyOwn.t < 450 ? 'hid' : ''} ${g.win == x.s ? 'w' : ''}">${cd(x.c)}</div>`).join('') + '</div>';
     pl = g.trick.length;
     if (g.last) h += `<div class="lt"><small>دست قبل</small><div class="ctr2">${g.last.cards.map(x => `<div class="q q${rel(x.s)} ${g.last.w == x.s ? 'w' : ''}">${cd(x.c)}</div>`).join('')}</div></div>`;
-    $('#tbl').innerHTML = h + '<div id="wm">CACTUC</div>';
+    $('#tbl').innerHTML = h + '<div id="wm">CACTUC</div><div class="idTag">@cactuc580</div>';
     if (sel != null && !g.hand.includes(sel)) sel = null;
     if (!drag) $('#hand').innerHTML = g.hand.filter(c => c != pending).map((c, i) => `<span data-c="${c}" style="--i:${i}" class="${g.phase == 'deal' ? 'dl' : ''} ${sel == c ? 'sel' : ''}">${cd(c, my && !g.legal.includes(c) ? 'dim' : '')}</span>`).join('');
     if (g.nid != nid) { nid = g.nid; if (g.note) { toast(g.note); $('#hand').classList.add('sw'); setTimeout(() => $('#hand').classList.remove('sw'), 800); } }
