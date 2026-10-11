@@ -22,6 +22,12 @@ io.on('connection', s => {
     if (i < 0) return s.emit('err', 'اتاق پر است؛ همه‌ی صندلی‌ها آدم هستند.');
     s.data.code = c;
   };
+  s.on('watch', ({ code } = {}) => {
+    code = String(code || '').toUpperCase().trim();
+    const r = rooms[code];
+    if (!r || ended(r)) return s.emit('expired', expiredMessage);
+    s.data.code = code; r.watch(s.id);
+  });
   s.on('preview', code => {
     code = String(code || '').toUpperCase().trim();
     const r = rooms[code];
