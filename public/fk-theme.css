@@ -63,3 +63,15 @@ body.pg-mf #specBadge{right:8px;left:auto;bottom:auto;top:132px}
 #specWelcome.show{display:block;animation:swl 5.8s ease both}
 @keyframes swl{0%{opacity:0;transform:translateX(-50%) translateY(-10px)}8%{opacity:1;transform:translateX(-50%)}88%{opacity:1}100%{opacity:0}}
 .q.hid{visibility:hidden}
+
+.idTag{position:absolute;left:0;right:0;text-align:center;font-size:10px;font-weight:700;letter-spacing:.06em;color:#ffffff59;direction:ltr;line-height:1;cursor:pointer;z-index:3;-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+body.pg-fk .idTag{top:calc(30% + 21px)}
+body.pg-mf .idTag{top:calc(24vw + min(12vw,62px)*1.15 + 3px)}
+body.carpet-f7 .idTag,body.carpet-f8 .idTag{color:#0000008c}
+#idToast{display:none;position:fixed;top:78px;left:50%;transform:translateX(-50%);z-index:100000;background:#000d;color:#ffd76a;border-radius:12px;padding:8px 16px;font-size:13px;font-family:Vazirmatn,Tahoma,sans-serif}
+.credit2,.credit2 *{-webkit-user-select:text!important;user-select:text!important;-webkit-touch-callout:default!important}
+.credit2{margin-top:14px;padding-top:10px;border-top:1px solid #ffffff24;text-align:center;font-family:Vazirmatn,Tahoma,sans-serif}
+.credit2 .cr1{font-size:11px;color:#9fcfc0}
+.credit2 .cr2{margin:4px 0 8px;font-size:17px;font-weight:800;letter-spacing:.06em;color:#ffd76a;direction:ltr;cursor:pointer;display:inline-block}
+.credit2 .cr3{display:flex;gap:8px;justify-content:center}
+.credit2 .cr3 button{flex:1;max-width:150px;padding:8px 6px;border-radius:10px;border:1px solid #f0b64a88;background:#0b1f1ecc;color:#fff;font:inherit;font-size:12px;margin:0}
