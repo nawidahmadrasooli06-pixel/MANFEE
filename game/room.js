@@ -4,9 +4,10 @@ class Room {
     this.code = code; this.io = io; this.seats = [null, null, null, null];
     this.g = null; this.host = null; this.t = Date.now();
     this.look = { carpet: 'c1', cards: 'k1' }; this.track = 1; this.playing = false;
-    this.invitePending = false; this.inviteAccepted = false; this.starting = 0; this.startTimer = null;
+    this.spec = new Set(); this.invitePending = false; this.inviteAccepted = false; this.starting = 0; this.startTimer = null;
   }
-  setTrack(n) { this.track = n; this.playing = true; this.seats.forEach(s => { if (s && s.sid) this.io.to(s.sid).emit('track', n); }); }
+  setTrack(n) { this.track = n; this.playing = true; this.seats.forEach(s => { if (s && s.sid) this.io.to(s.sid).emit('track', n); }); this.spec.forEach(id => this.io.to(id).emit('track', n)); }
+  watch(sid) { this.spec.add(sid); this.send(); }
   seatOf(sid) { return this.seats.findIndex(x => x && x.sid == sid); }
   free() { return this.g ? [0, 1, 2, 3].filter(i => this.g.bot[i]) : []; }
   pickList() { return this.free().map(i => ({ i, name: this.seats[i].name, mate: this.seats[(i + 2) % 4].name })); }
@@ -66,6 +67,7 @@ class Room {
     return true;
   }
   leave(sid) {
+    if (this.spec.delete(sid)) { this.send(); return; }
     const i = this.seatOf(sid); if (i < 0) return;
     if (this.g) { this.seats[i].sid = null; if (!this.seats.some(s => s && s.sid)) this.g.stop(); }
     else {
@@ -80,9 +82,13 @@ class Room {
     const away = g ? seats.map((x, i) => x && x.off ? { i, name: x.name } : null).filter(Boolean) : [];
     this.seats.forEach((s, i) => {
       if (s && s.sid) this.io.to(s.sid).emit('state', {
-        code: this.code, me: i, host: s.token == this.host, seats, away, g: g ? g.view(i) : null,
+        code: this.code, me: i, host: s.token == this.host, spec: this.spec.size, seats, away, g: g ? g.view(i) : null,
         look: this.look, track: this.track, playing: this.playing, starting: this.starting, invitePending: this.invitePending, inviteAccepted: this.inviteAccepted
       });
+    });
+    this.spec.forEach(id => {
+      const v = g ? g.view(0) : null; if (v) { v.hand = []; v.legal = []; v.rem = null; }
+      this.io.to(id).emit('state', { code: this.code, me: 0, host: false, isSpec: true, spec: this.spec.size, seats, away: [], g: v, look: this.look, track: this.track, playing: this.playing, starting: this.starting, invitePending: false, inviteAccepted: false });
     });
   }
 }
