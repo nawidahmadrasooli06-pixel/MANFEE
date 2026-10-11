@@ -237,6 +237,11 @@ function openSettingsModal() {
   document.body.appendChild(bar);
 })();
 
+(function () {
+  const b = document.createElement('div'); b.id = 'specBadge'; b.style.display = 'none'; document.body.appendChild(b);
+  window.setSpec = n => { b.textContent = '👁 تماشاچی ' + (n | 0); b.style.display = 'block'; };
+})();
+
 applyLook(prefLook());
 if (lsGet('mon', '0') === '1') { roomTrack = parseInt(lsGet('mtrack', '1'), 10) || 1; roomPlaying = true; musicOn = true; playLocal(roomTrack); }
 updateMusicUI();
