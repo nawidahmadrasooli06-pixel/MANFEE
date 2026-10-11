@@ -6,22 +6,25 @@ bgAudio.preload = 'auto';
 const TRACKS = 21;
 let actx = null, gainNode = null, roomTrack = 1, musicOn = false, trackSynced = false, lookNow = null;
 
-const CARPETS = [['c1', 'سبز لوزی'], ['c2', 'قرمز گل'], ['c3', 'سرمه‌ای'], ['c4', 'طلایی ترنج'], ['c5', 'مشکی طلایی']];
-const CARDSETS = [['k1', 'سفید کلاسیک'], ['k2', 'مشکی دارک'], ['k3', 'جوکر قرمز'], ['k4', 'سبز گل‌گلی'], ['k5', 'مشکی طلایی']];
+const MF_CARPETS = [['c1', 'سبز لوزی'], ['c2', 'قرمز گل'], ['c3', 'سرمه‌ای'], ['c4', 'طلایی ترنج'], ['c5', 'مشکی طلایی']];
+const MF_CARDS = [['k1', 'سفید کلاسیک'], ['k2', 'مشکی دارک'], ['k3', 'جوکر قرمز'], ['k4', 'سبز گل‌گلی'], ['k5', 'مشکی طلایی']];
+const FK_CARPETS = [['f1', 'زمرد شب'], ['f2', 'یاقوتی'], ['f3', 'آبی سلطنتی'], ['f4', 'مشکی کربن'], ['f5', 'بنفش جوکر'], ['f6', 'طلایی شاهی'], ['f7', 'یخی'], ['f8', 'شنی کرم'], ['f9', 'سبز نئونی'], ['f10', 'قرمز آتشین']];
+const FK_CARDS = [['g1', 'عاج کلاسیک'], ['g2', 'نیمه‌شب'], ['g3', 'جوکر طلایی'], ['g4', 'جوکر بنفش'], ['g5', 'یاقوت'], ['g6', 'زمرد'], ['g7', 'نقره‌ای'], ['g8', 'نئونی'], ['g9', 'طلای ناب'], ['g10', 'یخی']];
+const PAGE_GAME = location.pathname.indexOf('fiskoot') >= 0 ? 'fk' : 'mf';
+const GAMES = { mf: { c: MF_CARPETS, k: MF_CARDS, kc: 'carpet', kk: 'cards', dc: 'c1', dk: 'k1' }, fk: { c: FK_CARPETS, k: FK_CARDS, kc: 'fk_carpet', kk: 'fk_cards', dc: 'f1', dk: 'g1' } };
+let tabGame = PAGE_GAME;
+const modalGame = () => inRoom() ? PAGE_GAME : tabGame;
 
 function lsGet(k, d) { try { return localStorage.getItem(k) || d; } catch (e) { return d; } }
 function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { } }
 function inRoom() { return typeof st !== 'undefined' && st && st.code; }
 
-/* ---------- فرش و پر ---------- */
-function cleanLook(l) {
-  l = l || {};
-  return {
-    carpet: CARPETS.some(x => x[0] === l.carpet) ? l.carpet : 'c1',
-    cards: CARDSETS.some(x => x[0] === l.cards) ? l.cards : 'k1'
-  };
+/* ---------- فرش و پر (برای هر بازی جدا ذخیره می‌شود) ---------- */
+function cleanLook(l, g) {
+  const G = GAMES[g || PAGE_GAME]; l = l || {};
+  return { carpet: G.c.some(x => x[0] === l.carpet) ? l.carpet : G.dc, cards: G.k.some(x => x[0] === l.cards) ? l.cards : G.dk };
 }
-function prefLook() { return cleanLook({ carpet: lsGet('carpet', 'c1'), cards: lsGet('cards', 'k1') }); }
+function prefLook(g) { g = g || PAGE_GAME; const G = GAMES[g]; return cleanLook({ carpet: lsGet(G.kc, G.dc), cards: lsGet(G.kk, G.dk) }, g); }
 
 function applyLook(l) {
   l = cleanLook(l);
@@ -34,26 +37,30 @@ function applyLook(l) {
 }
 
 function setLook(part) {
-  if (inRoom() && !st.host) return;
-  const l = cleanLook(Object.assign({}, lookNow || prefLook(), part));
-  lsSet('carpet', l.carpet); lsSet('cards', l.cards);
-  applyLook(l);
-  if (inRoom() && st.host) sk.emit('look', l);
+  const g = modalGame();
+  if (g === PAGE_GAME && inRoom() && !st.host) return;
+  const cur = g === PAGE_GAME ? (lookNow || prefLook(g)) : prefLook(g);
+  const l = cleanLook(Object.assign({}, cur, part), g), G = GAMES[g];
+  lsSet(G.kc, l.carpet); lsSet(G.kk, l.cards);
+  if (g === PAGE_GAME) { applyLook(l); if (inRoom() && st.host) sk.emit('look', l); } else refreshLookPicker();
 }
 function pickCarpet(id) { setLook({ carpet: id }); }
 function pickCards(id) { setLook({ cards: id }); }
+function pickGame(g) { tabGame = g; refreshLookPicker(); }
 
 const SAMPLE = '<div class="c"><em>A</em><b>♠</b></div><div class="c r heart"><em>K</em><b>♥</b></div><div class="c r"><em>Q</em><b>♦</b></div><div class="c"><em>J</em><b>♣</b></div>';
 
 function lookPickerHTML() {
-  const l = lookNow || prefLook();
+  const g = modalGame(), G = GAMES[g];
+  const l = g === PAGE_GAME ? (lookNow || prefLook(g)) : prefLook(g);
   const can = !inRoom() || st.host;
   const dis = can ? '' : ' disabled';
-  const car = CARPETS.map(([id, n]) =>
+  const tabs = inRoom() ? '' : `<div class="gtabs"><button class="${g === 'mf' ? 'sel' : ''}" onclick="pickGame('mf')">♠ بازی منفی</button><button class="${g === 'fk' ? 'sel' : ''}" onclick="pickGame('fk')">♥ بازی حکم</button></div><div class="lkNote">تنظیمات زیر برای ${g === 'mf' ? 'بازی منفی' : 'بازی حکم (فیسکوت)'} است</div>`;
+  const car = G.c.map(([id, n]) =>
     `<button class="sw pv carpet-${id}${l.carpet === id ? ' sel' : ''}"${dis} onclick="pickCarpet('${id}')"><span>${n}</span></button>`).join('');
-  const crd = CARDSETS.map(([id, n]) =>
+  const crd = G.k.map(([id, n]) =>
     `<button class="sw swc pv cards-${id}${l.cards === id ? ' sel' : ''}"${dis} onclick="pickCards('${id}')"><div class="c r heart"><em>A</em><b>♥</b></div><span>${n}</span></button>`).join('');
-  return `
+  return `${tabs}
     <div class="pv pvbig carpet-${l.carpet} cards-${l.cards}"><div class="pvmark">CACTUC</div><div class="pvrow">${SAMPLE}</div></div>
     <div class="lkTitle">🧶 فرش میز</div><div class="swrow">${car}</div>
     <div class="lkTitle">🃏 طرح پر</div><div class="swrow">${crd}</div>
@@ -93,6 +100,7 @@ function setupAudioGraph() {
 }
 
 function playLocal(n) {
+  lsSet('mon', '1'); lsSet('mtrack', String(n));
   if (!setupAudioGraph()) bgAudio.volume = savedVol() / 100;
   if (actx && actx.state === 'suspended') actx.resume();
   const ext = (n == 1 || n == 21) ? 'm4a' : 'mp3';
@@ -128,7 +136,7 @@ function updateMusicUI() {
 /* توقف و ادامه فقط برای خود شخص است.
    فقط اگر هنوز هیچ‌کس موزیک را شروع نکرده باشد، شروعش برای همه است */
 function musicToggle() {
-  if (musicOn) { userStopped = true; musicOn = false; bgAudio.pause(); }
+  if (musicOn) { userStopped = true; musicOn = false; lsSet('mon', '0'); bgAudio.pause(); }
   else if (!roomPlaying) { goTrack(roomTrack); return; }
   else { userStopped = false; musicOn = true; playLocal(roomTrack); }
   updateMusicUI();
@@ -168,7 +176,7 @@ function syncTrackFromState(n, playing) {
 }
 
 function musicSelect(v) {
-  if (v === '-1') { userStopped = true; musicOn = false; bgAudio.pause(); updateMusicUI(); }
+  if (v === '-1') { userStopped = true; musicOn = false; lsSet('mon', '0'); bgAudio.pause(); updateMusicUI(); }
   else goTrack(parseInt(v, 10));
 }
 
@@ -230,5 +238,6 @@ function openSettingsModal() {
 })();
 
 applyLook(prefLook());
+if (lsGet('mon', '0') === '1') { roomTrack = parseInt(lsGet('mtrack', '1'), 10) || 1; roomPlaying = true; musicOn = true; playLocal(roomTrack); }
 updateMusicUI();
 if (typeof sk !== 'undefined') sk.on('track', onRemoteTrack);
