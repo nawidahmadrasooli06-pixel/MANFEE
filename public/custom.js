@@ -6,10 +6,10 @@ bgAudio.preload = 'auto';
 const TRACKS = 21;
 let actx = null, gainNode = null, roomTrack = 1, musicOn = false, trackSynced = false, lookNow = null;
 
-const MF_CARPETS = [['c1', 'سبز لوزی'], ['c2', 'قرمز گل'], ['c3', 'سرمه‌ای'], ['c4', 'طلایی ترنج'], ['c5', 'مشکی طلایی']];
-const MF_CARDS = [['k1', 'سفید کلاسیک'], ['k2', 'مشکی دارک'], ['k3', 'جوکر قرمز'], ['k4', 'سبز گل‌گلی'], ['k5', 'مشکی طلایی']];
 const FK_CARPETS = [['f1', 'زمرد شب'], ['f2', 'یاقوتی'], ['f3', 'آبی سلطنتی'], ['f4', 'مشکی کربن'], ['f5', 'بنفش جوکر'], ['f6', 'طلایی شاهی'], ['f7', 'یخی'], ['f8', 'شنی کرم'], ['f9', 'سبز نئونی'], ['f10', 'قرمز آتشین']];
 const FK_CARDS = [['g1', 'عاج کلاسیک'], ['g2', 'نیمه‌شب'], ['g3', 'جوکر طلایی'], ['g4', 'جوکر بنفش'], ['g5', 'یاقوت'], ['g6', 'زمرد'], ['g7', 'نقره‌ای'], ['g8', 'نئونی'], ['g9', 'طلای ناب'], ['g10', 'یخی']];
+const MF_CARPETS = [['c1', 'سبز لوزی'], ['c2', 'قرمز گل'], ['c3', 'سرمه‌ای'], ['c4', 'طلایی ترنج'], ['c5', 'مشکی طلایی']].concat(FK_CARPETS);
+const MF_CARDS = [['k1', 'سفید کلاسیک'], ['k2', 'مشکی دارک'], ['k3', 'جوکر قرمز'], ['k4', 'سبز گل‌گلی'], ['k5', 'مشکی طلایی']].concat(FK_CARDS);
 const PAGE_GAME = location.pathname.indexOf('fiskoot') >= 0 ? 'fk' : 'mf';
 const GAMES = { mf: { c: MF_CARPETS, k: MF_CARDS, kc: 'carpet', kk: 'cards', dc: 'c1', dk: 'k1' }, fk: { c: FK_CARPETS, k: FK_CARDS, kc: 'fk_carpet', kk: 'fk_cards', dc: 'f1', dk: 'g1' } };
 let tabGame = PAGE_GAME;
