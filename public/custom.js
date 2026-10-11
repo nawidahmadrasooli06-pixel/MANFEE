@@ -238,6 +238,17 @@ function openSettingsModal() {
 })();
 
 (function () {
+  document.body.classList.add('pg-' + PAGE_GAME);
+  const w = document.createElement('div'); w.id = 'specWelcome'; document.body.appendChild(w); let tmw;
+  window.showWelcome = function () {
+    const sp = typeof st !== 'undefined' && st && st.isSpec;
+    w.innerHTML = '<small>CACTUC</small>به تماشای بازی خوش اومدی دوست عزیز' + (sp ? '' : '<em>👁 یک تماشاچی وارد شد</em>');
+    w.classList.remove('show'); void w.offsetWidth; w.classList.add('show');
+    clearTimeout(tmw); tmw = setTimeout(() => w.classList.remove('show'), 5800);
+  };
+  if (typeof sk !== 'undefined') sk.on('specJoin', window.showWelcome);
+})();
+(function () {
   const b = document.createElement('div'); b.id = 'specBadge'; b.style.display = 'none'; document.body.appendChild(b);
   window.setSpec = n => { b.textContent = '👁 تماشاچی ' + (n | 0); b.style.display = 'block'; };
 })();
