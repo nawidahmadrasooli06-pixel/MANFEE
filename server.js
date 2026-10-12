@@ -1,6 +1,6 @@
 const express = require('express'), http = require('http'), { Server } = require('socket.io');
 const Room = require('./game/room');
-const db = require('./db');
+//const db = require('./db');
 const { verifyInitData } = require('./telegram-auth');
 const tgbot = require('./bot');
 const app = express();
