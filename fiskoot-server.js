@@ -1,8 +1,5 @@
 // بازی حکم (فیسکوت) - سرور آنلاین (مستقل از منفی؛ کانال /fiskoot)
 const L = 'ABCDEFGHJKLMNPQRSTUVWXYZ', BOTS = ['احمد', 'محمد', 'محمود'];
-const db = require('./db');
-const crypto = require('crypto');
-const { verifyInitData } = require('./telegram-auth');
 let smart;
 try { smart = require('./game/smartplay'); } catch (e1) { try { smart = require('./game/game/smartplay'); } catch (e2) { console.log('smartplay.js not found; using simple bot'); smart = { choose: o => o.legal[0] }; } }
 const S = c => c / 20 | 0, Rk = c => c % 20;
@@ -14,7 +11,6 @@ const FC = ['f1','f2','f3','f4','f5','f6','f7','f8','f9','f10'], GC = ['g1','g2'
 const cleanLook = l => ({ carpet: FC.includes(l && l.carpet) ? l.carpet : 'f1', cards: GC.includes(l && l.cards) ? l.cards : 'g1' });
 module.exports = function (io) {
   const nsp = io.of('/fiskoot'), rooms = {};
-  nsp.use((socket, next) => { const u = verifyInitData(socket.handshake.auth && socket.handshake.auth.initData || ''); socket.data.telegramUserId = u ? u.id : null; next(); });
   const legal = (r, p) => { const h = r.hands[p], led = r.trick.length ? S(r.trick[0].c) : null; const lg = led !== null ? h.filter(c => S(c) == led) : []; return lg.length ? lg : h; };
   const actor = r => r.phase == 'pick' ? r.pick.turn : r.phase == 'trump' ? r.hk : r.phase == 'play' ? r.turn : -1;
   const view = (r, i, sp) => ({
@@ -92,43 +88,33 @@ module.exports = function (io) {
     step(r); return true;
   }
   function endTrick(r) {
-    const w = winner(r.trick, r.trump); r.last = { cards: r.trick, w }; r.playerTricks[w] = (r.playerTricks[w] || 0) + 1; r.tw[w % 2]++; r.trick = [];
+    const w = winner(r.trick, r.trump); r.last = { cards: r.trick, w }; r.tw[w % 2]++; r.trick = [];
     if (r.tw[0] >= 7 || r.tw[1] >= 7) {
       const ht = r.hk % 2, wt = r.tw[0] >= 7 ? 0 : 1, o = 1 - wt; let pts = 1, kind = 'برد عادی';
       if (wt == ht) { if (r.tw[o] == 0) { pts = 3; kind = 'کت‌فیسی 🔥'; } } else if (r.tw[ht] == 0) { pts = 7; kind = 'کدرنگ 💥'; }
       r.sc[wt] += pts;
       r.res = { kind, pts, w: wt, tw: [...r.tw], nhk: wt == ht ? r.hk : (r.hk + 1) % 4 };
-      r.matchHands.push({ hand: r.matchHands.length + 1, governor: r.hk, trump: r.trump, tricks: [...r.tw], result: { ...r.res }, at: new Date().toISOString() });
-      r.totalTricks[0] += r.tw[0]; r.totalTricks[1] += r.tw[1];
       r.phase = (r.sc[0] >= 13 || r.sc[1] >= 13) ? 'over' : 'res';
-      if (r.phase === 'over' && !r.historySaved && !r.historySaving) {
-        r.historySaving = true;
-        const winnerTeam = r.sc[0] >= 13 ? 0 : 1;
-        db.recordMatch({ id: r.historyId || crypto.randomUUID(), gameType: 'fiskoot', startedAt: r.matchStartedAt || new Date(), endedAt: new Date(), winnerTeam, scores: r.sc,
-          details: { hands: r.matchHands, totalTricks: r.totalTricks },
-          players: r.seats.map((x, i) => ({ name: x && x.name || 'بازیکن', telegramId: x && x.telegramUserId, team: i % 2, isBot: !!(x && x.bot), claims: null, taken: r.playerTricks[i] || 0, details: { seat: i, governorHands: r.matchHands.filter(h => h.governor === i).length } }))
-        }).then(ok => { r.historySaving = false; if (ok) { r.historySaved = true; console.log('Fiskoot match history saved'); } }).catch(e => { r.historySaving = false; console.error('Fiskoot history save failed:', e.message); });
-      }
     } else { r.phase = 'play'; r.turn = w; }
     step(r);
   }
   const place = r => [0, 2, 1, 3].find(i => !r.seats[i]);
-  const mkSeat = (name, token, sid, telegramUserId = null) => ({ name: String(name || 'بازیکن').slice(0, 14), token, sid, telegramUserId: telegramUserId ? String(telegramUserId) : null, bot: false, on: true });
-  const back = (so, r, i, tok) => { const s = r.seats[i]; s.sid = so.id; s.on = true; if (so.data.telegramUserId) s.telegramUserId = so.data.telegramUserId; if (s.rep) { s.bot = false; s.rep = false; } so.data = { ...so.data, code: r.code, tok }; step(r); };
+  const mkSeat = (name, token, sid) => ({ name: String(name || 'بازیکن').slice(0, 14), token, sid, bot: false, on: true });
+  const back = (so, r, i, tok) => { const s = r.seats[i]; s.sid = so.id; s.on = true; if (s.rep) { s.bot = false; s.rep = false; } so.data = { code: r.code, tok }; step(r); };
   nsp.on('connection', so => {
     const R = () => rooms[so.data && so.data.code], tk = () => so.data && so.data.tok;
-    const takeSeat = (r, k, name, token) => { const s = r.seats[k]; if (!s || !s.auto || !s.bot) return so.emit('err', 'این صندلی دیگر ربات نیست؛ دوباره امتحان کن.'); r.seats[k] = mkSeat(name, token, so.id, so.data.telegramUserId); so.data = { ...so.data, code: r.code, tok: token }; step(r); };
+    const takeSeat = (r, k, name, token) => { const s = r.seats[k]; if (!s || !s.auto || !s.bot) return so.emit('err', 'این صندلی دیگر ربات نیست؛ دوباره امتحان کن.'); r.seats[k] = mkSeat(name, token, so.id); so.data = { code: r.code, tok: token }; step(r); };
     so.on('create', ({ name, token, look } = {}) => {
       let c; do c = [0, 1, 2, 3].map(() => L[Math.random() * 24 | 0]).join(''); while (rooms[c]);
-      const r = rooms[c] = { code: c, host: token, matchStartedAt: null, matchHands: [], totalTricks: [0,0], playerTricks: [0,0,0,0], historySaved: false, historySaving: false, historyId: null, seats: [mkSeat(name, token, so.id, so.data.telegramUserId), null, null, null], phase: 'lobby', aceLow: false, sc: [0, 0], hk: -1, dl: -1, trump: null, hands: [[], [], [], []], trick: [], last: null, tw: [0, 0], turn: -1, pick: null, res: null, wait: null, cnt: 0, t: null, at: Date.now(), look: cleanLook(look), track: 1, playing: false, paused: false, spec: new Set() };
-      so.data = { ...so.data, code: c, tok: token }; send(r);
+      const r = rooms[c] = { code: c, host: token, seats: [mkSeat(name, token, so.id), null, null, null], phase: 'lobby', aceLow: false, sc: [0, 0], hk: -1, dl: -1, trump: null, hands: [[], [], [], []], trick: [], last: null, tw: [0, 0], turn: -1, pick: null, res: null, wait: null, cnt: 0, t: null, at: Date.now(), look: cleanLook(look), track: 1, playing: false, paused: false, spec: new Set() };
+      so.data = { code: c, tok: token }; send(r);
     });
     so.on('join', ({ code, name, token } = {}) => {
       const r = rooms[String(code || '').toUpperCase().trim()]; if (!r) return so.emit('err', 'اتاق پیدا نشد؛ کد را بررسی کن.');
       const i = seatOf(r, token); if (i >= 0) return back(so, r, i, token);
       if (r.phase != 'lobby') { const bl = r.seats.map((x, k) => x && x.auto && x.bot ? { k, n: x.name } : null).filter(Boolean); if (!bl.length) return so.emit('err', 'همهٔ صندلی‌ها آدم هستند و اتاق پر است.'); if (bl.length == 1) return takeSeat(r, bl[0].k, name, token); return so.emit('pick', { code: r.code, list: bl }); }
       const p = place(r); if (p === undefined) return so.emit('err', 'اتاق پر است.');
-      r.seats[p] = mkSeat(name, token, so.id, so.data.telegramUserId); so.data = { ...so.data, code: r.code, tok: token }; send(r);
+      r.seats[p] = mkSeat(name, token, so.id); so.data = { code: r.code, tok: token }; send(r);
     });
     so.on('rejoin', ({ code, token } = {}) => {
       const r = rooms[String(code || '').toUpperCase().trim()], i = r ? seatOf(r, token) : -1;
@@ -140,8 +126,8 @@ module.exports = function (io) {
     so.on('start', o => {
       const r = R(); if (!r || r.phase != 'lobby' || tk() !== r.host) return;
       if (!r.seats.every(x => x && x.on) && !(o && o.bots)) return so.emit('err', 'هنوز همهٔ صندلی‌ها پر نشده‌اند.');
-      let n = 0; for (let i = 0; i < 4; i++) if (!r.seats[i]) r.seats[i] = { name: BOTS[n++], token: null, telegramUserId: null, sid: null, bot: true, auto: true, on: true };
-      r.matchStartedAt = new Date(); r.matchHands = []; r.totalTricks = [0,0]; r.playerTricks = [0,0,0,0]; r.historySaved = false; r.historySaving = false; r.historyId = crypto.randomUUID(); r.sc = [0, 0]; r.phase = 'count'; r.cnt = 3; r.pick = { deck: mk(r.aceLow), f: [], turn: 0 }; step(r);
+      let n = 0; for (let i = 0; i < 4; i++) if (!r.seats[i]) r.seats[i] = { name: BOTS[n++], token: null, sid: null, bot: true, auto: true, on: true };
+      r.sc = [0, 0]; r.phase = 'count'; r.cnt = 3; r.pick = { deck: mk(r.aceLow), f: [], turn: 0 }; step(r);
     });
     so.on('flip', i => { const r = R(), s = r ? seatOf(r, tk()) : -1; if (s >= 0) flip(r, s, i | 0); });
     so.on('trump', t => { const r = R(), s = r ? seatOf(r, tk()) : -1; if (s >= 0 && s == r.hk) setTrump(r, t | 0); });
@@ -154,9 +140,8 @@ module.exports = function (io) {
     so.on('replace', () => { const r = R(); if (r && r.wait != null && seatOf(r, tk()) >= 0) { const s = r.seats[r.wait]; s.bot = true; s.rep = true; step(r); } });
     so.on('again', () => {
       const r = R(); if (!r || r.phase != 'over' || tk() !== r.host) return; clearTimeout(r.t);
-      r.seats = r.seats.map(s => (s && !s.auto && !s.rep && s.on) ? s : null); r.matchStartedAt = null; r.matchHands = []; r.totalTricks = [0,0]; r.playerTricks = [0,0,0,0]; r.historySaved = false; r.historySaving = false; r.historyId = null; r.paused = false; r.phase = 'lobby'; r.sc = [0, 0]; r.hands = [[], [], [], []]; r.trick = []; r.last = null; r.res = null; r.hk = r.dl = -1; r.trump = null; send(r);
+      r.seats = r.seats.map(s => (s && !s.auto && !s.rep && s.on) ? s : null); r.paused = false; r.phase = 'lobby'; r.sc = [0, 0]; r.hands = [[], [], [], []]; r.trick = []; r.last = null; r.res = null; r.hk = r.dl = -1; r.trump = null; send(r);
     });
-    so.on('react', emoji => { const r = R(), seat = r ? seatOf(r, tk()) : -1; if (!r || seat < 0 || !['😂','😆','😮','👏','😎'].includes(emoji)) return; if (Date.now() - (so.data.lastReact || 0) < 700) return; so.data.lastReact = Date.now(); const msg = { seat, emoji }; r.seats.forEach(x => { if (x && x.sid) { const o = nsp.sockets.get(x.sid); if (o) o.emit('reaction', msg); } }); r.spec.forEach(id => { const o = nsp.sockets.get(id); if (o) o.emit('reaction', msg); }); });
     so.on('disconnect', () => {
       const r = R(); if (!r) return; if (so.data.spec) { r.spec.delete(so.id); return send(r); } const i = seatOf(r, tk()); if (i < 0 || r.seats[i].sid !== so.id) return;
       if (r.phase == 'lobby') { r.seats[i].on = false; r.seats[i].sid = null; r.seats[i].off = Date.now(); send(r); }
