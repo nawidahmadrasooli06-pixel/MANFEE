@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <title>پروفایل من | CACTUC</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root{color-scheme:dark;--gold:#f4c96b;--bg:#07111e;--panel:#101e31;--line:#2b3d54}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -20%,#243d5e 0,transparent 60%),var(--bg);font-family:Vazirmatn,Tahoma,sans-serif;color:#f6f7fb;padding:calc(env(safe-area-inset-top) + 20px) 14px calc(env(safe-area-inset-bottom) + 28px)}main{width:min(760px,100%);margin:auto}.brand{text-align:center;color:var(--gold);letter-spacing:3px;font-weight:900;font-size:12px}.hero{text-align:center;padding:20px 10px 24px}.avatar{width:72px;height:72px;border:1px solid #f4c96b88;border-radius:24px;display:grid;place-items:center;margin:0 auto 12px;background:linear-gradient(145deg,#243c59,#0c1626);font-size:32px;box-shadow:0 8px 30px #0007}.hero h1{margin:0;font-size:26px}.muted{color:#9fb0c5;font-size:13px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat,.panel{background:linear-gradient(145deg,#14243a,#0e1929);border:1px solid var(--line);border-radius:17px;padding:14px}.stat{text-align:center}.stat b{display:block;color:var(--gold);font-size:25px}.stat span{font-size:12px;color:#b5c3d4}.panel{margin-top:14px}.filters{display:grid;grid-template-columns:1fr 1fr;gap:8px}.filters input,.filters select{width:100%;min-width:0;background:#091522;color:#fff;border:1px solid #334a65;border-radius:11px;padding:11px;font:inherit;font-size:13px}.filters input{grid-column:1/-1}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}.tabs button,.more,.back{border:1px solid #405673;background:#172a42;color:#eef4ff;border-radius:11px;padding:9px 13px;font:inherit;font-size:13px}.tabs button.active{background:var(--gold);color:#1a1a1a;border-color:var(--gold);font-weight:900}.match{padding:13px 0;border-top:1px solid #293b50}.match:first-child{border-top:0}.match-top{display:flex;justify-content:space-between;gap:10px;align-items:center}.pill{font-size:11px;border-radius:8px;padding:4px 7px;background:#253d56;color:#dbe7f6}.win{color:#7ee0ae}.loss{color:#ff9b9b}.teams{font-size:14px;font-weight:700;margin:8px 0}.details{color:#aebdd0;font-size:12px;line-height:1.9}.empty{text-align:center;padding:26px 8px;color:#aebdd0}.back{display:block;margin:18px auto 0;text-decoration:none;text-align:center;width:max-content}.status{text-align:center;padding:14px;color:#c7d3e4;font-size:13px}.more{display:block;margin:12px auto 0}.hidden{display:none!important}@media(max-width:380px){.stat{padding:10px 4px}.stat b{font-size:21px}.hero h1{font-size:22px}}
+    </style>
+</head>
+<body>
+    <main>
+        <div class="brand">CACTUC · بازی کارتی ممتاز</div>
+        <header class="hero">
+            <div class="avatar">♠</div>
+            <h1 id="greeting">پروفایل من</h1>
+            <div class="muted">آمار و خاطرات بازی‌های منفی و فیسکوت</div>
+        </header>
+        <section class="stats">
+            <div class="stat"><b id="total">—</b><span>کل مسابقات</span></div>
+            <div class="stat"><b id="wins">—</b><span>بردها</span></div>
+            <div class="stat"><b id="losses">—</b><span>باخت‌ها</span></div>
+        </section>
+        <section class="panel">
+            <div class="tabs" id="resultTabs">
+                <button class="active" data-result="all">همه</button>
+                <button data-result="won">بردها</button>
+                <button data-result="lost">باخت‌ها</button>
+            </div>
+            <div class="filters">
+                <select id="game">
+                    <option value="all">همهٔ بازی‌ها</option>
+                    <option value="manfee">منفی</option>
+                    <option value="fiskoot">فیسکوت (حکم)</option>
+                </select>
+                <input id="search" placeholder="جست‌وجو بر اساس نام هم‌تیمی یا حریف">
+            </div>
+        </section>
+        <section class="panel">
+            <h3 style="margin:0 0 10px;color:var(--gold)">تاریخچهٔ مسابقات</h3>
+            <div id="status" class="status">در حال بارگذاری تاریخچه…</div>
+            <div id="matches"></div>
+            <button id="more" class="more hidden">نمایش مسابقات بیشتر</button>
+        </section>
+        <a class="back" href="/">بازگشت به خانه</a>
+    </main>
+    <script>
+        const $=id=>document.getElementById(id),tg=window.Telegram&&Telegram.WebApp;try{tg&&tg.ready();tg&&tg.expand()}catch(_){}let result='all',offset=0,total=0,loading=false;const initData=tg&&tg.initData||'';const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        function fmt(d){try{return new Intl.DateTimeFormat('fa-IR',{dateStyle:'medium',timeStyle:'short'}).format(new Date(d))}catch(_){return new Date(d).toLocaleString()}}
+        function summaryStats(stats){let t=0,w=0,l=0;for(const s of stats||[]){t+=s.total||0;w+=s.wins||0;l+=s.losses||0}$('total').textContent=t;$('wins').textContent=w;$('losses').textContent=l}
+        function renderMatch(m){const won=Number(m.winner_team)===Number(m.my_team),players=m.players||[],team=players.filter(p=>Number(p.team)===Number(m.my_team)).map(p=>p.name),opp=players.filter(p=>Number(p.team)!==Number(m.my_team)).map(p=>p.name),kind=m.game_type==='manfee'?'منفی':'فیسکوت (حکم)',score=(m.scores||[]).join(' – '),claims=m.game_type==='fiskoot'?`دورهای برده‌شده در کل مسابقه: ${m.my_taken??'—'}`:(m.my_claims==null?'':`ادعای مجموع ثبت‌شده: ${m.my_claims} · دست‌های گرفته‌شده: ${m.my_taken??'—'}`),hands=(m.details&&m.details.hands)||[];const handRows=hands.map((h,i)=>{if(m.game_type==='manfee'){const c=(h.claims||[])[m.my_seat],t=(h.taken||[])[m.my_seat];return `<div>دست ${i+1}: ادعا ${c??'—'}، گرفته‌شده ${t??'—'}، نتیجهٔ تیمی ${h.resultTeam<0?'مساوی':Number(h.resultTeam)===Number(m.my_team)?'برد':'باخت'}</div>`}return `<div>دست ${i+1}: حاکم ${esc((players[h.governor]||{}).name||'—')}، نتیجه ${esc(h.result&&h.result.kind||'—')}، امتیاز ${esc(h.result&&h.result.pts||'—')}، دورها ${(h.tricks||[]).join(' – ')}</div>`}).join('');return `<article class="match"><div class="match-top"><span class="pill">${kind}</span><span class="${won?'win':'loss'}">${won?'🏆 برد':'باخت'}</span></div><div class="teams">${esc(team.join(' و '))} <span class="muted">در برابر</span> ${esc(opp.join(' و '))}</div><div class="details">📅 ${esc(fmt(m.ended_at))}<br>نتیجهٔ ثبت‌شده: ${esc(score||'—')}<br>${esc(claims)}</div>${hands.length?`<details class="details" style="margin-top:8px"><summary>جزئیات دست‌های مسابقه</summary>${handRows}</details>`:''}</article>`}
+        async function load(reset=true){if(loading)return;loading=true;if(reset){offset=0;$('matches').innerHTML='';$('status').textContent='در حال بارگذاری…'}try{if(!initData){$('status').textContent='برای مشاهدهٔ پروفایل شخصی، این صفحه را از داخل ربات تلگرام باز کن.';$('more').classList.add('hidden');return}const q=new URLSearchParams({game:$('game').value,result,q:$('search').value.trim(),limit:'20',offset:String(offset)});const r=await fetch('/api/profile?'+q,{headers:{'x-telegram-init-data':initData}});const d=await r.json();if(!r.ok)throw new Error(d.error||'بارگذاری ناموفق بود');$('greeting').textContent=d.user?.name?`پروفایل ${d.user.name}`:'پروفایل من';if(reset)summaryStats(d.stats);total=d.total||0;if(!d.matches.length&&reset){$('status').textContent='هنوز مسابقه‌ای برای نمایش ثبت نشده است. تاریخچه از زمان فعال‌شدن ذخیره‌سازی شروع می‌شود.'}else{$('status').textContent=total?`${total} مسابقه در تاریخچه`:'مسابقه‌ای پیدا نشد';$('matches').insertAdjacentHTML('beforeend',d.matches.map(renderMatch).join(''))}offset+=d.matches.length;$('more').classList.toggle('hidden',offset>=total\vert{}\vert{}d.matches.length===0)}catch(e){$('status').textContent=e.message||'خطا در بارگذاری تاریخچه'}finally{loading=false}}
+        document.querySelectorAll('#resultTabs button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#resultTabs button').forEach(x=>x.classList.toggle('active',x===b));result=b.dataset.result;load(true)}));$('game').addEventListener('change',()=>load(true));let searchTimer;$('search').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>load(true),350)});$('more').addEventListener('click',()=>load(false));load();
+    </script>
+</body>
+</html>
