@@ -1,7 +1,8 @@
-const $ = q => document.querySelector(q), sk = io();
+const $ = q => document.querySelector(q);
+const tg = window.Telegram && Telegram.WebApp;
+const sk = io({ auth: { initData: tg && tg.initData || '' } });
 const tok = localStorage.tok || (localStorage.tok = Math.random().toString(36).slice(2) + Date.now());
 let st = null, BOT = '', pend = null, menuMode = false;
-const tg = window.Telegram && Telegram.WebApp;
 if (tg) { tg.ready(); tg.expand(); tg.disableVerticalSwipes && tg.disableVerticalSwipes(); }
 fetch('/config').then(r => r.json()).then(c => BOT = c.bot).catch(() => { });
 const show = id => document.querySelectorAll('.scr').forEach(e => e.classList.toggle('on', e.id == id));
@@ -77,6 +78,11 @@ sk.on('pick', p => {
 sk.on('err', m => { alert(m); show('join'); });
 sk.on('expired', m => {
   localStorage.removeItem('room'); $('#expiredMsg').textContent = m || 'این بازی به پایان رسیده یا لینک آن منقضی شده است. ربات را دوباره استارت کن.'; show('expired');
+});
+sk.on('reaction', ({ seat, emoji } = {}) => {
+  if (!st || !Number.isInteger(seat) || !['😂','😆','😮','👏','😎'].includes(emoji)) return;
+  const rel = (seat - st.me + 4) % 4, target = document.querySelector('#tbl .st.p' + rel); if (!target) return;
+  const el = document.createElement('span'); el.className = 'reaction-pop'; el.textContent = emoji; target.appendChild(el); setTimeout(() => el.remove(), 1600);
 });
 sk.on('connect', () => {
   if (wq || (st && st.isSpec)) { sk.emit('watch', { code: st && st.isSpec ? st.code : wq }); return; }
