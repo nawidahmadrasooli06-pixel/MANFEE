@@ -4,7 +4,11 @@ const sk = io({ auth: { initData: tg && tg.initData } });
 const tok = localStorage.tok || (localStorage.tok = Math.random().toString(36).substring(2));
 let st = null, BOT = '', pend = null, menuMode = false;
 
-if (tg) { tg.ready(); tg.expand(); tg.disableVerticalSwipes?.(); }
+if (tg) { 
+    tg.ready(); 
+    tg.expand(); 
+    if (tg.disableVerticalSwipes) tg.disableVerticalSwipes(); 
+}
 
 fetch('/config').then(r => r.json()).then(c => { BOT = c.bot; }).catch(() => {});
 
@@ -19,18 +23,19 @@ const nm = () => {
 
 const act = (ev, a) => sk.emit(ev, a);
 
-// گرفتن عکس پروفایل و نام از تلگرام و نمایش وسط تخته
+// گرفتن عکس پروفایل و نام از تلگرام و نمایش وسط صفحه به صورت سبک
 document.addEventListener('DOMContentLoaded', () => {
     if (tg && tg.initDataUnsafe?.user) {
         const user = tg.initDataUnsafe.user;
         initPlayerProfile(user.first_name, user.photo_url);
     }
     setupRoomSeatSwapping();
+    
+    // حذف یا مخفی کردن المان‌های مربوط به تاریخچه از صفحه در صورت وجود
+    document.querySelectorAll('.history-btn, [data-history]').forEach(el => el.remove());
 });
 
 function initPlayerProfile(userName, userPhotoUrl) {
-    const container = $('#player-profile-display') || document.body;
-    // ایجاد یک بخش شیک و کوچک برای نمایش پروفایل بدون به‌هم‌ریختگی بورد
     if (!document.getElementById('custom-user-badge')) {
         const badge = document.createElement('div');
         badge.id = 'custom-user-badge';
@@ -79,9 +84,12 @@ sk.on('show_reaction', (data) => {
     }
 });
 
-$('#nm').value = localStorage.nm || (tg && tg.initDataUnsafe?.user?.first_name) || '';
+const nmInput = $('#nm');
+if (nmInput) {
+    nmInput.value = localStorage.nm || (tg && tg.initDataUnsafe?.user?.first_name) || '';
+}
 const inv = $('#invNm');
-if (inv) inv.value = $('#nm').value;
+if (inv) inv.value = nmInput ? nmInput.value : '';
 
 const qr = new URLSearchParams(location.search);
 if (qr.get('room')) {
