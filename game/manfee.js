@@ -3,7 +3,7 @@ const bot = require('./bot');
 // seats 0..3 ; play order goes seat -> seat+1 (to the right) ; teams = seat%2
 class Game {
   constructor(cb, bots, names) {
-    Object.assign(this, { cb, bot: bots, names, ser: [0, 0], dealer: -1, rid: 0, nid: 0, timers: [], phase: 'lobby', win: -1, dl: 0, dls: -1, stopped: false, seriesStartedAt: new Date(), seriesClaims: [0,0,0,0], seriesTaken: [0,0,0,0], historyHands: [], historySaved: false, historySaving: false, historyId: require('crypto').randomUUID() });
+    Object.assign(this, { cb, bot: bots, names, ser: [0, 0], dealer: -1, rid: 0, nid: 0, timers: [], phase: 'lobby', win: -1, dl: 0, dls: -1, stopped: false });
   }
   later(f, ms) { const t = setTimeout(f, ms); this.timers.push(t); return t; }
   emit() { this.cb(); }
@@ -18,13 +18,12 @@ class Game {
     return f.length ? f : h.slice();
   }
   newHand() {
-    if (!this.seriesStartedAt) this.seriesStartedAt = new Date();
     this.disarm(); this.timers.forEach(clearTimeout); this.timers = [];
     this.dealer = (this.dealer + 1) % 4;
     const d = deck();
     this.hands = [0, 1, 2, 3].map(i => sortHand(d.slice(i * 13, i * 13 + 13)));
     Object.assign(this, { claim: [0, 0, 0, 0], taken: [0, 0, 0, 0], trick: [], last: null, res: null, note: '', win: -1, bi: 0, phase: 'countdown', countdown: 3 });
-    this.rid++; this._handRecorded = false;
+    this.rid++;
     this.order = [1, 2, 3, 4].map(k => (this.dealer + k) % 4);
     this.emit();
     this.countdownStep();
@@ -129,15 +128,10 @@ class Game {
   finish(t) {
     this.disarm(); this.phase = 'over'; this.res = t;
     if (t >= 0) { this.ser[t]++; if (this.ser[t] >= 5) this.phase = 'series'; }
-    if (!this._handRecorded) {
-      for (let i=0;i<4;i++) { this.seriesClaims[i] += this.claim[i] || 0; this.seriesTaken[i] += this.taken[i] || 0; }
-      this.historyHands.push({ hand: this.rid, claims: [...this.claim], taken: [...this.taken], resultTeam: t, score: [...this.ser], at: new Date().toISOString() });
-      this._handRecorded = true;
-    }
     this.emit();
     if (this.phase == 'over') this.later(() => this.newHand(), 5000);
   }
-  again() { if (this.phase == 'series') { this.ser = [0, 0]; this.seriesStartedAt = new Date(); this.seriesClaims = [0,0,0,0]; this.seriesTaken = [0,0,0,0]; this.historyHands = []; this.historySaved = false; this.historySaving = false; this.historyId = require('crypto').randomUUID(); this.newHand(); } }
+  again() { if (this.phase == 'series') { this.ser = [0, 0]; this.newHand(); } }
   kick(s) {
     if (this.stopped) return;
     if (this.phase == 'bid' && this.order[this.bi] == s) this.bidStep();
