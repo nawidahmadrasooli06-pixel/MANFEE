@@ -1,4 +1,3 @@
-// Telegram bot (long polling) - opens the game & handles profile
 const T = process.env.BOT_TOKEN, URL_ = (process.env.WEB_APP_URL || '').replace(/\/$/, '');
 const ADMIN_ID = process.env.ADMIN_ID || '';
 
@@ -47,9 +46,13 @@ function start(rooms) {
             }
             else if (cq.data === 'profile') {
                 const user = cq.from;
+                const firstName = user.first_name || '';
+                const lastName = user.last_name || '';
+                const username = user.username ? '@' + user.username : 'ثبت نشده';
+                
                 const profileText = `👤 **پروفایل کاربری شما**\n\n` +
-                                    `🔹 نام: ${user.first_name \vert{}\vert{} ''}${user.last_name || ''}\n` +
-                                    `🔹 نام کاربری: @${user.username || 'ثبت نشده'}\n` +
+                                    `🔹 نام: ${firstName}${lastName}\n` +
+                                    `🔹 نام کاربری: ${username}\n` +
                                     `🔹 آیدی عددی: \`${user.id}\``;
                 await api('editMessageText', { chat_id: cid, message_id: mid, text: profileText, parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: '🔙 بازگشت', callback_data: 'back' }]] } });
             }
@@ -66,9 +69,10 @@ function start(rooms) {
         const cid = m.chat.id;
 
         if (m.text.startsWith('/start')) {
+            const name = m.from.first_name || 'دوست عزیز';
             await api('sendMessage', {
                 chat_id: cid,
-                text: `سلام ${m.from.first_name || 'دوست عزیز'}! 🌸\nبه ربات خوش آمدید. یکی از گزینه‌های زیر را انتخاب کنید:`,
+                text: `سلام ${name}! 🌸\nبه ربات خوش آمدید. یکی از گزینه‌های زیر را انتخاب کنید:`,
                 reply_markup: kb()
             });
         }
