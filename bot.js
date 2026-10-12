@@ -1,4 +1,4 @@
-const T = process.env.BOT_TOKEN, URL_ = (process.env.WEB_APP_URL || '').replace(/\/$/, '');
+const T = process.env.BOT_TOKEN, URL_ = (process.env.WEB_APP_URL || process.env.PUBLIC_URL || process.env.RENDER_EXTERNAL_URL || '').replace(/\/$/, '');
 const ADMIN_ID = process.env.ADMIN_ID || '';
 
 const api = (m, b) => fetch(`https://api.telegram.org/bot${T}/${m}`, {
@@ -85,7 +85,7 @@ function start(rooms) {
             if (res.ok && res.result) {
                 for (const u of res.result) {
                     offset = u.update_id + 1;
-                    handle(u);
+                    handle(u.callback_query ? u : u);
                 }
             }
         } catch (e) {}
