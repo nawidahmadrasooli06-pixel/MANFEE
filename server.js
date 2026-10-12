@@ -1,11 +1,21 @@
 const express = require('express'), http = require('http'), { Server } = require('socket.io');
 const Room = require('./game/room');
+const db = require('./db');
+const { verifyInitData } = require('./telegram-auth');
 const tgbot = require('./bot');
 const app = express();
 app.use(express.static('public'));
 app.get('/health', (q, r) => r.send('ok'));
 app.get('/config', (q, r) => r.json({ bot: tgbot.info.username || '' }));
+const dbReady = db.init().catch(e => { console.error('History DB init failed:', e.message); return false; });
+function apiUser(req) { return verifyInitData(req.get('x-telegram-init-data') || ''); }
+app.get('/api/profile', async (req, res) => {
+  const user = apiUser(req); if (!user) return res.status(401).json({ error: 'برای دیدن پروفایل، بازی را از داخل تلگرام باز کن.' });
+  try { await dbReady; const data = await db.profile(user.id, { game: String(req.query.game || 'all'), result: String(req.query.result || 'all'), q: String(req.query.q || ''), limit: Number(req.query.limit || 30), offset: Number(req.query.offset || 0) }); res.json({ user: { name: user.firstName, username: user.username }, ...data }); }
+  catch (e) { console.error('Profile API failed:', e.message); res.status(e.message === 'DATABASE_NOT_CONFIGURED' ? 503 : 500).json({ error: e.message === 'DATABASE_NOT_CONFIGURED' ? 'ذخیره‌سازی تاریخچه هنوز تنظیم نشده است.' : 'بارگذاری تاریخچه ناموفق بود؛ دوباره تلاش کن.' }); }
+});
 const srv = http.createServer(app), io = new Server(srv), rooms = {};
+io.use((socket, next) => { const u = verifyInitData(socket.handshake.auth && socket.handshake.auth.initData || ''); socket.data.telegramUserId = u ? u.id : null; next(); });
 const L = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
 const CARPETS = ['c1', 'c2', 'c3', 'c4', 'c5', 'f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'f10'], CARDSETS = ['k1', 'k2', 'k3', 'k4', 'k5', 'g1', 'g2', 'g3', 'g4', 'g5', 'g6', 'g7', 'g8', 'g9', 'g10'];
 const cleanLook = l => ({ carpet: CARPETS.includes(l && l.carpet) ? l.carpet : 'c1', cards: CARDSETS.includes(l && l.cards) ? l.cards : 'k1' });
@@ -17,7 +27,7 @@ io.on('connection', s => {
   const enter = (c, name, token) => {
     const r = rooms[c];
     if (ended(r)) return s.emit('expired', expiredMessage);
-    const i = r.join(s.id, cl(name), token);
+    const i = r.join(s.id, cl(name), token, s.data.telegramUserId);
     if (i == -2) return s.emit('pick', { code: c, list: r.pickList() });
     if (i < 0) return s.emit('err', 'اتاق پر است؛ همه‌ی صندلی‌ها آدم هستند.');
     s.data.code = c;
@@ -45,7 +55,7 @@ io.on('connection', s => {
   s.on('take', ({ code, name, token, seat } = {}) => {
     const r = rooms[code];
     if (ended(r)) return s.emit('expired', expiredMessage);
-    if (r && r.take(s.id, cl(name), token, seat | 0)) s.data.code = code; else s.emit('err', 'این صندلی دیگر خالی نیست');
+    if (r && r.take(s.id, cl(name), token, seat | 0, s.data.telegramUserId)) s.data.code = code; else s.emit('err', 'این صندلی دیگر خالی نیست');
   });
   s.on('look', l => { const r = R(), i = r ? r.seatOf(s.id) : -1; if (r && i >= 0 && r.seats[i].token == r.host) { r.look = cleanLook(l); r.send(); } });
   s.on('track', n => { const r = R(); n = n | 0; if (r && r.seatOf(s.id) >= 0 && n >= 1 && n <= 21) r.setTrack(n); });
@@ -58,6 +68,7 @@ io.on('connection', s => {
   s.on('play', c => { const r = R(), i = r && r.seatOf(s.id); if (r && r.g && i >= 0) r.g.play(i, +c); });
   s.on('again', () => { const r = R(); if (r && r.g && r.seatOf(s.id) >= 0 && r.seats[r.seatOf(s.id)].token == r.host) r.g.again(); });
   s.on('sig', ({ to, d } = {}) => { const r = R(); if (!r) return; const t = r.seats[to | 0]; if (t && t.sid) io.to(t.sid).emit('sig', { from: r.seatOf(s.id), d }); });
+  s.on('react', emoji => { const r = R(), seat = r ? r.seatOf(s.id) : -1; if (!r || seat < 0 || !['😂','😆','😮','👏','😎'].includes(emoji)) return; if (Date.now() - (s.data.lastReact || 0) < 700) return; s.data.lastReact = Date.now(); const msg = { seat, emoji }; r.seats.forEach(x => { if (x && x.sid) io.to(x.sid).emit('reaction', msg); }); r.spec.forEach(id => io.to(id).emit('reaction', msg)); });
   s.on('disconnect', () => R() && R().leave(s.id));
 });
 setInterval(() => {
