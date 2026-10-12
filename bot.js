@@ -20,7 +20,7 @@ function start(rooms) {
     if (!T || !URL_) return console.log('Telegram BOT_TOKEN or WEB_APP_URL missing');
 
     const kb = () => ({ inline_keyboard: [
-        [{ text: '🎲 شروع بازی منفی', web_app: { url: `${URL_}/` } }],
+        [{ text: '♠️ شروع بازی منفی', web_app: { url: `${URL_}/` } }],
         [{ text: '♠️ بازی حکم (فیسکوت)', web_app: { url: `${URL_}/fiskoot.html` } }],
         [{ text: '👤 پروفایل من', callback_data: 'profile' }],
         [{ text: '📖 راهنمای بازی', callback_data: 'guide' }, { text: 'ℹ️ درباره ربات', callback_data: 'about' }]
@@ -85,7 +85,7 @@ function start(rooms) {
             if (res.ok && res.result) {
                 for (const u of res.result) {
                     offset = u.update_id + 1;
-                    handle(u.callback_query ? u : u);
+                    handle(u);
                 }
             }
         } catch (e) {}
