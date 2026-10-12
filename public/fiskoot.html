@@ -97,7 +97,7 @@ body{display:block}
 #pz{position:fixed;inset:0;z-index:24;background:#000b;display:none;align-items:center;justify-content:center;padding:16px}
 </style><link rel="stylesheet" href="fk-theme.css"></head><body>
 <div id="top"><div class="chip">امتیاز (تا 13)<br><span class="g">تیم ما <b id="sa">0</b></span><br><span class="r">تیم حریف <b id="sb">0</b></span></div><div class="chip" id="tr">رنگ (حکم): —</div><div class="chip">دورها (تا 7)<br><span class="g">تیم ما <b id="ta">0</b></span><br><span class="r">تیم حریف <b id="tb">0</b></span></div></div>
-<div id="tbl"><div id="tc"></div><div id="lt"></div><div id="ann"></div><button id="ex" onclick="exitG()">خروج ✕</button>
+<div id="tbl"><div id="tc"></div><div class="idTag">@cactuc580</div><div id="lt"></div><div id="ann"></div><button id="ex" onclick="exitG()">خروج ✕</button>
 <div class="seat" id="s2" style="top:6px;left:50%;transform:translateX(-50%)"></div><div class="seat" id="s3" style="left:4px;top:50%;transform:translateY(-50%)"></div><div class="seat" id="s1" style="right:4px;top:50%;transform:translateY(-50%)"></div><div class="seat" id="s0" style="bottom:4px;left:50%;transform:translateX(-50%)"></div>
 <div id="ctr"><div class="slot" id="p0"></div><div class="slot" id="p1"></div><div class="slot" id="p2"></div><div class="slot" id="p3"></div></div>
 <div id="pick"><div id="pm"></div><div id="pg"></div></div><div id="tp"></div><div id="cd"></div><div id="shf"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
@@ -149,7 +149,8 @@ function invite(){const go=l=>{const u='https://t.me/share/url?url='+encodeURICo
 function inviteWatch(){const go=l=>{const u='https://t.me/share/url?url='+encodeURIComponent(l)+'&text='+encodeURIComponent('بیا بازی حکم (فیسکوت) را زنده تماشا کن! 👁 کد اتاق: '+st.code);try{Telegram.WebApp.openTelegramLink(u)}catch(e){window.open(u,'_blank')}};fetch('/config').then(r=>r.json()).then(c=>go(c.bot?'https://t.me/'+c.bot+'?start=fkw_'+st.code:location.origin+'/fiskoot.html?watch='+st.code)).catch(()=>go(location.origin+'/fiskoot.html?watch='+st.code))}
 function exitG(){if(confirm('از بازی خارج می‌شوی؟ بعداً با همان کد برمی‌گردی.'))location.href='/'}
 function onSt(){if(st.ph=='lobby'){scr('');scr('lobby');rLobby();if(st.isSpec)$('lm').textContent='👁 تو تماشاچی هستی؛ منتظر شروع بازی…'}else{scr('');rGame()}}
-function rLobby(){['pick','tp','cd','ov','wt','pz'].forEach(i=>$(i).style.display='none');$('hand').innerHTML='';hk0='';$('rc').textContent=st.code;
+function rLobby(){['pick','tp','cd','ov','wt','pz'].forEach(i=>$(i).style.display='none');$('hand').innerHTML='';hk0='';
+ $('rc').textContent=st.code;
  const t=(h,ks)=>`<div class="th">${h}</div>`+ks.map(k=>{const s=st.seats[k];return s?`<div class="st ${k==st.me?'me':''}">${s.n}${k==st.me?' (تو)':''}${!s.on?' ⚠ قطع شد':''}</div>`:`<div class="st" onclick="sit(${k})">خالی ← ربات (بزن تا اینجا بنشینی)</div>`}).join('');
  $('room').innerHTML=t('تیم 1 (روبه‌روی هم)',[0,2])+t('تیم 2 (روبه‌روی هم)',[1,3]);
  $('al').checked=st.low;$('al').disabled=!st.host;const full=st.seats.every(x=>x&&x.on);$('go').style.display=$('gob').style.display=st.host?'block':'none';$('go').disabled=!full;$('go').style.opacity=full?1:.4;
@@ -159,7 +160,7 @@ function sk0(c){return PO[S(c)]}
 function rGame(){
  const me=st.me,rel=k=>(k-me+4)%4,mt=me%2,ph=st.ph;
  $('sa').textContent=st.sc[mt];$('sb').textContent=st.sc[1-mt];$('ta').textContent=st.tw[mt];$('tb').textContent=st.tw[1-mt];
- const T=st.tr;$('tr').innerHTML=T==null?'رنگ (حکم): —':`رنگ (حکم): <span class="${T>1?'red':''}">${SU[T]} ${SN[T]}</span>`;
+ const T=st.tr;$('tr').innerHTML=T==null?'رنگ (حکم): ؟':`رنگ (حکم): <span class="${T>1?'red':''}">${SU[T]} ${SN[T]}</span>`;
  $('tc').innerHTML=T==null?'':`<span style="color:${T>1?'#ff6b6b':'#fff'}">${SU[T]}</span><small>رنگ (حکم)</small>`;
  const act=ph=='play'?st.turn:ph=='pick'?st.pk.t:ph=='trump'?st.hk:-1;
  for(let k=0;k<4;k++){const s=st.seats[k],e=$('s'+rel(k));e.classList.toggle('on',act===k);
