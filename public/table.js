@@ -53,7 +53,7 @@ const T = (() => {
     for (let s = 0; s < 4; s++) {
       const x = st.seats[s], on = (g.phase == 'play' && g.turn == s) || (g.phase == 'bid' && g.bidTurn == s), c = g.claims[s];
       const tag = x.off ? '<i class="o">قطع</i>' : x.sub ? '<i class="o">ربات</i>' : '';
-      h += `<div class="st p${rel(s)} ${on ? 'on' : ''} ${s % 2 == mt ? 'm' : 'e'}">${g.dealer == s ? '<i>میر</i>' : ''}${tag}<u>${x.name}</u><b>${g.taken[s]}/${c == null ? '؟' : c}</b>${!st.isSpec?`<div class=\"react-row\">${['😂','😆','😮','👏','😎'].map(e=>`<button onclick=\"act('react','${e}')\">${e}</button>`).join('')}</div>`:''}</div>`;
+      h += `<div class="st p${rel(s)} ${on ? 'on' : ''} ${s % 2 == mt ? 'm' : 'e'}">${g.dealer == s ? '<i>میر</i>' : ''}${tag}<u>${x.name}</u><b>${g.taken[s]}/${c == null ? '؟' : c}</b></div>`;
     }
     h += '<div class="ctr">' + g.trick.map((x, i) => `<div class="q q${rel(x.s)} ${i >= pl && !(flyOwn && x.s == me && x.c == flyOwn.c && Date.now() - flyOwn.t < 2000) ? 'in' : ''} ${flyOwn && x.s == me && x.c == flyOwn.c && Date.now() - flyOwn.t < 450 ? 'hid' : ''} ${g.win == x.s ? 'w' : ''}">${cd(x.c)}</div>`).join('') + '</div>';
     pl = g.trick.length;
@@ -76,7 +76,7 @@ const T = (() => {
     const rev = g.rem && g.rem.some(h => h.length) ? `<small>پرهای باقی‌مانده</small><div class="rvl">${[0, 1, 2, 3].map(k => { const q = (me + k) % 4; return `<div class="rr ${q % 2 == mt ? 'm' : 'e'}"><u>${name(q)}</u><div class="rc">${g.rem[q].map(c => cd(c)).join('')}</div></div>`; }).join('')}</div>` : '';
     if (g.phase == 'deal') o = `<div class="bn"><small>میر این دست</small><big>${name(g.dealer)}</big></div>`;
     if (g.phase == 'over') o = `<div class="bn sm"><big>${g.res < 0 ? 'مساوی! هر دو تیم به ادعایشان رسیدند' : `تیم ${g.teams[g.res].join(' و ')} این دست را برد`}</big>${rev}</div>`;
-    if (g.phase == 'series') { const wt = g.ser[0] >= 5 ? 0 : 1; if (window.showVictory) window.showVictory({ key: 'manfee-' + st.code + '-' + g.ser.join('-'), title: 'قهرمانان منفی', winners: g.teams[wt], losers: g.teams[1-wt], score: g.ser.join(' – '), homeUrl: '/', againLabel: 'بازی مجدد', onAgain: () => act('again') }); o = ''; }
+    if (g.phase == 'series') { const wt = g.ser[0] >= 5 ? 0 : 1; o = `<div class="bn"><small>بازی به پایان رسید</small><big>🏆 تیم ${g.teams[wt].join(' و ')} برنده شد</big><small>نتیجه سری: ${g.ser[0]} – ${g.ser[1]}</small>${rev}<button class="go" onclick="act('again')">بازی مجدد</button></div>`; }
     $('#ov').innerHTML = o;
   }
   // drag a card up to the table to play it; a tap only lifts it for a closer look
