@@ -1,150 +1,96 @@
 const $ = q => document.querySelector(q);
-const tg = window.Telegram && Telegram.WebApp;
-const sk = io({ auth: { initData: tg && tg.initData || '' } });
-const tok = localStorage.tok || (localStorage.tok = Math.random().toString(36).slice(2) + Date.now());
+const tg = window.Telegram && window.Telegram.WebApp;
+const sk = io({ auth: { initData: tg && tg.initData } });
+const tok = localStorage.tok || (localStorage.tok = Math.random().toString(36).substring(2));
 let st = null, BOT = '', pend = null, menuMode = false;
-if (tg) { tg.ready(); tg.expand(); tg.disableVerticalSwipes && tg.disableVerticalSwipes(); }
-fetch('/config').then(r => r.json()).then(c => BOT = c.bot).catch(() => { });
-const show = id => document.querySelectorAll('.scr').forEach(e => e.classList.toggle('on', e.id == id));
+
+if (tg) { tg.ready(); tg.expand(); tg.disableVerticalSwipes?.(); }
+
+fetch('/config').then(r => r.json()).then(c => { BOT = c.bot; }).catch(() => {});
+
+const show = id => document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+
 const nm = () => {
-  const el = $('#invite').classList.contains('on') ? $('#invNm') : $('#nm');
-  const n = (el && el.value || localStorage.nm || 'بازیکن').trim().slice(0, 14) || 'بازیکن';
-  localStorage.nm = n; return n;
+    const el = $('#invite');
+    const n = (el && el.value || localStorage.nm || (tg && tg.initDataUnsafe?.user?.first_name) || 'بازیکن').trim();
+    localStorage.nm = n;
+    return n;
 };
+
 const act = (ev, a) => sk.emit(ev, a);
-$('#nm').value = localStorage.nm || (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.first_name) || '';
-$('#invNm').value = $('#nm').value;
-const qr = new URLSearchParams(location.search).get('r'), wq = new URLSearchParams(location.search).get('w');
-if (qr) show('invite');
-function mk() { sk.emit('create', { name: nm(), token: tok, look: typeof prefLook === 'function' ? prefLook() : undefined }); }
-function jn() { sk.emit('join', { code: $('#cd').value, name: nm(), token: tok }); }
-function acceptInvite() { $('#nm').value = $('#invNm').value; sk.emit('join', { code: qr || $('#invCode').textContent, name: nm(), token: tok }); }
-function backToMenu() { menuMode = true; show('menu'); }
-function resume() {
-  if (st && st.g) { menuMode = false; show('game'); T.render(st); return; }
-  sk.emit('join', { code: localStorage.room, name: localStorage.nm || 'بازیکن', token: tok }); }
-function fresh() { menuMode = false; localStorage.removeItem('room'); pend = null; history.replaceState(0, '', '/'); $('#cd').value = ''; show('join'); }
-function take(i) { sk.emit('take', { ...pend, seat: i }); }
-function startGame() { sk.emit('start', { forceBots: false }); }
-function startWithBots() { sk.emit('start', { forceBots: true }); }
-function restartBot() {
-  if (BOT && tg && tg.openTelegramLink) tg.openTelegramLink('https://t.me/' + BOT);
-  else if (BOT) location.href = 'https://t.me/' + BOT;
-  else { fresh(); }
+
+// گرفتن عکس پروفایل و نام از تلگرام و نمایش وسط تخته
+document.addEventListener('DOMContentLoaded', () => {
+    if (tg && tg.initDataUnsafe?.user) {
+        const user = tg.initDataUnsafe.user;
+        initPlayerProfile(user.first_name, user.photo_url);
+    }
+    setupRoomSeatSwapping();
+});
+
+function initPlayerProfile(userName, userPhotoUrl) {
+    const container = $('#player-profile-display') || document.body;
+    // ایجاد یک بخش شیک و کوچک برای نمایش پروفایل بدون به‌هم‌ریختگی بورد
+    if (!document.getElementById('custom-user-badge')) {
+        const badge = document.createElement('div');
+        badge.id = 'custom-user-badge';
+        badge.className = 'fixed top-2 right-2 z-50 flex items-center gap-2 bg-slate-900/80 px-3 py-1 rounded-full border border-slate-700 shadow-md backdrop-blur-sm';
+        badge.innerHTML = `
+            <img src="${userPhotoUrl || 'https://via.placeholder.com/25'}" alt="Avatar" class="w-5 h-5 rounded-full object-cover border border-amber-400">
+            <span class="text-xs font-medium text-slate-200">${userName}</span>
+        `;
+        document.body.appendChild(badge);
+    }
 }
-function share() {
-  act('invite');
-  const link = BOT ? `https://t.me/${BOT}?start=${st.code}` : location.origin + '/?r=' + st.code;
-  const text = 'بیا بازی منفی! کد اتاق: ' + st.code;
-  if (tg) tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(text));
-  else navigator.share ? navigator.share({ title: 'منفی', text, url: link }).catch(() => { }) : navigator.clipboard.writeText(link).then(() => alert('لینک کپی شد'));
+
+// سیستم جابه‌جایی آزاد روی صندلی‌های اتاق قبل از شروع بازی
+function setupRoomSeatSwapping() {
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('room-seat')) {
+            if (!window.gameStarted) {
+                const targetSeatId = e.target.getAttribute('data-seat-id');
+                sk.emit('change_seat', { seatId: targetSeatId });
+            }
+        }
+    });
 }
-function shareWatch() {
-  const code = (st && st.code) || localStorage.room; if (!code) { alert('اول وارد یک اتاق شو'); return; }
-  const link = BOT ? `https://t.me/${BOT}?start=w_${code}` : location.origin + '/?w=' + code;
-  const text = 'بیا بازی منفی را زنده تماشا کن! 👁 کد اتاق: ' + code;
-  if (tg) tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(text));
-  else navigator.share ? navigator.share({ title: 'منفی', text, url: link }).catch(() => { }) : navigator.clipboard.writeText(link).then(() => alert('لینک کپی شد'));
+
+// سیستم ایموجی‌های زنده (واکنش‌ها)
+function sendReaction(emojiSymbol) {
+    sk.emit('send_reaction', { emoji: emojiSymbol });
 }
-function lobby() {
-  const cell = i => { const x = st.seats[i]; return `<button class="sb ${x ? 'f' : ''}" onclick="act('sit',${i})">${x ? x.name + (i == st.me && !st.isSpec ? ' (تو)' : '') : 'خالی ← ربات'}</button>`; };
-  $('#lb').innerHTML = `<h3>تیم ۱ (روبه‌روی هم)</h3>${cell(0)}${cell(2)}<h3>تیم ۲ (روبه‌روی هم)</h3>${cell(1)}${cell(3)}`;
-  $('#code').textContent = st.code;
-  $('#go').style.display = st.host ? '' : 'none';
-  $('#force').style.display = st.host && st.invitePending ? '' : 'none';
-  $('#go').disabled = !!st.starting || (!!st.invitePending && !st.inviteAccepted);
-  $('#go').textContent = st.invitePending && !st.inviteAccepted ? 'منتظر ورود دوستت…' : 'شروع بازی';
-  $('#waitMsg').textContent = st.invitePending && !st.inviteAccepted ? 'دوستت هنوز وارد اتاق نشده؛ اینجا منتظرش می‌مانیم.' : st.inviteAccepted ? 'دوستت وارد شد؛ آماده شروع بازی هستید.' : '';
-  $('#startCount').textContent = st.starting ? `شروع بازی تا ${st.starting}…` : '';
+
+sk.on('show_reaction', (data) => {
+    const { userId, emoji } = data;
+    const playerElement = document.getElementById(`player-${userId}`);
+    
+    if (playerElement) {
+        const reactionBubble = document.createElement('div');
+        reactionBubble.className = 'absolute -top-10 left-1/2 -translate-x-1/2 text-2xl transition-all duration-700 opacity-100 z-50 pointer-events-none';
+        reactionBubble.innerText = emoji;
+        
+        playerElement.appendChild(reactionBubble);
+        
+        setTimeout(() => {
+            reactionBubble.style.opacity = '0';
+            reactionBubble.style.transform = 'translate(-50%, -15px) scale(0.8)';
+            setTimeout(() => reactionBubble.remove(), 500);
+        }, 2000);
+    }
+});
+
+$('#nm').value = localStorage.nm || (tg && tg.initDataUnsafe?.user?.first_name) || '';
+const inv = $('#invNm');
+if (inv) inv.value = $('#nm').value;
+
+const qr = new URLSearchParams(location.search);
+if (qr.get('room')) {
+    show('invite');
+    const rInput = $('#joinCode');
+    if (rInput) rInput.value = qr.get('room');
+} else {
+    show('menu');
 }
-sk.on('state', s => {
-  st = s; if (!s.isSpec) localStorage.room = s.code; history.replaceState(0, '', (s.isSpec ? '?w=' : '?r=') + s.code);
-  document.body.classList.toggle('spectator', !!s.isSpec); if (typeof setSpec === 'function') setSpec(s.spec || 0);
-  if (typeof applyLook === 'function' && s.look) applyLook(s.look);
-  if (typeof syncTrackFromState === 'function') syncTrackFromState(s.track, s.playing);
-  if (s.g) { if (!menuMode) show('game'); T.render(s); } else { menuMode = false; show('lobby'); lobby(); }
-});
-sk.on('inviteInfo', info => {
-  if (info.expired) { $('#expiredMsg').textContent = info.message || 'این دعوت منقضی شده است.'; show('expired'); return; }
-  $('#inviter').textContent = info.inviter || 'دوستت'; $('#invCode').textContent = info.code || qr || '';
-  $('#invNm').value = localStorage.nm || $('#invNm').value;
-  show('invite');
-});
-sk.on('pick', p => {
-  pend = { code: p.code, name: nm(), token: tok };
-  $('#pk').innerHTML = p.list.map(x => `<button class="sb f" onclick="take(${x.i})">جای «${x.name}» بنشین<br><small>هم‌تیمی: ${x.mate}</small></button>`).join('');
-  show('pick');
-});
-sk.on('err', m => { alert(m); show('join'); });
-sk.on('expired', m => {
-  localStorage.removeItem('room'); $('#expiredMsg').textContent = m || 'این بازی به پایان رسیده یا لینک آن منقضی شده است. ربات را دوباره استارت کن.'; show('expired');
-});
-sk.on('reaction', ({ seat, emoji } = {}) => {
-  if (!st || !Number.isInteger(seat) || !['😂','😆','😮','👏','😎'].includes(emoji)) return;
-  const rel = (seat - st.me + 4) % 4, target = document.querySelector('#tbl .st.p' + rel); if (!target) return;
-  const el = document.createElement('span'); el.className = 'reaction-pop'; el.textContent = emoji; target.appendChild(el); setTimeout(() => el.remove(), 1600);
-});
-sk.on('connect', () => {
-  if (wq || (st && st.isSpec)) { sk.emit('watch', { code: st && st.isSpec ? st.code : wq }); return; }
-  if (qr) { sk.emit('preview', qr); return; }
-  if (st) { sk.emit('join', { code: st.code, name: localStorage.nm || 'بازیکن', token: tok }); return; }
-});
 
-
-/* MANFEE_PRIVACY_SHIELD_V2 */
-(function () {
-  if (window.__MANFEE_PRIVACY_SHIELD_V2) return;
-  window.__MANFEE_PRIVACY_SHIELD_V2 = true;
-
-  function installPrivacyShield() {
-    if (document.getElementById('manfee-privacy-shield')) return;
-
-    const shield = document.createElement('div');
-    shield.id = 'manfee-privacy-shield';
-    shield.innerHTML =
-      '<div class="manfee-privacy-box">' +
-        '<div class="manfee-privacy-lock">🔒</div>' +
-        '<div class="manfee-privacy-title">میز بازی خصوصی است</div>' +
-        '<div class="manfee-privacy-sub">هنگام خروج از صفحه، کارت‌ها پنهان می‌شوند.</div>' +
-      '</div>';
-
-    const style = document.createElement('style');
-    style.id = 'manfee-privacy-shield-style';
-    style.textContent = `
-      #manfee-privacy-shield{
-        position:fixed; inset:0; z-index:2147483647; display:none;
-        align-items:center; justify-content:center;
-        background:#000; color:#fff; text-align:center;
-        user-select:none; -webkit-user-select:none;
-      }
-      #manfee-privacy-shield .manfee-privacy-box{padding:24px}
-      #manfee-privacy-shield .manfee-privacy-lock{font-size:48px}
-      #manfee-privacy-shield .manfee-privacy-title{margin-top:12px;font-size:22px;font-weight:800}
-      #manfee-privacy-shield .manfee-privacy-sub{margin-top:8px;font-size:14px;opacity:.86}
-    `;
-    (document.head || document.documentElement).appendChild(style);
-    document.body.appendChild(shield);
-
-    const show = () => { shield.style.display = 'flex'; };
-    const hide = () => { shield.style.display = 'none'; };
-
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) show();
-      else hide();
-    }, {passive:true});
-
-    window.addEventListener('pagehide', show, {passive:true});
-    window.addEventListener('blur', show, {passive:true});
-    window.addEventListener('focus', hide, {passive:true});
-
-    document.addEventListener('copy', e => e.preventDefault(), {capture:true});
-    document.addEventListener('cut', e => e.preventDefault(), {capture:true});
-    document.addEventListener('contextmenu', e => e.preventDefault(), {capture:true});
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', installPrivacyShield, {once:true});
-  } else {
-    installPrivacyShield();
-  }
-})();
+function mk() { sk.emit('create', { name: nm() }); }
+function jn() { sk.emit('join', { code: $('#joinCode').value, name: nm() }); }
