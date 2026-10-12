@@ -1,6 +1,4 @@
 const Game = require('./manfee');
-//const db = require('../db');
-const crypto = require('crypto');
 class Room {
   constructor(code, io) {
     this.code = code; this.io = io; this.seats = [null, null, null, null];
@@ -21,7 +19,7 @@ class Room {
     if (this.seatOf(sid) < 0 || this.g) return;
     this.invitePending = true; this.inviteAccepted = false; this.send();
   }
-  join(sid, name, token, telegramUserId = null) {
+  join(sid, name, token) {
     let i = this.seats.findIndex(x => x && (x.token == token || x.returnToken == token));
     if (i < 0) {
       if (this.g) return this.free().length ? -2 : -1;
@@ -31,7 +29,7 @@ class Room {
     }
     const s = this.seats[i];
     if (s.returnToken === token) { s.returnToken = null; s.token = token; }
-    s.sid = sid; if (telegramUserId) s.telegramUserId = String(telegramUserId);
+    s.sid = sid;
     if (name && !s.bot) s.name = name;
     if (!this.host) this.host = token;
     if (this.g) { this.g.bot[i] = false; this.g.names[i] = s.name; }
@@ -39,10 +37,10 @@ class Room {
     if (this.g) { this.g.stopped ? this.g.wake() : this.g.kick(i); }
     return i;
   }
-  take(sid, name, token, i, telegramUserId = null) {
+  take(sid, name, token, i) {
     if (!this.g || !this.g.bot[i] || this.seats.some(x => x && x.token == token)) return false;
     const old = this.seats[i] || {};
-    this.seats[i] = { name, token, sid, telegramUserId: telegramUserId ? String(telegramUserId) : null, returnToken: old.token || old.returnToken || null };
+    this.seats[i] = { name, token, sid, returnToken: old.token || old.returnToken || null };
     this.g.bot[i] = false; this.g.names[i] = name;
     if (!this.host) this.host = token;
     this.send(); this.g.stopped ? this.g.wake() : this.g.kick(i);
@@ -80,14 +78,6 @@ class Room {
   }
   send() {
     this.t = Date.now(); const g = this.g;
-    if (g && g.phase === 'series' && !g.historySaved && !g.historySaving) {
-      g.historySaving = true;
-      const winnerTeam = g.ser[0] >= 5 ? 0 : 1;
-      db.recordMatch({ id: g.historyId || crypto.randomUUID(), gameType: 'manfee', startedAt: g.seriesStartedAt || new Date(), endedAt: new Date(), winnerTeam, scores: g.ser,
-        details: { hands: g.historyHands || [] },
-        players: this.seats.map((x, i) => ({ name: x && x.name || g.names[i] || 'بازیکن', telegramId: x && !g.bot[i] && !x.bot ? x.telegramUserId : null, team: i % 2, isBot: !!(x && (x.bot || g.bot[i])), claims: g.seriesClaims ? g.seriesClaims[i] : null, taken: g.seriesTaken ? g.seriesTaken[i] : null, details: { seat: i } }))
-      }).then(ok => { g.historySaving = false; if (ok) { g.historySaved = true; console.log('Manfee match history saved'); } }).catch(e => { g.historySaving = false; console.error('Manfee history save failed:', e.message); });
-    }
     const seats = this.seats.map((s, i) => s ? { name: s.name, bot: !!s.bot, on: !!s.sid, off: !!g && !s.bot && !s.sid && !g.bot[i], sub: !!g && !s.bot && g.bot[i] } : null);
     const away = g ? seats.map((x, i) => x && x.off ? { i, name: x.name } : null).filter(Boolean) : [];
     this.seats.forEach((s, i) => {
