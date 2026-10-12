@@ -237,32 +237,6 @@ function openSettingsModal() {
   document.body.appendChild(bar);
 })();
 
-function idToast(t) {
-  let e = document.getElementById('idToast');
-  if (!e) { e = document.createElement('div'); e.id = 'idToast'; document.body.appendChild(e); }
-  e.textContent = t; e.style.display = 'block'; clearTimeout(idToast.t); idToast.t = setTimeout(() => e.style.display = 'none', 2200);
-}
-function copyId() {
-  const t = '@cactuc580', done = () => idToast('آیدی ' + t + ' کپی شد');
-  const fb = () => { const a = document.createElement('textarea'); a.value = t; a.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); done(); } catch (e) { idToast(t); } a.remove(); };
-  try { navigator.clipboard.writeText(t).then(done, fb); } catch (e) { fb(); }
-}
-function openId() {
-  const u = 'https://t.me/cactuc580';
-  try { Telegram.WebApp.openTelegramLink(u); } catch (e) { window.open(u, '_blank'); }
-}
-document.addEventListener('click', e => { if (e.target.closest && e.target.closest('.idTag')) copyId(); });
-(function () {
-  const ov = document.getElementById('ov'); if (!ov) return;
-  const add = () => {
-    if (ov.querySelector('.credit2') || !/بازی مجدد|بازگشت به اتاق|برنده شد/.test(ov.textContent)) return;
-    const host = ov.querySelector('.bn') || ov.querySelector('.box') || ov.firstElementChild; if (!host) return;
-    const d = document.createElement('div'); d.className = 'credit2';
-    d.innerHTML = '<div class="cr1">طراح و سازندهٔ ربات</div><div class="cr2" onclick="openId()">@cactuc580</div><div class="cr3"><button onclick="copyId()">کپی آیدی</button><button onclick="openId()">پیام در تلگرام</button></div>';
-    host.appendChild(d);
-  };
-  new MutationObserver(add).observe(ov, { childList: true, subtree: true }); add();
-})();
 (function () {
   document.body.classList.add('pg-' + PAGE_GAME);
   const w = document.createElement('div'); w.id = 'specWelcome'; document.body.appendChild(w); let tmw;
