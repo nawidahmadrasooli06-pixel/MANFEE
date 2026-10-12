@@ -9,10 +9,8 @@ app.get('/config', (q, r) => r.json({ bot: tgbot.info && tgbot.info.username ? t
 
 const srv = http.createServer(app), io = new Server(srv), rooms = {};
 
-// بدون نیاز به دیتابیس و توکن‌سنجی پیچیده تاریخچه - کاملاً سبک و پاک
 io.use((socket, next) => {
   const initData = socket.handshake.auth && socket.handshake.auth.initData;
-  // استخراج ساده آیدی کاربر از تلگرام وب‌اپ در صورت وجود
   let userId = null;
   try {
     if (initData) {
@@ -78,11 +76,9 @@ io.on('connection', s => {
     if (r && r.take(s.id, cl(name), token, seat | 0, s.data.telegramUserId)) s.data.code = code; else s.emit('err', 'این صندلی دیگر خالی نیست');
   });
 
-  // قابلیت جابه‌جایی صندلی‌ها در اتاق پیش از شروع بازی
   s.on('change_seat', ({ seatId } = {}) => {
     const r = R();
     if (r && !r.g) {
-      // منطق جابه‌جایی صندلی در اتاق در صورت وجود متد مربوطه در روم
       if (typeof r.changeSeat === 'function') {
         r.changeSeat(s.id, seatId);
       }
@@ -101,7 +97,6 @@ io.on('connection', s => {
   s.on('again', () => { const r = R(); if (r && r.g && r.seatOf(s.id) >= 0 && r.seats[r.seatOf(s.id)].token == r.host) r.g.again(); });
   s.on('sig', ({ to, d } = {}) => { const r = R(); if (!r) return; const t = r.seats[to | 0]; if (t && t.sid) io.to(t.sid).emit('sig', { from: r.seatOf(s.id), d }); });
 
-  // سیستم ایموجی‌های زنده (واکنش‌ها) با پایداری کامل
   s.on('react', emoji => {
     const r = R(), seat = r ? r.seatOf(s.id) : -1;
     if (!r || seat < 0 || !['😂','😆','😮','👏','😎','❤️','🔥'].includes(emoji)) return;
@@ -123,10 +118,10 @@ setInterval(() => {
 }, 6e5);
 
 try {
-  require('./fiskoot-server')(io); // بازی حکم (فیسکوت)
+  require('./fiskoot-server')(io);
 } catch (e) {
   console.log('Fiskoot server loaded optional error handled.');
 }
 
 srv.listen(process.env.PORT || 3000, () => console.log('Manfee server running smoothly'));
-tgbot(rooms);
+tgbot.start(rooms);
