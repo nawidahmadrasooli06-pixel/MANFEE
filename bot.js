@@ -10,6 +10,7 @@ function start(rooms) {
   const kb = code => ({ inline_keyboard: [
     [{ text: '🎮 شروع بازی منفی', web_app: { url: URL_ + (code ? '/?r=' + code + '&invite=1' : '') } }],
     [{ text: '♠ بازی حکم (فیسکوت)', web_app: { url: URL_ + '/fiskoot.html' } }],
+    [{ text: '👤 پروفایل و تاریخچه', web_app: { url: URL_ + '/profile.html' } }],
     [{ text: '📘 راهنمای بازی', callback_data: 'guide' }, { text: 'ℹ️ درباره ربات', callback_data: 'about' }]
   ] });
   const handle = async u => {
