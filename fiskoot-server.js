@@ -15,7 +15,7 @@ module.exports = function (io) {
   const actor = r => r.phase == 'pick' ? r.pick.turn : r.phase == 'trump' ? r.hk : r.phase == 'play' ? r.turn : -1;
   const view = (r, i, sp) => ({
     code: r.code, ph: r.phase, me: i, host: !sp && r.seats[i].token === r.host, spec: r.spec.size, isSpec: !!sp, low: r.aceLow,
-    seats: r.seats.map((s, k) => s && { n: s.name, b: s.bot, on: s.on, k: r.hands[k].length }),
+    seats: r.seats.map((s, k) => s && { n: s.name, profile: s.profile || null, b: s.bot, on: s.on, k: r.hands[k].length }),
     hand: (sp || r.phase == 'shuf') ? [] : r.hands[i], tr: r.trump, hk: r.hk, dl: r.dl, turn: r.phase == 'play' ? r.turn : -1,
     trick: r.trick, w: r.phase == 'tr' ? winner(r.trick, r.trump) : -1, last: r.last, tw: r.tw, sc: r.sc,
     pk: r.pick && { f: r.pick.f, t: r.pick.turn }, look: r.look, track: r.track, playing: !!r.playing, paused: !!r.paused, res: r.res, wait: r.wait, cnt: r.cnt,
@@ -99,29 +99,32 @@ module.exports = function (io) {
     step(r);
   }
   const place = r => [0, 2, 1, 3].find(i => !r.seats[i]);
-  const mkSeat = (name, token, sid) => ({ name: String(name || 'بازیکن').slice(0, 14), token, sid, bot: false, on: true });
+  const cleanProfile = p => { if(!p||typeof p!=='object')return null; const es=['🃏','😎','👑','🦅','🐺','🌙','🔥','💎']; return {name:String(p.name||'بازیکن').slice(0,14),avatar:/^https:\/\//i.test(String(p.avatar||''))?String(p.avatar).slice(0,500):'',photo:/^https:\/\//i.test(String(p.photo||''))?String(p.photo).slice(0,500):'',emoji:es.includes(p.emoji)?p.emoji:'🃏'}; };
+  const mkSeat = (name, token, sid, profile) => ({ name: String(name || 'بازیکن').slice(0, 14), token, sid, profile:cleanProfile(profile), bot: false, on: true });
   const back = (so, r, i, tok) => { const s = r.seats[i]; s.sid = so.id; s.on = true; if (s.rep) { s.bot = false; s.rep = false; } so.data = { code: r.code, tok }; step(r); };
   nsp.on('connection', so => {
     const R = () => rooms[so.data && so.data.code], tk = () => so.data && so.data.tok;
-    const takeSeat = (r, k, name, token) => { const s = r.seats[k]; if (!s || !s.auto || !s.bot) return so.emit('err', 'این صندلی دیگر ربات نیست؛ دوباره امتحان کن.'); r.seats[k] = mkSeat(name, token, so.id); so.data = { code: r.code, tok: token }; step(r); };
-    so.on('create', ({ name, token, look } = {}) => {
+    const takeSeat = (r, k, name, token, profile) => { const s = r.seats[k]; if (!s || !s.auto || !s.bot) return so.emit('err', 'این صندلی دیگر ربات نیست؛ دوباره امتحان کن.'); r.seats[k] = mkSeat(name, token, so.id, profile); so.data = { code: r.code, tok: token }; step(r); };
+    so.on('create', ({ name, token, look, profile } = {}) => {
       let c; do c = [0, 1, 2, 3].map(() => L[Math.random() * 24 | 0]).join(''); while (rooms[c]);
-      const r = rooms[c] = { code: c, host: token, seats: [mkSeat(name, token, so.id), null, null, null], phase: 'lobby', aceLow: false, sc: [0, 0], hk: -1, dl: -1, trump: null, hands: [[], [], [], []], trick: [], last: null, tw: [0, 0], turn: -1, pick: null, res: null, wait: null, cnt: 0, t: null, at: Date.now(), look: cleanLook(look), track: 1, playing: false, paused: false, spec: new Set() };
+      const r = rooms[c] = { code: c, host: token, seats: [mkSeat(name, token, so.id, profile), null, null, null], phase: 'lobby', aceLow: false, sc: [0, 0], hk: -1, dl: -1, trump: null, hands: [[], [], [], []], trick: [], last: null, tw: [0, 0], turn: -1, pick: null, res: null, wait: null, cnt: 0, t: null, at: Date.now(), look: cleanLook(look), track: 1, playing: false, paused: false, spec: new Set() };
       so.data = { code: c, tok: token }; send(r);
     });
-    so.on('join', ({ code, name, token } = {}) => {
+    so.on('join', ({ code, name, token, profile } = {}) => {
       const r = rooms[String(code || '').toUpperCase().trim()]; if (!r) return so.emit('err', 'اتاق پیدا نشد؛ کد را بررسی کن.');
-      const i = seatOf(r, token); if (i >= 0) return back(so, r, i, token);
-      if (r.phase != 'lobby') { const bl = r.seats.map((x, k) => x && x.auto && x.bot ? { k, n: x.name } : null).filter(Boolean); if (!bl.length) return so.emit('err', 'همهٔ صندلی‌ها آدم هستند و اتاق پر است.'); if (bl.length == 1) return takeSeat(r, bl[0].k, name, token); return so.emit('pick', { code: r.code, list: bl }); }
+      const i = seatOf(r, token); if (i >= 0) { if(profile)r.seats[i].profile=cleanProfile(profile); if(name)r.seats[i].name=String(name).slice(0,14); return back(so, r, i, token); }
+      if (r.phase != 'lobby') { const bl = r.seats.map((x, k) => x && x.auto && x.bot ? { k, n: x.name } : null).filter(Boolean); if (!bl.length) return so.emit('err', 'همهٔ صندلی‌ها آدم هستند و اتاق پر است.'); if (bl.length == 1) return takeSeat(r, bl[0].k, name, token, profile); return so.emit('pick', { code: r.code, list: bl }); }
       const p = place(r); if (p === undefined) return so.emit('err', 'اتاق پر است.');
-      r.seats[p] = mkSeat(name, token, so.id); so.data = { code: r.code, tok: token }; send(r);
+      r.seats[p] = mkSeat(name, token, so.id, profile); so.data = { code: r.code, tok: token }; send(r);
     });
     so.on('rejoin', ({ code, token } = {}) => {
       const r = rooms[String(code || '').toUpperCase().trim()], i = r ? seatOf(r, token) : -1;
       if (i < 0) return so.emit('gone'); back(so, r, i, token);
     });
-    so.on('take', ({ code, name, token, seat } = {}) => { const r = rooms[String(code || '').toUpperCase().trim()]; if (r && r.phase != 'lobby') takeSeat(r, seat | 0, name, token); });
-    so.on('sit', k => { const r = R(), i = r ? seatOf(r, tk()) : -1; k = k | 0; if (r && r.phase == 'lobby' && i >= 0 && k >= 0 && k < 4 && !r.seats[k]) { r.seats[k] = r.seats[i]; r.seats[i] = null; send(r); } });
+    so.on('take', ({ code, name, token, seat, profile } = {}) => { const r = rooms[String(code || '').toUpperCase().trim()]; if (r && r.phase != 'lobby') takeSeat(r, seat | 0, name, token, profile); });
+    so.on('profileUpdate', p => { const r=R(),i=r?seatOf(r,tk()):-1;if(i<0||!p)return;const q=cleanProfile(p);r.seats[i].profile=q;r.seats[i].name=q.name;send(r); });
+    so.on('reaction', emoji => { const r=R(), i=r?seatOf(r,tk()):-1, allowed=['😂','❤️','😮','😡','💣']; if(!r||i<0||!allowed.includes(emoji))return; r.seats.forEach((x,k)=>{if(x&&x.sid){const o=nsp.sockets.get(x.sid);if(o)o.emit('reaction',{seat:i,emoji,at:Date.now()})}});r.spec.forEach(id=>{const o=nsp.sockets.get(id);if(o)o.emit('reaction',{seat:i,emoji,at:Date.now()})}); });
+    so.on('sit', k => { const r = R(), i = r ? seatOf(r, tk()) : -1; k = k | 0; if (r && r.phase == 'lobby' && i >= 0 && k >= 0 && k < 4 && i !== k) { const other=r.seats[k]; r.seats[k]=r.seats[i]; r.seats[i]=other; send(r); } });
     so.on('cfg', o => { const r = R(); if (r && r.phase == 'lobby' && tk() === r.host) { r.aceLow = !!(o && o.low); send(r); } });
     so.on('start', o => {
       const r = R(); if (!r || r.phase != 'lobby' || tk() !== r.host) return;
