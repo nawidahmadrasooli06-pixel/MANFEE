@@ -1,17 +1,26 @@
-const $ = q => document.querySelector(q), 
-      sk = io({
-        path: '/socket.io',
-        transports: ['websocket', 'polling']
-      });
+// تعریف متغیر سراسری برای Socket.io
+window.sk = io({
+  path: '/socket.io',
+  transports: ['websocket', 'polling']
+});
 
+const sk = window.sk;
 const tok = localStorage.tok || (localStorage.tok = Math.random().toString(36).slice(2) + Date.now());
 let st = null, BOT = '', pend = null, menuMode = false;
-const tg = window.Telegram && Telegram.WebApp;
-if (tg) { tg.ready(); tg.expand(); tg.disableVerticalSwipes && tg.disableVerticalSwipes(); }
-fetch('/config').then(r => r.json()).then(c => BOT = c.bot).catch(() => { });
-const show = id => document.querySelectorAll('.scr').forEach(e => e.classList.toggle('on', e.id == id));
 
-const currentProfile = () => {
+const tg = window.Telegram && Telegram.WebApp;
+if (tg) { 
+  try { tg.ready(); tg.expand(); tg.disableVerticalSwipes && tg.disableVerticalSwipes(); } catch(e){} 
+}
+
+fetch('/config').then(r => r.json()).then(c => BOT = c.bot).catch(() => { });
+
+// تابع تعویض صفحه (کاملاً سراسری و مقاوم در برابر ارور)
+window.show = function(id) {
+  document.querySelectorAll('.scr').forEach(e => e.classList.toggle('on', e.id == id));
+};
+
+window.currentProfile = function() {
   try {
     return (window.CProfile && window.CProfile.payload) ? window.CProfile.payload() : { name: localStorage.nm || 'بازیکن' };
   } catch(e) {
@@ -19,8 +28,8 @@ const currentProfile = () => {
   }
 };
 
-const nm = () => {
-  const el = $('#invite') && $('#invite').classList.contains('on') ? $('#invNm') : $('#nm');
+window.nm = function() {
+  const el = document.querySelector('#invite') && document.querySelector('#invite').classList.contains('on') ? document.querySelector('#invNm') : document.querySelector('#nm');
   let n = 'بازیکن';
   try {
     n = (window.CProfile && window.CProfile.name) ? window.CProfile.name() : ((el && el.value) || localStorage.nm || 'بازیکن');
@@ -32,110 +41,154 @@ const nm = () => {
   return n;
 };
 
-const act = (ev, a) => sk.emit(ev, a);
+window.act = function(ev, a) { sk.emit(ev, a); };
 
-if ($('#nm')) $('#nm').value = localStorage.nm || (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.first_name) || '';
-if ($('#invNm') && $('#nm')) $('#invNm').value = $('#nm').value;
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.querySelector('#nm')) document.querySelector('#nm').value = localStorage.nm || (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.first_name) || '';
+  if (document.querySelector('#invNm') && document.querySelector('#nm')) document.querySelector('#invNm').value = document.querySelector('#nm').value;
+});
 
 const qr = new URLSearchParams(location.search).get('r'), wq = new URLSearchParams(location.search).get('w');
-if (qr) show('invite');
+if (qr) window.show('invite');
 
-function mk() { 
-  sk.emit('create', { name: nm(), token: tok, profile: currentProfile(), look: typeof prefLook === 'function' ? prefLook() : undefined }); 
-}
+window.mk = function() { 
+  sk.emit('create', { name: window.nm(), token: tok, profile: window.currentProfile(), look: typeof prefLook === 'function' ? prefLook() : undefined }); 
+};
 
-function jn() { 
-  sk.emit('join', { code: $('#cd').value, name: nm(), token: tok, profile: currentProfile() }); 
-}
+window.jn = function() { 
+  const cdEl = document.querySelector('#cd');
+  const code = cdEl ? cdEl.value : '';
+  sk.emit('join', { code, name: window.nm(), token: tok, profile: window.currentProfile() }); 
+};
 
-function acceptInvite() { 
-  if ($('#invNm')) $('#invNm').value = nm(); 
-  sk.emit('join', { code: qr || ($('#invCode') && $('#invCode').textContent), name: nm(), token: tok, profile: currentProfile() }); 
-}
+window.acceptInvite = function() { 
+  if (document.querySelector('#invNm')) document.querySelector('#invNm').value = window.nm(); 
+  const invCodeEl = document.querySelector('#invCode');
+  sk.emit('join', { code: qr || (invCodeEl && invCodeEl.textContent), name: window.nm(), token: tok, profile: window.currentProfile() }); 
+};
 
-function backToMenu() { menuMode = true; show('menu'); }
+window.backToMenu = function() { menuMode = true; window.show('menu'); };
 
-function resume() {
-  if (st && st.g) { menuMode = false; show('game'); if (window.T) T.render(st); return; }
-  sk.emit('join', { code: localStorage.room, name: nm(), token: tok, profile: currentProfile() }); 
-}
+window.resume = function() {
+  if (st && st.g) { menuMode = false; window.show('game'); if (window.T) T.render(st); return; }
+  if (localStorage.room) {
+    sk.emit('join', { code: localStorage.room, name: window.nm(), token: tok, profile: window.currentProfile() }); 
+  } else {
+    window.show('join');
+  }
+};
 
-function fresh() { menuMode = false; localStorage.removeItem('room'); pend = null; history.replaceState(0, '', '/'); if ($('#cd')) $('#cd').value = ''; show('join'); }
-function take(i) { sk.emit('take', { ...pend, name:nm(), profile:currentProfile(), seat: i }); }
-function startGame() { sk.emit('start', { forceBots: false }); }
-function startWithBots() { sk.emit('start', { forceBots: true }); }
+window.fresh = function() { 
+  menuMode = false; 
+  localStorage.removeItem('room'); 
+  pend = null; 
+  history.replaceState(0, '', '/'); 
+  if (document.querySelector('#cd')) document.querySelector('#cd').value = ''; 
+  window.show('join'); 
+};
 
-function restartBot() {
+window.take = function(i) { sk.emit('take', { ...pend, name: window.nm(), profile: window.currentProfile(), seat: i }); };
+window.startGame = function() { sk.emit('start', { forceBots: false }); };
+window.startWithBots = function() { sk.emit('start', { forceBots: true }); };
+
+window.restartBot = function() {
   if (BOT && tg && tg.openTelegramLink) tg.openTelegramLink('https://t.me/' + BOT);
   else if (BOT) location.href = 'https://t.me/' + BOT;
-  else { fresh(); }
-}
+  else { window.fresh(); }
+};
 
-function share() {
+window.share = function() {
   if (!st || !st.code) return;
-  act('invite');
+  window.act('invite');
   const link = BOT ? `https://t.me/${BOT}?start=${st.code}` : location.origin + '/?r=' + st.code;
   const text = 'بیا بازی منفی! کد اتاق: ' + st.code;
   if (tg) tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(text));
   else navigator.share ? navigator.share({ title: 'منفی', text, url: link }).catch(() => { }) : navigator.clipboard.writeText(link).then(() => alert('لینک کپی شد'));
-}
+};
 
-function shareWatch() {
+window.shareWatch = function() {
   const code = (st && st.code) || localStorage.room; if (!code) { alert('اول وارد یک اتاق شو'); return; }
   const link = BOT ? `https://t.me/${BOT}?start=w_${code}` : location.origin + '/?w=' + code;
   const text = 'بیا بازی منفی را زنده تماشا کن! 👁 کد اتاق: ' + code;
   if (tg) tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(text));
   else navigator.share ? navigator.share({ title: 'منفی', text, url: link }).catch(() => { }) : navigator.clipboard.writeText(link).then(() => alert('لینک کپی شد'));
-}
+};
 
 function lobby() {
   if (!st || !st.seats) return;
-  const cell = i => { const x = st.seats[i]; const p=x&&x.profile; const ava=p&&(p.avatar||p.photo)?`<img class="lobby-avatar" src="${String(p.avatar||p.photo).replace(/&/g,'&amp;').replace(/\"/g,'&quot;')}">`:`<span class="lobby-avatar emoji">${p&&p.emoji||'🃏'}</span>`; return `<button class="sb ${x ? 'f' : ''}" onclick="act('sit',${i})">${x ? ava + '<b>'+x.name+'</b>' + (i == st.me && !st.isSpec ? ' (تو)' : '') : 'صندلی خالی'}</button>`; };
-  if ($('#lb')) $('#lb').innerHTML = `<h3>تیم ۱ (روبه‌روی هم)</h3>${cell(0)}${cell(2)}<h3>تیم ۲ (روبه‌روی هم)</h3>${cell(1)}${cell(3)}`;
-  if ($('#code')) $('#code').textContent = st.code;
-  if ($('#go')) {
-    $('#go').style.display = st.host ? '' : 'none';
-    $('#go').disabled = !!st.starting || (!!st.invitePending && !st.inviteAccepted);
-    $('#go').textContent = st.invitePending && !st.inviteAccepted ? 'منتظر ورود دوستت…' : 'شروع بازی';
+  const cell = i => { 
+    const x = st.seats[i]; 
+    const p = x && x.profile; 
+    const ava = p && (p.avatar || p.photo) ? `<img class="lobby-avatar" src="${String(p.avatar||p.photo).replace(/&/g,'&amp;').replace(/\"/g,'&quot;')}">` : `<span class="lobby-avatar emoji">${p&&p.emoji||'🃏'}</span>`; 
+    return `<button class="sb ${x ? 'f' : ''}" onclick="window.act('sit',${i})">${x ? ava + '<b>'+x.name+'</b>' + (i == st.me && !st.isSpec ? ' (تو)' : '') : 'صندلی خالی'}</button>`; 
+  };
+  const lb = document.querySelector('#lb');
+  if (lb) lb.innerHTML = `<h3>تیم ۱ (روبه‌روی هم)</h3>${cell(0)}${cell(2)}<h3>تیم ۲ (روبه‌روی هم)</h3>${cell(1)}${cell(3)}`;
+  
+  const cd = document.querySelector('#code');
+  if (cd) cd.textContent = st.code;
+  
+  const go = document.querySelector('#go');
+  if (go) {
+    go.style.display = st.host ? '' : 'none';
+    go.disabled = !!st.starting || (!!st.invitePending && !st.inviteAccepted);
+    go.textContent = st.invitePending && !st.inviteAccepted ? 'منتظر ورود دوستت…' : 'شروع بازی';
   }
-  if ($('#force')) $('#force').style.display = st.host && st.invitePending ? '' : 'none';
-  if ($('#waitMsg')) $('#waitMsg').textContent = st.invitePending && !st.inviteAccepted ? 'دوستت هنوز وارد اتاق نشده؛ اینجا منتظرش می‌مانیم.' : st.inviteAccepted ? 'دوستت وارد شد؛ آماده شروع بازی هستید.' : '';
-  if ($('#startCount')) $('#startCount').textContent = st.starting ? `شروع بازی تا ${st.starting}…` : '';
+  const force = document.querySelector('#force');
+  if (force) force.style.display = st.host && st.invitePending ? '' : 'none';
+  
+  const waitMsg = document.querySelector('#waitMsg');
+  if (waitMsg) waitMsg.textContent = st.invitePending && !st.inviteAccepted ? 'دوستت هنوز وارد اتاق نشده؛ اینجا منتظرش می‌مانیم.' : st.inviteAccepted ? 'دوستت وارد شد؛ آماده شروع بازی هستید.' : '';
+  
+  const startCount = document.querySelector('#startCount');
+  if (startCount) startCount.textContent = st.starting ? `شروع بازی تا ${st.starting}…` : '';
 }
 
 sk.on('state', s => {
-  st = s; window.CactucCurrentState=s; document.body.classList.toggle('in-game',!!s.g); if (!s.isSpec) localStorage.room = s.code; history.replaceState(0, '', (s.isSpec ? '?w=' : '?r=') + s.code);
-  document.body.classList.toggle('spectator', !!s.isSpec); if (typeof setSpec === 'function') setSpec(s.spec || 0);
+  st = s; window.CactucCurrentState = s; 
+  document.body.classList.toggle('in-game', !!s.g); 
+  if (!s.isSpec) localStorage.room = s.code; 
+  history.replaceState(0, '', (s.isSpec ? '?w=' : '?r=') + s.code);
+  document.body.classList.toggle('spectator', !!s.isSpec); 
+  if (typeof setSpec === 'function') setSpec(s.spec || 0);
   if (typeof applyLook === 'function' && s.look) applyLook(s.look);
   if (typeof syncTrackFromState === 'function') syncTrackFromState(s.track, s.playing);
-  if (s.g) { if (!menuMode) show('game'); if (window.T) T.render(s); } else { menuMode = false; show('lobby'); lobby(); }
+  if (s.g) { if (!menuMode) window.show('game'); if (window.T) T.render(s); } else { menuMode = false; window.show('lobby'); lobby(); }
 });
 
 sk.on('inviteInfo', info => {
-  if (info.expired) { if ($('#expiredMsg')) $('#expiredMsg').textContent = info.message || 'این دعوت منقضی شده است.'; show('expired'); return; }
-  if ($('#inviter')) $('#inviter').textContent = info.inviter || 'دوستت'; 
-  if ($('#invCode')) $('#invCode').textContent = info.code || qr || '';
-  if ($('#invNm')) $('#invNm').value = localStorage.nm \vert{}\vert{} $('#invNm').value;
-  show('invite');
+  const exp = document.querySelector('#expiredMsg');
+  if (info.expired) { if (exp) exp.textContent = info.message || 'این دعوت منقضی شده است.'; window.show('expired'); return; }
+  const inviter = document.querySelector('#inviter');
+  if (inviter) inviter.textContent = info.inviter || 'دوستت'; 
+  const invCode = document.querySelector('#invCode');
+  if (invCode) invCode.textContent = info.code || qr || '';
+  const invNm = document.querySelector('#invNm');
+  if (invNm) invNm.value = localStorage.nm || invNm.value;
+  window.show('invite');
 });
 
 sk.on('pick', p => {
-  pend = { code: p.code, name: nm(), token: tok };
-  if ($('#pk')) $('#pk').innerHTML = p.list.map(x => `<button class="sb f" onclick="take(${x.i})">جای «${x.name}» بنشین<br><small>هم‌تیمی: ${x.mate}</small></button>`).join('');
-  show('pick');
+  pend = { code: p.code, name: window.nm(), token: tok };
+  const pk = document.querySelector('#pk');
+  if (pk) pk.innerHTML = p.list.map(x => `<button class="sb f" onclick="window.take(${x.i})">جای «${x.name}» بنشین<br><small>هم‌تیمی: ${x.mate}</small></button>`).join('');
+  window.show('pick');
 });
 
 document.addEventListener('cactuc-profile', e => { if(st && st.code && e.detail && e.detail.complete) sk.emit('profileUpdate', e.detail); });
 sk.on('reaction', d => { if(window.showCactucReaction) window.showCactucReaction(d); });
-sk.on('err', m => { alert(m); show('join'); });
+sk.on('err', m => { alert(m); window.show('join'); });
 sk.on('expired', m => {
-  localStorage.removeItem('room'); if ($('#expiredMsg')) $('#expiredMsg').textContent = m || 'این بازی به پایان رسیده یا لینک آن منقضی شده است. ربات را دوباره استارت کن.'; show('expired');
+  localStorage.removeItem('room'); 
+  const exp = document.querySelector('#expiredMsg');
+  if (exp) exp.textContent = m || 'این بازی به پایان رسیده یا لینک آن منقضی شده است. ربات را دوباره استارت کن.'; 
+  window.show('expired');
 });
 
 sk.on('connect', () => {
   if (wq || (st && st.isSpec)) { sk.emit('watch', { code: st && st.isSpec ? st.code : wq }); return; }
   if (qr) { sk.emit('preview', qr); return; }
-  if (st) { sk.emit('join', { code: st.code, name: nm(), token: tok, profile: currentProfile() }); return; }
+  if (st) { sk.emit('join', { code: st.code, name: window.nm(), token: tok, profile: window.currentProfile() }); return; }
 });
 
 /* MANFEE_PRIVACY_SHIELD_V2 */
