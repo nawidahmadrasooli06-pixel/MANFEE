@@ -13,10 +13,7 @@ input{font:inherit;font-size:17px;padding:12px;border-radius:12px;border:2px sol
 .credit{margin-top:22px;display:flex;flex-direction:column;gap:3px;font-size:13px;opacity:.85;max-width:300px}.credit a{color:var(--gold)}
 #lb{display:flex;flex-direction:column;gap:6px;width:100%;max-width:300px}#lb h3{margin:8px 0 0;font-size:14px;color:var(--gold)}
 .sb{font:inherit;padding:12px;border-radius:12px;border:2px dashed #2b5a55;background:#0f2a28;color:#9bb}.sb.f{border:2px solid var(--gold);color:#fff;background:#1b4b47}
-#game.on{justify-content:flex-start;align-items:stretch;gap:0;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);position:relative;
- background:radial-gradient(ellipse at center,#0000 35%,#000a 100%),
- conic-gradient(from 45deg at 50% 50%,#0000 0 25%,#ffffff14 0 50%,#0000 0 75%,#ffffff14 0) 0 0/46px 46px,
- radial-gradient(circle at 50% 45%,#23605a,#0e2b29);box-shadow:inset 0 0 0 7px #c79a4a55,inset 0 0 0 11px #0005}
+#game.on{justify-content:flex-start;align-items:stretch;gap:0;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);position:relative;background:radial-gradient(ellipse at center,#0000 35%,#000a 100%),conic-gradient(from 45deg at 50% 50%,#0000 0 25%,#ffffff14 0 50%,#0000 0 75%,#ffffff14 0) 0 0/46px 46px,radial-gradient(circle at 50% 45%,#23605a,#0e2b29);box-shadow:inset 0 0 0 7px #c79a4a55,inset 0 0 0 11px #0005}
 #hud{display:flex;gap:8px;justify-content:center;padding:8px 10px 0;z-index:2}
 .pl{font-size:12px;font-weight:700;padding:5px 10px;border-radius:10px;background:#0b1f1ecc}.pl.m{color:#7fe0a0}.pl.e{color:#ff9a8f}
 #tbl{position:relative;flex:1;min-height:0}
@@ -115,4 +112,18 @@ input{font:inherit;font-size:17px;padding:12px;border-radius:12px;border:2px sol
 body.carpet-c5 #game.on{box-shadow:none!important}
 .in-game #cactucProfileButton{display:none!important}.victory-screen{isolation:isolate}.victory-screen .fireworks{position:relative;min-height:34px}.victory-screen .fireworks:before,.victory-screen .fireworks:after{content:"✦ ✹ ✧ ✦";position:absolute;top:0;left:4%;font-size:16px;letter-spacing:6px;color:#fff1a3;text-shadow:0 0 12px #ffdf63;animation:burstA 1.5s ease-in-out infinite alternate}.victory-screen .fireworks:after{left:auto;right:4%;animation-delay:.5s}@keyframes burstA{from{transform:translateY(4px) scale(.7);opacity:.35}to{transform:translateY(-5px) scale(1.15);opacity:1}}
 .victory-screen{pointer-events:auto}.in-game #cactucProfileButton{display:none!important}
-.scr .btn{position:relative;overflow:hidden;border:1px solid #d8c06f55;box-shadow:0 5px 0 #050b10,0 9px 18px #0007,inset 0 1px #ffffff35;transform:translateY(0);transition:transform .14s,box-shadow .14s;background:linear-gradient(145deg,#23385e,#101b34);color:#f5f7ff}.scr .btn:active{transform:translateY(3px);box-shadow:0 2px 0 #050b10,0 4px 8px #0007}.scr .btn.go{background:linear-gradient(145deg,#ffe58a,#c8a34b);color:#1a2337;border-color:#fff0ad}.scr .btn:before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,#fff2,transparent 35%);pointer-events:none}
+.scr .btn{position:relative;overflow:hidden;border:1px solid #d8c06f55;box-shadow:0 5px 0 #050b10,0 9px 18px #0007,inset 0 1px #ffffff35;transform:translateY(0);transition:transform .14s,box-shadow .14s;background:linear-gradient(145deg,#23385e,#101b34);color:#f5f7ff}.scr .btn:active{transform:translateY(3px);box-shadow:0 2px 0 #050b10,0 4px 8px #0007}.scr .btn.go{background:linear-gradient(145deg,#ffe58a,#c8a34b);color:#1a2337;border-color:#fff0ad}:is(#menu,#about,#guideChoice,#guideFk,#guide,#join,#lobby,#pick,#expired,#resume) .btn:before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,#fff2,transparent 35%);pointer-events:none}
+
+/* CACTUC hotfix: keep menu controls readable on small Telegram WebViews */
+:is(#menu,#about,#guideChoice,#guideFk,#guide,#join,#lobby,#pick,#expired,#resume){overflow-y:auto!important;overflow-x:hidden!important;justify-content:flex-start!important;gap:10px!important;padding:calc(16px + env(safe-area-inset-top,0px)) 18px calc(28px + env(safe-area-inset-bottom,0px))!important;overscroll-behavior:contain}
+:is(#menu,#about,#guideChoice,#guideFk,#guide,#join,#lobby,#pick,#expired,#resume)>.btn,:is(#menu,#about,#guideChoice,#guideFk,#guide,#join,#lobby,#pick,#expired,#resume)>button.btn{flex:0 0 auto;min-height:48px;height:auto!important;max-height:none!important;white-space:normal;line-height:1.45;padding:12px 14px!important;overflow:visible!important}
+:is(#menu,#about,#guideChoice,#guideFk,#guide,#join,#lobby,#pick,#expired,#resume) .btn:before{border-radius:inherit}
+#menu .brandTop{flex:0 0 auto}
+#menu .logo,#menu .sub,#menu .credit{flex:0 0 auto}
+#menu .btn-row{flex:0 0 auto}
+#menu #resumeBox{flex:0 0 auto;width:100%}
+#menu #resumeBox .btn{min-height:46px}
+#menu .brandId{cursor:pointer;display:inline-block;padding:4px 8px}
+:is(#menu,#about,#guideChoice,#guideFk,#guide,#join,#lobby,#pick,#expired,#resume) .lnk{flex:0 0 auto;min-height:36px}
+#cactucProfileButton{top:calc(8px + env(safe-area-inset-top,0px))}
+@media(max-height:720px){:is(#menu,#about,#guideChoice,#guideFk,#guide,#join,#lobby,#pick,#expired,#resume){gap:7px!important;padding-top:10px!important}:is(#menu,#about,#guideChoice,#guideFk,#guide,#join,#lobby,#pick,#expired,#resume) h2{margin:4px 0}:is(#menu,#about,#guideChoice,#guideFk,#guide,#join,#lobby,#pick,#expired,#resume)>.btn{min-height:44px}}
