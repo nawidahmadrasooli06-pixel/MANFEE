@@ -39,7 +39,7 @@ class Room {
     return i;
   }
   updateProfile(sid, p) { const i=this.seatOf(sid); if(i<0||!p)return; const q=this.cleanProfile(p); if(!q)return; this.seats[i].profile=q; this.seats[i].name=q.name; if(this.g)this.g.names[i]=q.name; this.send(); }
-  cleanProfile(p) { if (!p || typeof p !== 'object') return null; const validEmoji = ['🃏','😎','👑','🦅','🐺','🌙','🔥','💎']; return { name: String(p.name || 'بازیکن').slice(0,14), avatar: /^https:\/\//i.test(String(p.avatar || '')) ? String(p.avatar).slice(0,500) : '', photo: /^https:\/\//i.test(String(p.photo || '')) ? String(p.photo).slice(0,500) : '', emoji: validEmoji.includes(p.emoji) ? p.emoji : '🃏' }; }
+  cleanProfile(p) { if (!p || typeof p !== 'object') return null; const validEmoji = ['🃏','😎','👑','🦅','🐺','🌙','🔥','💎']; return { name: String(p.name || 'بازیکن').slice(0,14), avatar: (/^https:\/\//i.test(String(p.avatar || '')) && String(p.avatar).length <= 500) ? String(p.avatar) : (/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/i.test(String(p.avatar || '')) && String(p.avatar).length <= 420000) ? String(p.avatar) : '', photo: (/^https:\/\//i.test(String(p.photo || '')) && String(p.photo).length <= 500) ? String(p.photo) : (/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/i.test(String(p.photo || '')) && String(p.photo).length <= 420000) ? String(p.photo) : '', emoji: validEmoji.includes(p.emoji) ? p.emoji : '🃏' }; }
   take(sid, name, token, i, profile) {
     if (!this.g || !this.g.bot[i] || this.seats.some(x => x && x.token == token)) return false;
     const old = this.seats[i] || {};
