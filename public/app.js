@@ -16,9 +16,9 @@ $('#nm').value = localStorage.nm || (tg && tg.initDataUnsafe && tg.initDataUnsaf
 $('#invNm').value = $('#nm').value;
 const qr = new URLSearchParams(location.search).get('r'), wq = new URLSearchParams(location.search).get('w');
 if (qr) show('invite');
-function mk() { if(window.CProfile&&!window.CProfile.payload().complete){openMyProfile();return;} sk.emit('create', { name: nm(), token: tok, profile: currentProfile(), look: typeof prefLook === 'function' ? prefLook() : undefined }); }
-function jn() { if(window.CProfile&&!window.CProfile.payload().complete){openMyProfile();return;} sk.emit('join', { code: $('#cd').value, name: nm(), token: tok, profile: currentProfile() }); }
-function acceptInvite() { if(window.CProfile&&!window.CProfile.payload().complete){openMyProfile();return;} $('#nm').value = nm(); sk.emit('join', { code: qr || $('#invCode').textContent, name: nm(), token: tok, profile: currentProfile() }); }
+function mk() { if(window.CProfile&&(!window.CProfile.payload().complete || !window.CProfile.payload().avatar)){openMyProfile();return;} sk.emit('create', { name: nm(), token: tok, profile: currentProfile(), look: typeof prefLook === 'function' ? prefLook() : undefined }); }
+function jn() { if(window.CProfile&&(!window.CProfile.payload().complete || !window.CProfile.payload().avatar)){openMyProfile();return;} sk.emit('join', { code: $('#cd').value, name: nm(), token: tok, profile: currentProfile() }); }
+function acceptInvite() { if(window.CProfile&&(!window.CProfile.payload().complete || !window.CProfile.payload().avatar)){openMyProfile();return;} $('#nm').value = nm(); sk.emit('join', { code: qr || $('#invCode').textContent, name: nm(), token: tok, profile: currentProfile() }); }
 function backToMenu() { menuMode = true; show('menu'); }
 function resume() {
   if (st && st.g) { menuMode = false; show('game'); T.render(st); return; }
