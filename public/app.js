@@ -15,7 +15,7 @@ if (tg) {
 
 fetch('/config').then(r => r.json()).then(c => BOT = c.bot).catch(() => { });
 
-// تابع تعویض صفحه (کاملاً سراسری و مقاوم در برابر ارور)
+// تابع تعویض صفحه (سراسری و ایمن برای آیفون و اندروید)
 window.show = function(id) {
   document.querySelectorAll('.scr').forEach(e => e.classList.toggle('on', e.id == id));
 };
@@ -88,8 +88,14 @@ window.fresh = function() {
 };
 
 window.take = function(i) { sk.emit('take', { ...pend, name: window.nm(), profile: window.currentProfile(), seat: i }); };
-window.startGame = function() { sk.emit('start', { forceBots: false }); };
-window.startWithBots = function() { sk.emit('start', { forceBots: true }); };
+
+// اصلاح قطعی برای شروع بازی و پر شدن صندلی‌ها با ربات‌ها
+window.startGame = function() { 
+  sk.emit('start', { bots: true, forceBots: false }); 
+};
+window.startWithBots = function() { 
+  sk.emit('start', { bots: true, forceBots: true }); 
+};
 
 window.restartBot = function() {
   if (BOT && tg && tg.openTelegramLink) tg.openTelegramLink('https://t.me/' + BOT);
@@ -188,7 +194,7 @@ sk.on('expired', m => {
 sk.on('connect', () => {
   if (wq || (st && st.isSpec)) { sk.emit('watch', { code: st && st.isSpec ? st.code : wq }); return; }
   if (qr) { sk.emit('preview', qr); return; }
-  if (st) { sk.emit('join', { code: st.code, name: window.nm(), token: tok, profile: window.currentProfile() }); return; }
+  if (st) { sk.emit('join', { code: st.code, name: window.nm(), token: tok, profile: currentProfile() }); return; }
 });
 
 /* MANFEE_PRIVACY_SHIELD_V2 */
