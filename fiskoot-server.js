@@ -99,7 +99,7 @@ module.exports = function (io) {
     step(r);
   }
   const place = r => [0, 2, 1, 3].find(i => !r.seats[i]);
-  const cleanProfile = p => { if(!p||typeof p!=='object')return null; const es=['🃏','😎','👑','🦅','🐺','🌙','🔥','💎']; return {name:String(p.name||'بازیکن').slice(0,14),avatar:/^https:\/\//i.test(String(p.avatar||''))?String(p.avatar).slice(0,500):'',photo:/^https:\/\//i.test(String(p.photo||''))?String(p.photo).slice(0,500):'',emoji:es.includes(p.emoji)?p.emoji:'🃏'}; };
+  const cleanProfile = p => { if(!p||typeof p!=='object')return null; const es=['🃏','😎','👑','🦅','🐺','🌙','🔥','💎']; return {name:String(p.name||'بازیکن').slice(0,14),avatar:(/^https:\/\//i.test(String(p.avatar||''))&&String(p.avatar).length<=500)?String(p.avatar):(/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/i.test(String(p.avatar||''))&&String(p.avatar).length<=420000)?String(p.avatar):'',photo:(/^https:\/\//i.test(String(p.photo||''))&&String(p.photo).length<=500)?String(p.photo):(/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/i.test(String(p.photo||''))&&String(p.photo).length<=420000)?String(p.photo):'',emoji:es.includes(p.emoji)?p.emoji:'🃏'}; };
   const mkSeat = (name, token, sid, profile) => ({ name: String(name || 'بازیکن').slice(0, 14), token, sid, profile:cleanProfile(profile), bot: false, on: true });
   const back = (so, r, i, tok) => { const s = r.seats[i]; s.sid = so.id; s.on = true; if (s.rep) { s.bot = false; s.rep = false; } so.data = { code: r.code, tok }; step(r); };
   nsp.on('connection', so => {
