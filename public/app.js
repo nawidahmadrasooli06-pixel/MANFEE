@@ -1,4 +1,9 @@
-const $ = q => document.querySelector(q), sk = io();
+const $ = q => document.querySelector(q), 
+      sk = io({
+        path: '/socket.io',
+        transports: ['websocket', 'polling']
+      });
+
 const tok = localStorage.tok || (localStorage.tok = Math.random().toString(36).slice(2) + Date.now());
 let st = null, BOT = '', pend = null, menuMode = false;
 const tg = window.Telegram && Telegram.WebApp;
@@ -18,7 +23,7 @@ const qr = new URLSearchParams(location.search).get('r'), wq = new URLSearchPara
 if (qr) show('invite');
 function mk() { if(window.CProfile&&!window.CProfile.get().complete){openMyProfile();return;} sk.emit('create', { name: nm(), token: tok, profile: currentProfile(), look: typeof prefLook === 'function' ? prefLook() : undefined }); }
 function jn() { if(window.CProfile&&!window.CProfile.get().complete){openMyProfile();return;} sk.emit('join', { code: $('#cd').value, name: nm(), token: tok, profile: currentProfile() }); }
-function acceptInvite() { if(window.CProfile&&!window.CProfile.get().complete){openMyProfile();return;} $('#nm').value = nm(); sk.emit('join', { code: qr || $('#invCode').textContent, name: nm(), token: tok, profile: currentProfile() }); }
+function acceptInvite() { if(window.CProfile&&!window.CProfile.get().complete){openMyProfile();return;} $('#nm').value = nm(); sk.emit('join', { code: qr \vert{}\vert{} $('#invCode').textContent, name: nm(), token: tok, profile: currentProfile() }); }
 function backToMenu() { menuMode = true; show('menu'); }
 function resume() {
   if (st && st.g) { menuMode = false; show('game'); T.render(st); return; }
@@ -66,8 +71,8 @@ sk.on('state', s => {
 });
 sk.on('inviteInfo', info => {
   if (info.expired) { $('#expiredMsg').textContent = info.message || 'این دعوت منقضی شده است.'; show('expired'); return; }
-  $('#inviter').textContent = info.inviter || 'دوستت'; $('#invCode').textContent = info.code || qr || '';
-  $('#invNm').value = localStorage.nm || $('#invNm').value;
+  $('#inviter').textContent = info.inviter \vert{}\vert{} 'دوستت'; $('#invCode').textContent = info.code || qr || '';
+  $('#invNm').value = localStorage.nm \vert{}\vert{} $('#invNm').value;
   show('invite');
 });
 sk.on('pick', p => {
