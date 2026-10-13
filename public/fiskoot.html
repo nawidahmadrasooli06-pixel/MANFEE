@@ -146,8 +146,8 @@ function scr(n){$('menu').style.display=n=='menu'?'flex':'none';$('lobby').style
 function rules(){$('rl').style.display='flex'}function openAbout(){$('aboutFk').style.display='flex'}function openGuideChooser(){$('guideChooser').style.display='flex'}
 function nameV(){const n=(window.CProfile?window.CProfile.name():$('nm').value||'').trim();if(!n){toast('اسمت را بنویس');return null}sv('fk_nm',n);return n}
 function profileV(){return window.CProfile?window.CProfile.payload():{name:nameV()};}
-function mkRoom(){const n=nameV();if(window.CProfile&&!window.CProfile.payload().complete){openMyProfile();return}if(n)sk.emit('create',{name:n,token:tok,profile:profileV(),look:prefLook()})}
-function joinCode(){const n=nameV(),c=$('cin').value.trim().toUpperCase();if(window.CProfile&&!window.CProfile.payload().complete){openMyProfile();return}if(n&&c)sk.emit('join',{code:c,name:n,token:tok,profile:profileV()})}
+function mkRoom(){const n=nameV();if(window.CProfile&&(!window.CProfile.payload().complete || !window.CProfile.payload().avatar)){openMyProfile();return}if(n)sk.emit('create',{name:n,token:tok,profile:profileV(),look:prefLook()})}
+function joinCode(){const n=nameV(),c=$('cin').value.trim().toUpperCase();if(window.CProfile&&(!window.CProfile.payload().complete || !window.CProfile.payload().avatar)){openMyProfile();return}if(n&&c)sk.emit('join',{code:c,name:n,token:tok,profile:profileV()})}
 function resume(){sk.emit('rejoin',{code:ld('fk_room'),token:tok})}
 function sit(k){sk.emit('sit',k)}
 function invite(){const go=l=>{const u='https://t.me/share/url?url='+encodeURIComponent(l)+'&text='+encodeURIComponent('بیا بازی حکم (فیسکوت)! کد اتاق: '+st.code);try{Telegram.WebApp.openTelegramLink(u)}catch(e){window.open(u,'_blank')}};fetch('/config').then(r=>r.json()).then(c=>go(c.bot?'https://t.me/'+c.bot+'?start=fk_'+st.code:location.origin+'/fiskoot.html?room='+st.code)).catch(()=>go(location.origin+'/fiskoot.html?room='+st.code))}
@@ -168,7 +168,7 @@ function rGame(){
  const T=st.tr;$('tr').innerHTML=T==null?'رنگ (حکم): ؟':`رنگ (حکم): <span class="${T>1?'red':''}">${SU[T]} ${SN[T]}</span>`;
  $('tc').innerHTML=T==null?'':`<span style="color:${T>1?'#ff6b6b':'#fff'}">${SU[T]}</span><small>رنگ (حکم)</small>`;
  const act=ph=='play'?st.turn:ph=='pick'?st.pk.t:ph=='trump'?st.hk:-1;
- for(let k=0;k<4;k++){const s=st.seats[k],e=$('s'+rel(k));e.classList.toggle('on',act===k);
+ for(let k=0;k<4;k++){const s=st.seats[k],e=$('s'+rel(k));e.dataset.seat=String(k);e.classList.toggle('on',act===k);
   const pr=s.profile||{},src=pr.avatar||pr.photo,ava=src?`<img class="fk-avatar" src="${String(src).replace(/&/g,'&amp;').replace(/\"/g,'&quot;')}">`:`<span class="fk-avatar emoji">${pr.emoji||'🃏'}</span>`,rp=k===me&&!st.isSpec?`<div class="reaction-picks fk-reactions">${['😂','❤️','😮','😡','💣'].map(x=>`<button onclick="sk.emit('reaction','${x}')">${x}</button>`).join('')}</div>`:'';e.innerHTML=`<div class="fk-player">${ava}<b>${s.n}</b></div>${s.b?'<div class="bt">bot</div>':''}<small>${st.hk==k?'🔑 حاکم ':''}${st.dl==k?'🃏 پخش ':''}${!s.on&&!s.b?'⚠ قطع شد ':''}${(k!=me||st.isSpec)&&s.k?s.k+' کارت':''}</small>${rp}${st.isSpec&&s.k?'<div class="bks">'+'<i></i>'.repeat(s.k)+'</div>':''}`}
  const put=(el,x,cls)=>{if(el.dataset.c!=x.c){el.innerHTML=cel(x.c,cls);el.dataset.c=x.c;if(cls.includes('slide'))el.firstChild.style.setProperty('--f','translate('+['0,110px','110px,0','0,-110px','-110px,0'][rel(x.p)]+')')}};
  const m={};st.trick.forEach(x=>m[rel(x.p)]=x);
