@@ -1,39 +1,25 @@
-
-<!doctype html>
-<html lang="fa" dir="rtl">
-<head>
+<html lang="fa" dir="rtl" style="--tg-viewport-height: 100vh; --tg-viewport-stable-height: 100vh;"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>منفی</title>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&amp;display=swap" rel="stylesheet">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>
-try {
-  var sp = Telegram.WebApp.initDataUnsafe.start_param || '';
-  if (sp.indexOf('fk_') == 0) {
-    location.replace('/fiskoot.html?room=' + encodeURIComponent(sp.slice(3)));
-  }
-} catch(e) {}
-</script>
+<script>try{var sp=Telegram.WebApp.initDataUnsafe.start_param||'';if(sp.indexOf('fk_')==0)location.replace('/fiskoot.html?room='+encodeURIComponent(sp.slice(3)))}catch(e){}</script>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="theme.css">
 <link rel="stylesheet" href="fk-theme.css">
 </head>
 <body>
 <div id="menu" class="scr on">
-  <div class="brandTop">
-    <b>VIP. CACTUC 🃏♠️</b>
-    <a href="https://t.me/cactuc580" onclick="return false" class="brandId" data-owner="1">@cactuc580</a>
-  </div>
   <div class="logo">♠ منفی</div>
   <div class="sub">بازی ورق چهار نفره</div>
-
+  
   <button class="btn go" onclick="show('join')">شروع بازی منفی</button>
   <button class="btn" onclick="location.href='/fiskoot.html'" style="border:3px solid #ffd76a;border-radius:14px">♠ بازی حکم (فیسکوت)</button>
   <button class="btn" onclick="openSettingsModal()">⚙️ تنظیمات، تم و موزیک</button>
-  <button class="btn" onclick="show('guideChoice')">📘 راهنما ⌄</button>
+  <button class="btn" onclick="show('guide')">📘 راهنمای بازی</button>
   <button class="btn" onclick="show('about')">ℹ️ درباره ربات</button>
-
+  
   <div id="resumeBox">
     <button class="btn" onclick="shareWatch()" style="margin-bottom:8px">👁 دعوت تماشاچی</button>
     <p style="margin:0 0 10px 0; font-size:12px; color:#f0b64a; font-weight:bold;">بازگشت به بازی نیمه‌کاره:</p>
@@ -44,7 +30,7 @@ try {
   </div>
 
   <div class="credit">
-    <b>طراح بات:</b><b dir="ltr">نوید=Cactuc</b><a dir="ltr" href="https://t.me/cactuc580">@cactuc580</a>
+    <b>طراح بات:</b><b dir="ltr">〘Cactuc = نــوید</b><a dir="ltr" href="https://t.me/cactuc580">@cactuc580</a>
     <span>ربات برای خوشگذرونی و ساعت تیری ساخته شده امید که لذت ببرین❤️</span>
   </div>
 </div>
@@ -52,31 +38,8 @@ try {
 <div id="about" class="scr scroll">
   <h2>درباره ربات</h2>
   <p>🃏 ربات بازی منفی؛ بازی ورق چهار نفره با دوستان یا ربات‌ها.</p>
-  <p>طراح: <b dir="ltr">نوید=Cactuc</b></p>
-  <a class="brandId" href="https://t.me/cactuc580">@cactuc580</a>
-  <p>اگر راهنمایی لازم داری یا بخشی را نمی‌فهمی، روی «راهنما ⌄» بزن و راهنمای بازی خودت را انتخاب کن. ⬇️</p>
-  <button class="btn" onclick="show('guideChoice')">📘 راهنما ⌄</button>
+  <p>طراح: 〘Cactuc = نــوید</p>
   <button class="lnk" onclick="show('menu')">بازگشت</button>
-</div>
-
-<div id="guideChoice" class="scr scroll">
-  <h2>📘 راهنمای بازی</h2>
-  <p>راهنمای همان بازی را انتخاب کن:</p>
-  <button class="btn go" onclick="show('guide')">🃏 راهنمای منفی</button>
-  <button class="btn" onclick="show('guideFk')">♠️ راهنمای حکم (فیسکوت)</button>
-  <button class="lnk" onclick="show('menu')">بازگشت به منو</button>
-</div>
-
-<div id="guideFk" class="scr scroll">
-  <h2>♠️ راهنمای حکم (فیسکوت)</h2>
-  <div class="guideText">
-    <b>۱) ورود</b><p>با دوستانت وارد اتاق شو یا میزبان با ربات‌ها شروع کند. در لابی روی صندلی بزن تا جایت عوض شود؛ همه قبل از شروع جای خود را مرتب کنند.</p>
-    <b>۲) پیدا کردن حاکم</b><p>در مرحله انتخاب، کارت‌های پشت‌رو را انتخاب کن. بازیکنی که توس/آس را پیدا کند حاکم می‌شود.</p>
-    <b>۳) انتخاب حکم</b><p>حاکم یکی از چهار خال را انتخاب می‌کند. اگر از خال شروع‌شده کارت داری، باید همان خال را بازی کنی؛ اگر نداری، کارت دیگری بینداز.</p>
-    <b>۴) بردن دست‌ها</b><p>هر دور تیمی که کارت قوی‌تر را داشته باشد می‌برد. تیمی که به ۷ دور برسد امتیاز آن دست را می‌گیرد؛ برد عادی ۱، کت‌فیسی ۳ و کدرنگ ۷ امتیاز دارد.</p>
-    <b>۵) برنده نهایی</b><p>بازی تا رسیدن یک تیم به ۱۳ امتیاز ادامه می‌یابد. هم‌تیمی‌ها روبه‌روی هم‌اند. می‌توانی زیر اسم خودت واکنش بفرستی.</p>
-  </div>
-  <button class="lnk" onclick="show('guideChoice')">بازگشت به راهنماها</button>
 </div>
 
 <div id="guide" class="scr scroll">
@@ -152,8 +115,8 @@ try {
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="table.js"></script>
-<script src="profile.js"></script>
 <script src="app.js"></script>
 <script src="custom.js"></script>
-</body>
-</html>
+
+
+</body></html>
