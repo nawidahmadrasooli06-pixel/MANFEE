@@ -53,7 +53,7 @@ const T = (() => {
     for (let s = 0; s < 4; s++) {
       const x = st.seats[s], on = (g.phase == 'play' && g.turn == s) || (g.phase == 'bid' && g.bidTurn == s), c = g.claims[s];
       const tag = x.off ? '<i class="o">قطع</i>' : x.sub ? '<i class="o">ربات</i>' : '';
-      h += `<div class="st p${rel(s)} ${on ? 'on' : ''} ${s % 2 == mt ? 'm' : 'e'}">${g.dealer == s ? '<i>میر</i>' : ''}${tag}<u>${x.name}</u><b>${g.taken[s]}/${c == null ? '؟' : c}</b></div>`;
+      h += `<div class="st p${rel(s)} ${on ? 'on' : ''} ${s % 2 == mt ? 'm' : 'e'}">${g.dealer == s ? '<i class="player-role">میر</i>' : ''}${tag}<u class="player-name">${x.name}</u><b>${g.taken[s]}/${c == null ? '؟' : c}</b></div>`;
     }
     h += '<div class="ctr">' + g.trick.map((x, i) => `<div class="q q${rel(x.s)} ${i >= pl && !(flyOwn && x.s == me && x.c == flyOwn.c && Date.now() - flyOwn.t < 2000) ? 'in' : ''} ${flyOwn && x.s == me && x.c == flyOwn.c && Date.now() - flyOwn.t < 450 ? 'hid' : ''} ${g.win == x.s ? 'w' : ''}">${cd(x.c)}</div>`).join('') + '</div>';
     pl = g.trick.length;
