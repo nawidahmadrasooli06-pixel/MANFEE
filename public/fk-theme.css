@@ -75,5 +75,3 @@ body.carpet-f7 .idTag,body.carpet-f8 .idTag{color:#0000008c}
 .credit2 .cr2{margin:4px 0 8px;font-size:17px;font-weight:800;letter-spacing:.06em;color:#ffd76a;direction:ltr;cursor:pointer;display:inline-block}
 .credit2 .cr3{display:flex;gap:8px;justify-content:center}
 .credit2 .cr3 button{flex:1;max-width:150px;padding:8px 6px;border-radius:10px;border:1px solid #f0b64a88;background:#0b1f1ecc;color:#fff;font:inherit;font-size:12px;margin:0}
-
-#specBadge{display:none}body.ingame #specBadge{display:block}
