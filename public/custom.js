@@ -275,8 +275,8 @@ document.addEventListener('click', e => { if (e.target.closest && e.target.close
   if (typeof sk !== 'undefined') sk.on('specJoin', window.showWelcome);
 })();
 (function () {
-  const b = document.createElement('div'); b.id = 'specBadge'; b.style.display = 'none'; document.body.appendChild(b);
-  window.setSpec = n => { b.textContent = '👁 تماشاچی ' + (n | 0); b.style.display = 'block'; };
+  const b = document.createElement('div'); b.id = 'specBadge'; document.body.appendChild(b);
+  window.setSpec = n => { b.textContent = '👁 تماشاچی ' + (n | 0); };
 })();
 
 applyLook(prefLook());
