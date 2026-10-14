@@ -46,7 +46,7 @@ function shareWatch() {
   else navigator.share ? navigator.share({ title: 'منفی', text, url: link }).catch(() => { }) : navigator.clipboard.writeText(link).then(() => alert('لینک کپی شد'));
 }
 function lobby() {
-  const cell = i => { const x = st.seats[i], other = x && i != st.me && !x.bot && x.on; return `<button class="sb ${x ? 'f' : ''}" onclick="${other && window.SOC ? `SOC.swap(${i})` : `act('sit',${i})`}">${x ? x.name + (i == st.me && !st.isSpec ? ' (تو)' : '') : 'خالی ← ربات'}</button>`; };
+  const cell = i => { const x = st.seats[i]; return `<button class="sb ${x ? 'f' : ''}" onclick="act('sit',${i})">${x ? x.name + (i == st.me && !st.isSpec ? ' (تو)' : '') : 'خالی ← ربات'}</button>`; };
   $('#lb').innerHTML = `<h3>تیم ۱ (روبه‌روی هم)</h3>${cell(0)}${cell(2)}<h3>تیم ۲ (روبه‌روی هم)</h3>${cell(1)}${cell(3)}`;
   $('#code').textContent = st.code;
   $('#go').style.display = st.host ? '' : 'none';
@@ -62,7 +62,6 @@ sk.on('state', s => {
   if (typeof applyLook === 'function' && s.look) applyLook(s.look);
   if (typeof syncTrackFromState === 'function') syncTrackFromState(s.track, s.playing);
   if (s.g) { if (!menuMode) show('game'); T.render(s); } else { menuMode = false; show('lobby'); lobby(); }
-  if (window.SOC) SOC.onState(s);
 });
 sk.on('inviteInfo', info => {
   if (info.expired) { $('#expiredMsg').textContent = info.message || 'این دعوت منقضی شده است.'; show('expired'); return; }
