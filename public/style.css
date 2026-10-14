@@ -1,4 +1,4 @@
-:root{--gold:#f0b64a;--cw:min(15vw,76px,13vh)}
+<html><head><meta name="color-scheme" content="light dark"></head><body><pre style="word-wrap: break-word; white-space: pre-wrap;">:root{--gold:#f0b64a;--cw:min(15vw,76px,13vh)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:#0b1f1e;color:#eef3ee;font-family:Vazirmatn,Tahoma,system-ui,sans-serif;overflow:hidden}
 .scr{display:none;height:100%;padding:env(safe-area-inset-top) 18px env(safe-area-inset-bottom);flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center}
@@ -108,3 +108,4 @@ input{font:inherit;font-size:17px;padding:12px;border-radius:12px;border:2px sol
 .c.heart b{font-size:1.85em;transform:translateY(2px) scale(.92);}
 .q.in{animation-duration:.72s;animation-timing-function:cubic-bezier(.16,.72,.2,1)}
 .dl{animation-duration:.72s;animation-timing-function:cubic-bezier(.16,.72,.2,1);animation-delay:calc(var(--i)*.16s + .45s)}
+</pre></body></html>
