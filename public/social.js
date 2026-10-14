@@ -16,7 +16,7 @@
   /* ---------- استایل‌ها ---------- */
   const css = document.createElement('style');
   css.textContent = `
-  .av{width:26px;height:26px;border-radius:50%;object-fit:cover;border:2px solid #f0b64a;background:#0b1f1e;flex:none;display:block;margin:0 auto 2px;font-size:13px;line-height:22px;text-align:center;color:#ffd76a;font-weight:800}
+  .av{width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid #f0b64a;background:#0b1f1e;flex:none;display:block;margin:0 0 0 5px;font-size:18px;line-height:42px;text-align:center;color:#ffd76a;font-weight:800}
   .rsv{padding-bottom:32px!important}
   #rxBar{position:fixed;z-index:70;display:none;gap:1px;background:#000b;border-radius:14px;padding:1px 4px;direction:ltr;transform:translateX(-50%);box-shadow:0 2px 8px #0008}
   #rxBar button{background:none;border:0;font-size:19px;line-height:1;padding:3px 3px;margin:0;color:#fff;min-width:0;width:auto;border-radius:8px}
@@ -337,10 +337,12 @@
 
   const css3 = document.createElement('style');
   css3.textContent = `
-  .av{width:46px;height:46px;border:3px solid #f0b64a;font-size:20px;line-height:40px;margin:0 auto 1px;box-shadow:0 2px 8px #0009}
+  .av{width:46px;height:46px;border:2px solid #f0b64a;font-size:18px;line-height:42px;margin:0 0 0 5px;box-shadow:0 2px 8px #0009}
   .st,.seat{background:none!important;border:0!important;box-shadow:none!important;padding:2px 4px!important;min-width:0!important;border-radius:0!important}
-  .st u,.st b,.st i,.seat div,.seat small,.seat b{text-shadow:0 0 5px #000,0 1px 3px #000}
-  .st u{font-size:13px}.st b{font-size:13px}
+  .st{display:flex;align-items:center;justify-content:center;gap:4px;direction:rtl;flex-wrap:wrap}
+  .st u,.st b,.st i,.seat div,.seat small,.seat b{ text-shadow:0 0 5px #000,0 1px 3px #000}
+  .st u{font-size:13px;text-decoration:none;white-space:nowrap}.st b{font-size:13px}
+  .st .player-role{font-style:normal;font-size:11px;font-weight:900;color:#ffd76a;white-space:nowrap}
   .st.on .av,.seat.on .av{box-shadow:0 0 0 2px #fff6,0 0 16px 5px #f0b64acc;border-color:#ffe08a}
   .seat small{font-size:10px}
   #rxBar{padding:0 3px;border-radius:12px;background:#0009}
