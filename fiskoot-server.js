@@ -21,18 +21,9 @@ module.exports = function (io) {
     pk: r.pick && { f: r.pick.f, t: r.pick.turn }, look: r.look, track: r.track, playing: !!r.playing, paused: !!r.paused, res: r.res, wait: r.wait, cnt: r.cnt,
     lg: (!sp && r.phase == 'play' && r.turn === i) ? legal(r, i) : null
   });
-  const ids = r => [...r.seats.filter(s => s && s.sid && s.on).map(s => s.sid), ...r.spec];
-  const sendAvs = r => {
-    const map = {}; r.seats.forEach((s, i) => { if (s && s.av) map[i] = s.av; });
-    const sig = Object.keys(map).map(k => k + ':' + map[k].length + map[k].slice(-8)).join('|');
-    if (!r.avk) r.avk = new Set();
-    if (sig !== r.avs) { r.avs = sig; r.avk.clear(); }
-    ids(r).forEach(id => { if (!r.avk.has(id)) { r.avk.add(id); const o = nsp.sockets.get(id); if (o) o.emit('avs', map); } });
-  };
   const send = r => {
     r.seats.forEach((s, i) => { if (s && s.sid && s.on) { const so = nsp.sockets.get(s.sid); if (so) so.emit('st', view(r, i)); } });
     r.spec.forEach(id => { const so = nsp.sockets.get(id); if (so) so.emit('st', view(r, 0, true)); });
-    sendAvs(r);
   };
   const seatOf = (r, tok) => r.seats.findIndex(s => s && s.token === tok);
   const botTrump = h => { let b = 0, bs = -1; for (let s = 0; s < 4; s++) { const l = h.filter(c => S(c) == s); const v = l.length * 100 + l.reduce((a, c) => a + Rk(c), 0); if (v > bs) { bs = v; b = s; } } return b; };
@@ -142,32 +133,6 @@ module.exports = function (io) {
     so.on('trump', t => { const r = R(), s = r ? seatOf(r, tk()) : -1; if (s >= 0 && s == r.hk) setTrump(r, t | 0); });
     so.on('play', c => { const r = R(), s = r ? seatOf(r, tk()) : -1; if (s >= 0 && !playCard(r, s, c | 0) && r.phase == 'play' && !r.paused) so.emit('err', 'بازی این کارت مجاز نیست؛ باید از همان خالی که بازی شده بازی کنی.'); });
     so.on('watch', ({ code } = {}) => { const r = rooms[String(code || '').toUpperCase().trim()]; if (!r) return so.emit('gone'); r.spec.add(so.id); so.data = { code: r.code, spec: true }; send(r); r.seats.forEach(x => { if (x && x.sid && x.on) { const o = nsp.sockets.get(x.sid); if (o) o.emit('specJoin'); } }); r.spec.forEach(id => { const o = nsp.sockets.get(id); if (o) o.emit('specJoin'); }); });
-    so.on('av', av => {
-      const r = R(), i = r ? seatOf(r, tk()) : -1; if (i < 0) return;
-      av = typeof av === 'string' ? av : '';
-      if (av && !(/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(av) || /^https:\/\/t\.me\//.test(av))) av = '';
-      if (av.length > 7000) av = '';
-      r.seats[i].av = av || undefined; send(r);
-    });
-    so.on('react', k => {
-      const r = R(), i = r ? seatOf(r, tk()) : -1; k = k | 0; if (i < 0 || k < 0 || k > 5) return;
-      const s = r.seats[i], now = Date.now(); if (now - (s.lr || 0) < 1200) return; s.lr = now;
-      ids(r).forEach(id => { const o = nsp.sockets.get(id); if (o) o.emit('react', { s: i, k }); });
-    });
-    so.on('swap', j => {
-      const r = R(), i = r ? seatOf(r, tk()) : -1; j = j | 0;
-      if (!r || r.phase !== 'lobby' || i < 0 || j < 0 || j > 3 || j === i) return;
-      const t = r.seats[j]; if (!t || !t.sid || !t.on) return;
-      r.sw = { a: i, b: j, ta: r.seats[i].token, tb: t.token };
-      const o = nsp.sockets.get(t.sid); if (o) o.emit('swapAsk', { name: r.seats[i].name });
-    });
-    so.on('swapAns', ok => {
-      const r = R(), i = r ? seatOf(r, tk()) : -1, w = r && r.sw;
-      if (!w || r.phase !== 'lobby' || i !== w.b) return; r.sw = null; if (!ok) return;
-      if (!r.seats[w.a] || !r.seats[w.b] || r.seats[w.a].token !== w.ta || r.seats[w.b].token !== w.tb) return;
-      [r.seats[w.a], r.seats[w.b]] = [r.seats[w.b], r.seats[w.a]];
-      ids(r).forEach(id => { const o = nsp.sockets.get(id); if (o) o.emit('swapDone'); }); send(r);
-    });
     so.on('look', l => { const r = R(); if (r && tk() === r.host) { r.look = cleanLook(l); send(r); } });
     so.on('track', n => { const r = R(); n = n | 0; if (r && seatOf(r, tk()) >= 0 && n >= 1 && n <= 21) { r.track = n; r.playing = true; r.seats.forEach(x => { if (x && x.sid && x.on && x.sid !== so.id) { const o = nsp.sockets.get(x.sid); if (o) o.emit('track', n); } }); r.spec.forEach(id => { const o = nsp.sockets.get(id); if (o) o.emit('track', n); }); } });
     so.on('pause', () => { const r = R(); if (r && tk() === r.host && r.phase != 'lobby' && r.phase != 'over') { r.paused = true; step(r); } });
