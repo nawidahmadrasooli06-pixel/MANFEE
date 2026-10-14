@@ -12,14 +12,6 @@ button{font:inherit;background:#c9a227;color:#222;border:0;border-radius:8px;pad
 #btns button{flex:1;background:#ffffff22;color:#fff}
 #tbl{flex:1;position:relative;background:radial-gradient(circle at 50% 45%,#1b6b45,#0d3d27 70%);overflow:hidden}
 .seat{position:absolute;background:#0008;border-radius:10px;padding:4px 8px;text-align:center;font-size:12px;min-width:74px;z-index:6}
-/* Clean player identity: profile on the right, plain name and role beside it */
-.seat{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:3px 5px;direction:rtl}
-.seat .av{width:46px;height:46px;min-width:46px;margin:0;border-width:2px}
-.seat .player-label{display:flex;align-items:center;justify-content:center;gap:4px;direction:rtl;white-space:nowrap;background:none!important}
-.seat .player-name{font-size:13px;font-weight:800}
-.seat .player-role{font-size:11px;font-weight:900;color:#ffd76a;text-shadow:0 1px 3px #000}
-.seat small{flex-basis:100%;width:100%;font-size:10px}
-
 .seat small{display:block;color:#ffd76a;font-size:11px;min-height:14px}
 .seat.on{box-shadow:0 0 12px 3px gold}
 #ctr{position:absolute;left:50%;top:50%;width:0;height:0}
@@ -110,16 +102,16 @@ body{display:block}
 <div id="ctr"><div class="slot" id="p0"></div><div class="slot" id="p1"></div><div class="slot" id="p2"></div><div class="slot" id="p3"></div></div>
 <div id="pick"><div id="pm"></div><div id="pg"></div></div><div id="tp"></div><div id="cd"></div><div id="shf"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
 <div id="msg"></div><div id="toast"></div><div id="hand"></div>
-<div class="scr" id="menu"><div class="vipH">VIP · CACTUC 🃏♠️</div><div class="vipId" onclick="SOC.idMenu()">@cactuc580</div><div class="logo" style="font-size:32px;font-weight:900;color:#f0b64a">♠ بازی حکم</div><div style="color:#9fcfc0">(فیسکوت)</div>
+<div class="scr" id="menu"><div style="font-size:32px;font-weight:900;color:#f0b64a">♠ بازی حکم</div><div style="color:#9fcfc0">(فیسکوت)</div>
 <div id="rsm" style="display:none;width:100%;max-width:320px;border:2px solid #f0b64a;border-radius:16px;padding:10px"><small>بازی قبلی شما با کد <b id="rcode" dir="ltr"></b> هنوز هست:</small><button class="btn go" style="margin-top:8px" onclick="resume()">ادامه بازی قبلی</button></div>
 <div id="inv" style="display:none;color:#ffd76a">دوستت تو را به بازی دعوت کرده است 💌<br><button class="lnk" onclick="copyLink()">📋 کپی لینک (برای باز کردن در Safari/Chrome)</button></div>
 <h2>ورود به میز</h2><input id="nm" maxlength="14" placeholder="اسمت را بنویس">
 <button class="btn go" onclick="mkRoom()">بازی جدید (ساخت اتاق)</button><div style="color:#9fcfc0;font-size:13px">یا با کد دوستت وارد شو</div>
-<input id="cin" maxlength="4" placeholder="کد اتاق" style="text-transform:uppercase;direction:ltr;text-align:center;width:100%;max-width:320px;padding:14px;border-radius:16px;border:2px solid #2d5a55;background:#0f2a28;color:#fff;font:inherit"><button class="btn" onclick="joinCode()">ورود با کد</button><button class="btn" onclick="SOC.openProfile()">👤 پروفایل من</button><button class="btn" onclick="openSettingsModal()">⚙️ تنظیمات، تم و موزیک</button><button class="lnk" onclick="SOC.about()">ℹ️ درباره ربات</button><a class="lnk" href="/">⬅ بازگشت به انتخاب بازی</a></div>
+<input id="cin" maxlength="4" placeholder="کد اتاق" style="text-transform:uppercase;direction:ltr;text-align:center;width:100%;max-width:320px;padding:14px;border-radius:16px;border:2px solid #2d5a55;background:#0f2a28;color:#fff;font:inherit"><button class="btn" onclick="joinCode()">ورود با کد</button><button class="btn" onclick="openSettingsModal()">⚙️ تنظیمات، تم و موزیک</button><a class="lnk" href="/">⬅ بازگشت به انتخاب بازی</a></div>
 <div class="scr" id="lobby" style="display:none"><h2>اتاق <span id="rc" style="color:#f0b64a;direction:ltr;display:inline-block"></span></h2>
-<button class="btn" onclick="invite()">📨 دعوت دوستان</button><button class="btn" onclick="openSettingsModal()">🎨 فرش، پر و موزیک</button><button class="btn" onclick="SOC.openProfile()">👤 پروفایل من</button><button class="btn" onclick="inviteWatch()">👁 دعوت تماشاچی</button><div id="room"></div>
+<button class="btn" onclick="invite()">📨 دعوت دوستان</button><button class="btn" onclick="openSettingsModal()">🎨 فرش، پر و موزیک</button><button class="btn" onclick="inviteWatch()">👁 دعوت تماشاچی</button><div id="room"></div>
 <label style="font-size:13px"><input type="checkbox" id="al" onchange="sk.emit('cfg',{low:this.checked})"> توس (آس) کمترین کارت باشد</label>
-<small id="lm" style="color:#9fcfc0"></small><button id="go" class="btn go" onclick="sk.emit('start')">شروع بازی</button><button id="gob" class="btn" onclick="sk.emit('start',{bots:1})">شروع با ربات‌ها 🤖</button><a class="lnk" href="/">خروج</a></div>
+<small id="lm" style="color:#9fcfc0"></small><button id="go" class="btn go" onclick="sk.emit('start')">شروع بازی</button><button id="gob" class="btn" onclick="sk.emit('start',{bots:1})">شروع با ربات‌ها 🤖</button><button class="btn" onclick="rules()">📘 قوانین بازی</button><a class="lnk" href="/">خروج</a></div>
 <div class="ovl" id="rl" style="display:none"><div class="box"><h2>قوانین بازی حکم (فیسکوت)</h2><ul>
 <li>4 نفر، دو تیم؛ هم‌تیمی روبه‌روست. تیمی که به 13 امتیاز برسد برنده است.</li>
 <li>حاکم (کسی که رنگ را می‌گوید): اولین کسی که توس (آس) بیاورد. پخش‌کننده سمت چپ حاکم است.</li>
@@ -140,7 +132,7 @@ let tok=ld('fk_tok');if(!tok){tok=Math.random().toString(36).slice(2)+Date.now()
 let tpT,st=null,pv=null,sel=null,drag=null,dis=null,hk0='',pvHand=[];
 const sk=io('/fiskoot');
 sk.on('connect',()=>{if(st&&st.code){if(st.isSpec)sk.emit('watch',{code:st.code});else sk.emit('rejoin',{code:st.code,token:tok})}});
-sk.on('st',s=>{pv=st?st.ph:null;st=s;if(!s.isSpec)sv('fk_room',s.code);try{SOC.onState(s)}catch(e){}try{setSpec(s.spec||0);if(s.look)applyLook(s.look);syncTrackFromState(s.track,s.playing)}catch(e){}onSt()});
+sk.on('st',s=>{pv=st?st.ph:null;st=s;if(!s.isSpec)sv('fk_room',s.code);try{setSpec(s.spec||0);if(s.look)applyLook(s.look);syncTrackFromState(s.track,s.playing)}catch(e){}onSt()});
 sk.on('err',m=>{toast(m);if(st){hk0='';rGame()}});
 sk.on('pick',d=>{pend={code:d.code};const W=$('wt');W.innerHTML='<div class="box"><h2>به کدام صندلی می‌نشینی؟</h2>بازی شروع شده؛ جای یکی از ربات‌ها می‌نشینی:'+d.list.map(x=>`<button class="btn go" style="margin-top:8px" onclick="takeSeat(${x.k})">تیم ${x.k%2?2:1} — صندلی ${x.k+1}: ${x.n} (bot)</button>`).join('')+'</div>';W.style.display='flex'});
 sk.on('gone',()=>{sv('fk_room',null);st=null;$('rsm').style.display='none';scr('menu');toast('این اتاق دیگر وجود ندارد')});
@@ -158,7 +150,7 @@ function inviteWatch(){const go=l=>{const u='https://t.me/share/url?url='+encode
 function exitG(){if(confirm('از بازی خارج می‌شوی؟ بعداً با همان کد برمی‌گردی.'))location.href='/'}
 function onSt(){if(st.ph=='lobby'){scr('');scr('lobby');rLobby();if(st.isSpec)$('lm').textContent='👁 تو تماشاچی هستی؛ منتظر شروع بازی…'}else{scr('');rGame()}}
 function rLobby(){['pick','tp','cd','ov','wt','pz'].forEach(i=>$(i).style.display='none');$('hand').innerHTML='';hk0='';$('rc').textContent=st.code;
- const t=(h,ks)=>`<div class="th">${h}</div>`+ks.map(k=>{const s=st.seats[k];return s?`<div class="st ${k==st.me?'me':''}" ${k!=st.me&&s.on?`onclick="SOC.swap(${k})"`:''}>${s.n}${k==st.me?' (تو)':''}${!s.on?' ⚠ قطع شد':''}</div>`:`<div class="st" onclick="sit(${k})">خالی ← ربات (بزن تا اینجا بنشینی)</div>`}).join('');
+ const t=(h,ks)=>`<div class="th">${h}</div>`+ks.map(k=>{const s=st.seats[k];return s?`<div class="st ${k==st.me?'me':''}">${s.n}${k==st.me?' (تو)':''}${!s.on?' ⚠ قطع شد':''}</div>`:`<div class="st" onclick="sit(${k})">خالی ← ربات (بزن تا اینجا بنشینی)</div>`}).join('');
  $('room').innerHTML=t('تیم 1 (روبه‌روی هم)',[0,2])+t('تیم 2 (روبه‌روی هم)',[1,3]);
  $('al').checked=st.low;$('al').disabled=!st.host;const full=st.seats.every(x=>x&&x.on);$('go').style.display=$('gob').style.display=st.host?'block':'none';$('go').disabled=!full;$('go').style.opacity=full?1:.4;
  $('lm').textContent=st.host?(full?'همه آمده‌اند؛ شروع کن.':'تا همهٔ صندلی‌ها پر نشود «شروع بازی» فعال نمی‌شود. اگر نمی‌خواهی منتظر بمانی، با ربات شروع کن.'):'منتظر شروع بازی توسط میزبان…'}
@@ -167,18 +159,18 @@ function sk0(c){return PO[S(c)]}
 function rGame(){
  const me=st.me,rel=k=>(k-me+4)%4,mt=me%2,ph=st.ph;
  $('sa').textContent=st.sc[mt];$('sb').textContent=st.sc[1-mt];$('ta').textContent=st.tw[mt];$('tb').textContent=st.tw[1-mt];
- const T=st.tr;$('tr').innerHTML=T==null?'رنگ (حکم): ؟':`رنگ (حکم): <span class="${T>1?'red':''}">${SU[T]} ${SN[T]}</span>`;
+ const T=st.tr;$('tr').innerHTML=T==null?'رنگ (حکم): —':`رنگ (حکم): <span class="${T>1?'red':''}">${SU[T]} ${SN[T]}</span>`;
  $('tc').innerHTML=T==null?'':`<span style="color:${T>1?'#ff6b6b':'#fff'}">${SU[T]}</span><small>رنگ (حکم)</small>`;
  const act=ph=='play'?st.turn:ph=='pick'?st.pk.t:ph=='trump'?st.hk:-1;
  for(let k=0;k<4;k++){const s=st.seats[k],e=$('s'+rel(k));e.classList.toggle('on',act===k);
-  e.innerHTML=`<div class="player-label ${k%2==me%2?'g':'r'}"><b class="player-name">${s.n}</b>${st.hk==k?'<span class="player-role">حاکم</span>':''}</div>${s.b?'<div class="bt">bot</div>':''}<small>${!s.on&&!s.b?'قطع شد ':''}${(k!=me||st.isSpec)&&s.k?s.k+' کارت':''}</small>${st.isSpec&&s.k?'<div class="bks">'+'<i></i>'.repeat(s.k)+'</div>':''}`}
+  e.innerHTML=`<div class="${k%2==me%2?'g':'r'}"><b>${s.n}</b></div>${s.b?'<div class="bt">bot</div>':''}<small>${st.hk==k?'🔑 حاکم ':''}${st.dl==k?'🃏 پخش ':''}${!s.on&&!s.b?'⚠ قطع شد ':''}${(k!=me||st.isSpec)&&s.k?s.k+' کارت':''}</small>${st.isSpec&&s.k?'<div class="bks">'+'<i></i>'.repeat(s.k)+'</div>':''}`}
  const put=(el,x,cls)=>{if(el.dataset.c!=x.c){el.innerHTML=cel(x.c,cls);el.dataset.c=x.c;if(cls.includes('slide'))el.firstChild.style.setProperty('--f','translate('+['0,110px','110px,0','0,-110px','-110px,0'][rel(x.p)]+')')}};
  const m={};st.trick.forEach(x=>m[rel(x.p)]=x);
  for(let q=0;q<4;q++){const el=$('p'+q);if(m[q]){put(el,m[q],'mid slide');if(st.w>=0)el.firstChild.classList.add(m[q].p==st.w?'w':'l')}else{el.innerHTML='';el.dataset.c=''}}
  const lt=$('lt');if(st.last){lt.style.display='block';const g=[-1,2,-1,3,-1,1,-1,0,-1],mm={};st.last.cards.forEach(x=>mm[rel(x.p)]=x);
   lt.innerHTML='دست قبلی<div class="x">'+g.map(q=>q<0?'<div></div>':cel(mm[q].c,mm[q].p==st.last.w?'w':'l')).join('')+'</div>'}else lt.style.display='none';
  const h=[...st.hand].sort((a,b)=>sk0(a)-sk0(b)||Rk(b)-Rk(a)),key=h.join()+'|'+(st.lg||[]).join();
- if(key!==hk0){hk0=key;const H=$('hand');H.innerHTML='';const W=H.clientWidth-8,n=h.length,stp=n>1?Math.min(30,(W-44)/(n-1)):0,ov=n>1?44-stp:0;
+ if(key!==hk0){hk0=key;const H=$('hand');H.innerHTML='';const W=H.clientWidth-8,n=h.length,stp=n>1?Math.min(34,(W-52)/(n-1)):0,ov=n>1?52-stp:0;
   let nw=0;h.forEach((c,i)=>{const t=document.createElement('div');t.innerHTML=cel(c);const e=t.firstChild;if(i)e.style.marginLeft=-ov+'px';e._c=c;if(!pvHand.includes(c)&&(ph=='trump'||ph=='deal'||ph=='play')){e.classList.add('deal');e.style.animationDelay=(nw++*(ph=='trump'?300:200))+'ms'}paint(e);bindCard(e,c);H.appendChild(e)});
   if(!st.lg)sel=null}
  pvHand=h;
@@ -189,7 +181,7 @@ function rGame(){
   st.pk.f.forEach(f=>{const e=g.children[f[0]];e.className='c sm flip '+(S(f[1])>1?'r':'');e.innerHTML=`<b>${lab(Rk(f[1]))}</b><i>${SU[S(f[1])]}</i>`});
   const lf=st.pk.f[st.pk.f.length-1];$('pm').innerHTML=lf?`${st.seats[lf[2]].n}: <span style="color:${S(lf[1])>1?'#ff6b6b':'#fff'}">${lab(Rk(lf[1]))}${SU[S(lf[1])]}</span>`:''}
  else g.innerHTML='';
- if(ph=='hint'&&pv!='hint')ann('برای اینکه حاکم بازی معلوم شود، باید <span class="ring">توس</span> یا آس (A) بیاوری',5000,'24%');
+ if(ph=='hint'&&pv!='hint')ann('برای اینکه حاکم بازی معلوم شود، باید <span class="ring">توس</span> یا آس (A) بیاوری',5000,'14%');
  if(ph=='hk'&&pv!='hk')ann(`🔑 <b>${st.seats[st.hk].n}</b> توس (آس) آورد<br>حاکم این است: <b>${st.seats[st.hk].n}</b><br><small>پخش‌کننده: ${st.seats[st.dl].n}</small>`,2900);
  const tp=$('tp');if(!st.isSpec&&ph=='trump'&&st.hk==me){tp.innerHTML=SU.map((s,i)=>`<button style="color:${i>1?'#d11':'#111'}" onclick="sk.emit('trump',${i})">${s}</button>`).join('');if(tp.style.display!='flex'){tp.style.display='none';clearTimeout(tpT);tpT=setTimeout(()=>{if(st&&st.ph=='trump'&&st.hk==st.me)tp.style.display='flex'},1700)}}else{clearTimeout(tpT);tp.style.display='none'}
  let mg='';
@@ -198,10 +190,10 @@ function rGame(){
  else if(ph=='trump')mg=(!st.isSpec&&st.hk==me)?'تو حاکمی (کسی که رنگ را می‌گوید): رنگ را بگو':`${st.seats[st.hk].n} رنگ (حکم) را می‌گوید…`;
  else if(ph=='shuf')mg=`${st.seats[st.dl].n} کارت‌ها را بُر می‌زند…`;else if(ph=='deal')mg=`${st.seats[st.dl].n} کارت‌ها را پخش می‌کند…`;
  else if(ph=='tr')mg=`${st.seats[st.w].n} دور را برد ✔`;
- $('msg').textContent=mg;try{SOC.afterDraw(st)}catch(e){}
+ $('msg').textContent=mg;
  const E=$('ex');E.textContent=st.host?'↩️ برگشت':'خروج ✕';E.onclick=st.host?()=>sk.emit('pause'):exitG;
  const Z=$('pz');if(st.paused){Z.innerHTML=st.host?`<div class="box"><h2>⏸ بازی متوقف است</h2>اینجا فرش، پر و موزیک را عوض کن، بعد ادامه بده.<br><button class="btn" onclick="openSettingsModal()">🎨 فرش، پر و موزیک</button><button class="btn" style="margin-top:8px" onclick="inviteWatch()">👁 دعوت تماشاچی</button><button class="btn go" style="margin-top:8px" onclick="sk.emit('resume')">▶ ادامه همان بازی</button><br><button class="lnk" onclick="exitG()">خروج</button></div>`:`<div class="box"><h2>⏸ میزبان در حال تغییر تنظیمات است</h2>چند لحظه صبر کن…</div>`;Z.style.display='flex'}else Z.style.display='none';
- const O=$('ov');if(ph=='res'){const r=st.res,wt=r.w==mt?'تیم ما':'تیم حریف';
+ const O=$('ov');if(ph=='res'||ph=='over'){const r=st.res,wt=r.w==mt?'تیم ما':'تیم حریف';
   let x=`<h2>${r.kind}</h2>${wt} دست را برد (${r.tw[mt]}–${r.tw[1-mt]})<br><b>+${r.pts} امتیاز</b><br>امتیاز کل: ما ${st.sc[mt]} — آن‌ها ${st.sc[1-mt]}`;
   x+=ph=='res'?`<br>حاکم بعدی: <b>${st.seats[r.nhk].n}</b><br><small>دست بعدی خودکار شروع می‌شود…</small>`:`<h2>${st.sc[mt]>=13?'🏆 تیم ما برنده شد!':'تیم حریف برنده شد'}</h2>`+(st.host?`<button class="btn go" onclick="sk.emit('again')">بازگشت به اتاق</button>`:'<small>منتظر میزبان…</small>');
   O.innerHTML=`<div class="box">${x}</div>`;O.style.display='flex'}else O.style.display='none';
@@ -226,5 +218,4 @@ const wq=new URLSearchParams(location.search).get('watch');if(wq){const go=()=>s
 if(u){$('cin').value=u.toUpperCase();$('inv').style.display='block'}
 if(ld('fk_room')){$('rsm').style.display='block';$('rcode').textContent=ld('fk_room')}
 </script>
-<script src="custom.js"></script>
-<script src="social.js"></script></body></html>
+<script src="custom.js"></script></body></html>
