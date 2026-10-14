@@ -251,7 +251,7 @@ function openId() {
   const u = 'https://t.me/cactuc580';
   try { Telegram.WebApp.openTelegramLink(u); } catch (e) { window.open(u, '_blank'); }
 }
-document.addEventListener('click', e => { if (e.target.closest && e.target.closest('.idTag')) copyId(); });
+document.addEventListener('click', e => { if (e.target.closest && e.target.closest('.idTag')) { if (window.SOC && SOC.idMenu) SOC.idMenu(); else copyId(); } });
 (function () {
   const ov = document.getElementById('ov'); if (!ov) return;
   const add = () => {
