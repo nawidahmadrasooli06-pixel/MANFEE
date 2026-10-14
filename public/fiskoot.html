@@ -12,6 +12,14 @@ button{font:inherit;background:#c9a227;color:#222;border:0;border-radius:8px;pad
 #btns button{flex:1;background:#ffffff22;color:#fff}
 #tbl{flex:1;position:relative;background:radial-gradient(circle at 50% 45%,#1b6b45,#0d3d27 70%);overflow:hidden}
 .seat{position:absolute;background:#0008;border-radius:10px;padding:4px 8px;text-align:center;font-size:12px;min-width:74px;z-index:6}
+/* Clean player identity: profile on the right, plain name and role beside it */
+.seat{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:3px 5px;direction:rtl}
+.seat .av{width:46px;height:46px;min-width:46px;margin:0;border-width:2px}
+.seat .player-label{display:flex;align-items:center;justify-content:center;gap:4px;direction:rtl;white-space:nowrap;background:none!important}
+.seat .player-name{font-size:13px;font-weight:800}
+.seat .player-role{font-size:11px;font-weight:900;color:#ffd76a;text-shadow:0 1px 3px #000}
+.seat small{flex-basis:100%;width:100%;font-size:10px}
+
 .seat small{display:block;color:#ffd76a;font-size:11px;min-height:14px}
 .seat.on{box-shadow:0 0 12px 3px gold}
 #ctr{position:absolute;left:50%;top:50%;width:0;height:0}
@@ -149,8 +157,7 @@ function invite(){const go=l=>{const u='https://t.me/share/url?url='+encodeURICo
 function inviteWatch(){const go=l=>{const u='https://t.me/share/url?url='+encodeURIComponent(l)+'&text='+encodeURIComponent('بیا بازی حکم (فیسکوت) را زنده تماشا کن! 👁 کد اتاق: '+st.code);try{Telegram.WebApp.openTelegramLink(u)}catch(e){window.open(u,'_blank')}};fetch('/config').then(r=>r.json()).then(c=>go(c.bot?'https://t.me/'+c.bot+'?start=fkw_'+st.code:location.origin+'/fiskoot.html?watch='+st.code)).catch(()=>go(location.origin+'/fiskoot.html?watch='+st.code))}
 function exitG(){if(confirm('از بازی خارج می‌شوی؟ بعداً با همان کد برمی‌گردی.'))location.href='/'}
 function onSt(){if(st.ph=='lobby'){scr('');scr('lobby');rLobby();if(st.isSpec)$('lm').textContent='👁 تو تماشاچی هستی؛ منتظر شروع بازی…'}else{scr('');rGame()}}
-function rLobby(){['pick','tp','cd','ov','wt','pz'].forEach(i=>$(i).style.display='none');$('hand').innerHTML='';hk0='';
- $('rc').textContent=st.code;
+function rLobby(){['pick','tp','cd','ov','wt','pz'].forEach(i=>$(i).style.display='none');$('hand').innerHTML='';hk0='';$('rc').textContent=st.code;
  const t=(h,ks)=>`<div class="th">${h}</div>`+ks.map(k=>{const s=st.seats[k];return s?`<div class="st ${k==st.me?'me':''}" ${k!=st.me&&s.on?`onclick="SOC.swap(${k})"`:''}>${s.n}${k==st.me?' (تو)':''}${!s.on?' ⚠ قطع شد':''}</div>`:`<div class="st" onclick="sit(${k})">خالی ← ربات (بزن تا اینجا بنشینی)</div>`}).join('');
  $('room').innerHTML=t('تیم 1 (روبه‌روی هم)',[0,2])+t('تیم 2 (روبه‌روی هم)',[1,3]);
  $('al').checked=st.low;$('al').disabled=!st.host;const full=st.seats.every(x=>x&&x.on);$('go').style.display=$('gob').style.display=st.host?'block':'none';$('go').disabled=!full;$('go').style.opacity=full?1:.4;
@@ -164,7 +171,7 @@ function rGame(){
  $('tc').innerHTML=T==null?'':`<span style="color:${T>1?'#ff6b6b':'#fff'}">${SU[T]}</span><small>رنگ (حکم)</small>`;
  const act=ph=='play'?st.turn:ph=='pick'?st.pk.t:ph=='trump'?st.hk:-1;
  for(let k=0;k<4;k++){const s=st.seats[k],e=$('s'+rel(k));e.classList.toggle('on',act===k);
-  e.innerHTML=`<div class="${k%2==me%2?'g':'r'}"><b>${s.n}</b></div>${s.b?'<div class="bt">bot</div>':''}<small>${st.hk==k?'🔑 حاکم ':''}${st.dl==k?'🃏 پخش ':''}${!s.on&&!s.b?'⚠ قطع شد ':''}${(k!=me||st.isSpec)&&s.k?s.k+' کارت':''}</small>${st.isSpec&&s.k?'<div class="bks">'+'<i></i>'.repeat(s.k)+'</div>':''}`}
+  e.innerHTML=`<div class="player-label ${k%2==me%2?'g':'r'}"><b class="player-name">${s.n}</b>${st.hk==k?'<span class="player-role">حاکم</span>':''}</div>${s.b?'<div class="bt">bot</div>':''}<small>${!s.on&&!s.b?'قطع شد ':''}${(k!=me||st.isSpec)&&s.k?s.k+' کارت':''}</small>${st.isSpec&&s.k?'<div class="bks">'+'<i></i>'.repeat(s.k)+'</div>':''}`}
  const put=(el,x,cls)=>{if(el.dataset.c!=x.c){el.innerHTML=cel(x.c,cls);el.dataset.c=x.c;if(cls.includes('slide'))el.firstChild.style.setProperty('--f','translate('+['0,110px','110px,0','0,-110px','-110px,0'][rel(x.p)]+')')}};
  const m={};st.trick.forEach(x=>m[rel(x.p)]=x);
  for(let q=0;q<4;q++){const el=$('p'+q);if(m[q]){put(el,m[q],'mid slide');if(st.w>=0)el.firstChild.classList.add(m[q].p==st.w?'w':'l')}else{el.innerHTML='';el.dataset.c=''}}
