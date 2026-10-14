@@ -13,7 +13,6 @@ const T = (() => {
     requestAnimationFrame(() => requestAnimationFrame(() => { cc.style.transform = `translate(${tx - cx}px,${ty - cy}px) scale(1)`; }));
     setTimeout(() => { cc.remove(); document.querySelectorAll('.q.hid').forEach(e => e.classList.remove('hid')); }, 460);
   }
-  window.shareBot = function(){const u='https://t.me/cactuc580bot';if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.openTelegramLink)Telegram.WebApp.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(u)+'&text='+encodeURIComponent('بیا با هم بازی منفی و حکم کنیم 🃏'));else if(navigator.share)navigator.share({url:u,title:'VIP. CACTUC'}).catch(()=>{});else if(navigator.clipboard)navigator.clipboard.writeText(u).then(()=>toast('لینک ربات کپی شد'));};
   function toast(m) { const t = $('#ts'); t.textContent = m; t.style.display = 'block'; clearTimeout(tm); tm = setTimeout(() => t.style.display = 'none', 2800); }
   function render(st) { pending = null; draw(st); }
   function mirReviewOverlay(st) {
@@ -54,7 +53,7 @@ const T = (() => {
     for (let s = 0; s < 4; s++) {
       const x = st.seats[s], on = (g.phase == 'play' && g.turn == s) || (g.phase == 'bid' && g.bidTurn == s), c = g.claims[s];
       const tag = x.off ? '<i class="o">قطع</i>' : x.sub ? '<i class="o">ربات</i>' : '';
-      const pr=x.profile||{},src=pr.avatar||pr.photo,ava=src?`<img class="player-avatar" src="${String(src).replace(/&/g,'&amp;').replace(/\"/g,'&quot;')}">`:`<span class="player-avatar emoji">${pr.emoji||'🃏'}</span>`; const reacts=s===me&&!st.isSpec?`<div class="reaction-picks">${['😂','❤️','😮','😡','💣'].map(e=>`<button onclick="act('reaction','${e}')" aria-label="واکنش ${e}">${e}</button>`).join('')}</div>`:''; h += `<div data-seat="${s}" class="st p${rel(s)} ${on ? 'on' : ''} ${s % 2 == mt ? 'm' : 'e'}">${g.dealer == s ? '<i>میر</i>' : ''}${tag}<div class="player-ident">${ava}<u>${x.name}</u></div><b>${g.taken[s]}/${c == null ? '؟' : c}</b>${reacts}</div>`;
+      h += `<div class="st p${rel(s)} ${on ? 'on' : ''} ${s % 2 == mt ? 'm' : 'e'}">${g.dealer == s ? '<i>میر</i>' : ''}${tag}<u>${x.name}</u><b>${g.taken[s]}/${c == null ? '؟' : c}</b></div>`;
     }
     h += '<div class="ctr">' + g.trick.map((x, i) => `<div class="q q${rel(x.s)} ${i >= pl && !(flyOwn && x.s == me && x.c == flyOwn.c && Date.now() - flyOwn.t < 2000) ? 'in' : ''} ${flyOwn && x.s == me && x.c == flyOwn.c && Date.now() - flyOwn.t < 450 ? 'hid' : ''} ${g.win == x.s ? 'w' : ''}">${cd(x.c)}</div>`).join('') + '</div>';
     pl = g.trick.length;
@@ -77,7 +76,7 @@ const T = (() => {
     const rev = g.rem && g.rem.some(h => h.length) ? `<small>پرهای باقی‌مانده</small><div class="rvl">${[0, 1, 2, 3].map(k => { const q = (me + k) % 4; return `<div class="rr ${q % 2 == mt ? 'm' : 'e'}"><u>${name(q)}</u><div class="rc">${g.rem[q].map(c => cd(c)).join('')}</div></div>`; }).join('')}</div>` : '';
     if (g.phase == 'deal') o = `<div class="bn"><small>میر این دست</small><big>${name(g.dealer)}</big></div>`;
     if (g.phase == 'over') o = `<div class="bn sm"><big>${g.res < 0 ? 'مساوی! هر دو تیم به ادعایشان رسیدند' : `تیم ${g.teams[g.res].join(' و ')} این دست را برد`}</big>${rev}</div>`;
-    if (g.phase == 'series') { const wt = g.ser[0] >= 5 ? 0 : 1, win=wt===0?[0,2]:[1,3], lose=wt===0?[1,3]:[0,2], pc=i=>{const p=(st.seats[i]||{}).profile||{},src=p.avatar||p.photo;return `<div class="winner-person">${src?`<img src="${String(src).replace(/&/g,'&amp;').replace(/\"/g,'&quot;')}">`:`<span>${p.emoji||'🃏'}</span>`}<b>${st.seats[i].name}</b></div>`}; o = `<div class="victory-screen"><div class="fireworks">✦ ✧ ✦ ✹ ✧ ✦</div><div class="brandTop"><b>VIP. CACTUC 🃏♠️</b><a class="brandId" href="https://t.me/cactuc580">@cactuc580</a></div><small>پایان بازی منفی</small><h2>🏆 تیم برنده</h2><div class="winner-row">${win.map(pc).join('')}</div><div class="loser-title">بازیکنان تیم بازنده</div><div class="winner-row losers">${lose.map(pc).join('')}</div><div class="final-score">نتیجه نهایی: ${g.ser[0]} — ${g.ser[1]}</div><div class="victory-actions"><button onclick="location.href='/'">بازگشت به انتخاب بازی</button><button onclick="openSettingsModal()">تنظیمات</button><button onclick="act('again')">شروع مجدد</button><button onclick="shareBot()">اشتراک‌گذاری ربات</button></div></div>`; }
+    if (g.phase == 'series') { const wt = g.ser[0] >= 5 ? 0 : 1; o = `<div class="bn"><small>بازی به پایان رسید</small><big>🏆 تیم ${g.teams[wt].join(' و ')} برنده شد</big><small>نتیجه سری: ${g.ser[0]} – ${g.ser[1]}</small>${rev}<button class="go" onclick="act('again')">بازی مجدد</button></div>`; }
     $('#ov').innerHTML = o;
   }
   // drag a card up to the table to play it; a tap only lifts it for a closer look
