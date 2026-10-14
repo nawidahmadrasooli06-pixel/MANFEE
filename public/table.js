@@ -59,6 +59,7 @@ const T = (() => {
     pl = g.trick.length;
     if (g.last) h += `<div class="lt"><small>دست قبل</small><div class="ctr2">${g.last.cards.map(x => `<div class="q q${rel(x.s)} ${g.last.w == x.s ? 'w' : ''}">${cd(x.c)}</div>`).join('')}</div></div>`;
     $('#tbl').innerHTML = h + '<div id="wm">CACTUC</div><div class="idTag">@cactuc580</div>';
+    if (window.SOC) SOC.afterDraw(st);
     if (sel != null && !g.hand.includes(sel)) sel = null;
     if (!drag) $('#hand').innerHTML = g.hand.filter(c => c != pending).map((c, i) => `<span data-c="${c}" style="--i:${i}" class="${g.phase == 'deal' ? 'dl' : ''} ${sel == c ? 'sel' : ''}">${cd(c, my && !g.legal.includes(c) ? 'dim' : '')}</span>`).join('');
     if (g.nid != nid) { nid = g.nid; if (g.note) { toast(g.note); $('#hand').classList.add('sw'); setTimeout(() => $('#hand').classList.remove('sw'), 800); } }
@@ -76,7 +77,7 @@ const T = (() => {
     const rev = g.rem && g.rem.some(h => h.length) ? `<small>پرهای باقی‌مانده</small><div class="rvl">${[0, 1, 2, 3].map(k => { const q = (me + k) % 4; return `<div class="rr ${q % 2 == mt ? 'm' : 'e'}"><u>${name(q)}</u><div class="rc">${g.rem[q].map(c => cd(c)).join('')}</div></div>`; }).join('')}</div>` : '';
     if (g.phase == 'deal') o = `<div class="bn"><small>میر این دست</small><big>${name(g.dealer)}</big></div>`;
     if (g.phase == 'over') o = `<div class="bn sm"><big>${g.res < 0 ? 'مساوی! هر دو تیم به ادعایشان رسیدند' : `تیم ${g.teams[g.res].join(' و ')} این دست را برد`}</big>${rev}</div>`;
-    if (g.phase == 'series') { const wt = g.ser[0] >= 5 ? 0 : 1; o = `<div class="bn"><small>بازی به پایان رسید</small><big>🏆 تیم ${g.teams[wt].join(' و ')} برنده شد</big><small>نتیجه سری: ${g.ser[0]} – ${g.ser[1]}</small>${rev}<button class="go" onclick="act('again')">بازی مجدد</button></div>`; }
+    if (g.phase == 'series' && !window.SOC) { const wt = g.ser[0] >= 5 ? 0 : 1; o = `<div class="bn"><small>بازی به پایان رسید</small><big>🏆 تیم ${g.teams[wt].join(' و ')} برنده شد</big><small>نتیجه سری: ${g.ser[0]} – ${g.ser[1]}</small>${rev}<button class="go" onclick="act('again')">بازی مجدد</button></div>`; }
     $('#ov').innerHTML = o;
   }
   // drag a card up to the table to play it; a tap only lifts it for a closer look
