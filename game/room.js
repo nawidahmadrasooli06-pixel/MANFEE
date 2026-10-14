@@ -90,42 +90,6 @@ class Room {
       const v = g ? g.view(0) : null; if (v) { v.hand = []; v.legal = []; v.rem = null; }
       this.io.to(id).emit('state', { code: this.code, me: 0, host: false, isSpec: true, spec: this.spec.size, seats, away: [], g: v, look: this.look, track: this.track, playing: this.playing, starting: this.starting, invitePending: false, inviteAccepted: false });
     });
-    this._sendAvs();
-  }
-  _ids() { return [...this.seats.filter(s => s && s.sid).map(s => s.sid), ...this.spec]; }
-  _sendAvs() {
-    const map = {}; this.seats.forEach((s, i) => { if (s && s.av) map[i] = s.av; });
-    const sig = Object.keys(map).map(k => k + ':' + map[k].length + map[k].slice(-8)).join('|');
-    const known = this._avk || (this._avk = new Set());
-    if (sig !== this._avs) { this._avs = sig; known.clear(); }
-    this._ids().forEach(id => { if (!known.has(id)) { known.add(id); this.io.to(id).emit('avs', map); } });
-  }
-  setAv(sid, av) {
-    const i = this.seatOf(sid); if (i < 0 || !this.seats[i]) return;
-    av = typeof av === 'string' ? av : '';
-    if (av && !(/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(av) || /^https:\/\/t\.me\//.test(av))) av = '';
-    if (av.length > 7000) av = '';
-    this.seats[i].av = av || undefined; this.send();
-  }
-  react(sid, k) {
-    const i = this.seatOf(sid); if (i < 0 || !(k >= 0 && k < 6)) return;
-    const s = this.seats[i], now = Date.now(); if (now - (s.lr || 0) < 1200) return; s.lr = now;
-    this._ids().forEach(id => this.io.to(id).emit('react', { s: i, k }));
-  }
-  swap(sid, j) {
-    const i = this.seatOf(sid);
-    if (this.g || i < 0 || j < 0 || j > 3 || j === i) return;
-    const t = this.seats[j]; if (!t || !t.sid || t.bot) return;
-    this.sw = { a: i, b: j, ta: this.seats[i].token, tb: t.token };
-    this.io.to(t.sid).emit('swapAsk', { name: this.seats[i].name });
-  }
-  swapAns(sid, ok) {
-    const i = this.seatOf(sid), w = this.sw;
-    if (!w || this.g || i !== w.b) return;
-    this.sw = null; if (!ok) return;
-    if (!this.seats[w.a] || !this.seats[w.b] || this.seats[w.a].token !== w.ta || this.seats[w.b].token !== w.tb) return;
-    [this.seats[w.a], this.seats[w.b]] = [this.seats[w.b], this.seats[w.a]];
-    this._ids().forEach(id => this.io.to(id).emit('swapDone')); this.send();
   }
 }
 module.exports = Room;
