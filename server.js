@@ -28,6 +28,10 @@ io.on('connection', s => {
     if (!r || ended(r)) return s.emit('expired', expiredMessage);
     s.data.code = code; r.watch(s.id);
   });
+  s.on('av', av => { const r = R(); r && r.setAv(s.id, av); });
+  s.on('react', k => { const r = R(); r && r.react(s.id, k | 0); });
+  s.on('swap', j => { const r = R(); r && r.swap(s.id, j | 0); });
+  s.on('swapAns', ok => { const r = R(); r && r.swapAns(s.id, !!ok); });
   s.on('preview', code => {
     code = String(code || '').toUpperCase().trim();
     const r = rooms[code];
