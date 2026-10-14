@@ -301,6 +301,7 @@
   S.onState = function (s) {
     S.sendAv(); S.checkEnd(s);
     const inG = GAME === 'mf' ? !!s.g : s.ph !== 'lobby';
+    document.body.classList.toggle('ingame', !!inG);
     if (!inG) { const b = $$('rxBar'); if (b) b.style.display = 'none'; }
   };
 
