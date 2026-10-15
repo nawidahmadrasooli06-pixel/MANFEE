@@ -107,14 +107,4 @@ input{font:inherit;font-size:17px;padding:12px;border-radius:12px;border:2px sol
 #go:disabled{opacity:.65;filter:saturate(.65)}
 .c.heart b{font-size:1.85em;transform:translateY(2px) scale(.92);}
 .q.in{animation-duration:.72s;animation-timing-function:cubic-bezier(.16,.72,.2,1)}
-.dl{animation-duration:.72s;animation-timing-function:cubic-bezier(.16,.72,.2,1);animation-delay:calc(var(--i)*.16s + .45s)}
-
-
-/* CACTUC final UI polish: compact controls and seat-edge player identity */
-.player-ident{display:flex;align-items:center;gap:5px;white-space:nowrap;direction:ltr}
-.player-avatar{width:34px!important;height:34px!important;min-width:34px;object-fit:cover;border-radius:50%;vertical-align:middle}
-.st.p1 .player-ident,.st.p3 .player-ident{flex-direction:row-reverse}
-.st.p1,.st.p3{justify-content:flex-start}
-.st.p0,.st.p2{justify-content:center}
-button,.btn,.menu button,.controls button{font-size:clamp(12px,2.8vw,15px);padding:7px 11px}
-@media(max-height:760px){button,.btn,.menu button,.controls button{padding:5px 9px;font-size:12px}.menu,.modal,.screen{gap:7px}}
+.dl{animation-duration:.72s;animation-timing-function:cubic-bezier(.16,.72,.2,1);animation-delay:calc(var::i)*.16s + .45s)}
