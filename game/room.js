@@ -19,31 +19,28 @@ class Room {
     if (this.seatOf(sid) < 0 || this.g) return;
     this.invitePending = true; this.inviteAccepted = false; this.send();
   }
-  join(sid, name, token, profile) {
+  join(sid, name, token) {
     let i = this.seats.findIndex(x => x && (x.token == token || x.returnToken == token));
     if (i < 0) {
       if (this.g) return this.free().length ? -2 : -1;
       i = this.seats.findIndex(x => !x); if (i < 0) return -1;
-      this.seats[i] = { name, token, profile: this.cleanProfile(profile) };
+      this.seats[i] = { name, token };
       if (this.invitePending && token !== this.host) { this.inviteAccepted = true; this.invitePending = false; }
     }
     const s = this.seats[i];
     if (s.returnToken === token) { s.returnToken = null; s.token = token; }
     s.sid = sid;
     if (name && !s.bot) s.name = name;
-    if (profile && !s.bot) s.profile = this.cleanProfile(profile);
     if (!this.host) this.host = token;
     if (this.g) { this.g.bot[i] = false; this.g.names[i] = s.name; }
     this.send();
     if (this.g) { this.g.stopped ? this.g.wake() : this.g.kick(i); }
     return i;
   }
-  updateProfile(sid, p) { const i=this.seatOf(sid); if(i<0||!p)return; const q=this.cleanProfile(p); if(!q)return; this.seats[i].profile=q; this.seats[i].name=q.name; if(this.g)this.g.names[i]=q.name; this.send(); }
-  cleanProfile(p) { if (!p || typeof p !== 'object') return null; const validEmoji = ['🃏','😎','👑','🦅','🐺','🌙','🔥','💎']; return { name: String(p.name || 'بازیکن').slice(0,14), avatar: (/^https:\/\//i.test(String(p.avatar || '')) && String(p.avatar).length <= 500) ? String(p.avatar) : (/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/i.test(String(p.avatar || '')) && String(p.avatar).length <= 420000) ? String(p.avatar) : '', photo: (/^https:\/\//i.test(String(p.photo || '')) && String(p.photo).length <= 500) ? String(p.photo) : (/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/i.test(String(p.photo || '')) && String(p.photo).length <= 420000) ? String(p.photo) : '', emoji: validEmoji.includes(p.emoji) ? p.emoji : '🃏' }; }
-  take(sid, name, token, i, profile) {
+  take(sid, name, token, i) {
     if (!this.g || !this.g.bot[i] || this.seats.some(x => x && x.token == token)) return false;
     const old = this.seats[i] || {};
-    this.seats[i] = { name, token, sid, profile: this.cleanProfile(profile), returnToken: old.token || old.returnToken || null };
+    this.seats[i] = { name, token, sid, returnToken: old.token || old.returnToken || null };
     this.g.bot[i] = false; this.g.names[i] = name;
     if (!this.host) this.host = token;
     this.send(); this.g.stopped ? this.g.wake() : this.g.kick(i);
@@ -56,8 +53,8 @@ class Room {
   }
   sit(sid, j) {
     const i = this.seatOf(sid);
-    if (this.g || i < 0 || j < 0 || j > 3 || i === j) return;
-    const other = this.seats[j]; this.seats[j] = this.seats[i]; this.seats[i] = other; this.send();
+    if (this.g || i < 0 || j < 0 || j > 3 || this.seats[j]) return;
+    this.seats[j] = this.seats[i]; this.seats[i] = null; this.send();
   }
   start(sid, forceBots = false) {
     const i = this.seatOf(sid);
@@ -81,7 +78,7 @@ class Room {
   }
   send() {
     this.t = Date.now(); const g = this.g;
-    const seats = this.seats.map((s, i) => s ? { name: s.name, profile: s.profile || null, bot: !!s.bot, on: !!s.sid, off: !!g && !s.bot && !s.sid && !g.bot[i], sub: !!g && !s.bot && g.bot[i] } : null);
+    const seats = this.seats.map((s, i) => s ? { name: s.name, bot: !!s.bot, on: !!s.sid, off: !!g && !s.bot && !s.sid && !g.bot[i], sub: !!g && !s.bot && g.bot[i] } : null);
     const away = g ? seats.map((x, i) => x && x.off ? { i, name: x.name } : null).filter(Boolean) : [];
     this.seats.forEach((s, i) => {
       if (s && s.sid) this.io.to(s.sid).emit('state', {
