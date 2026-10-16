@@ -379,24 +379,34 @@
 
   const css4 = document.createElement('style');
   css4.textContent = `
-  .av{width:52px;height:52px;border:3px solid #f0b64a;font-size:22px;line-height:46px;margin:0;flex:none}
-  .st,.seat{display:flex!important;flex-direction:row;align-items:center;gap:6px;padding:0!important;background:none!important;border:0!important;box-shadow:none!important;min-width:0!important;border-radius:0!important}
-  .stx{display:flex;flex-direction:column;align-items:flex-start;line-height:1.3}
-  .nl{display:flex;align-items:center;gap:5px;font-size:14px;font-weight:700;text-shadow:0 0 5px #000,0 1px 3px #000;white-space:nowrap}
-  .st u{text-decoration:none;font-size:14px;font-weight:700}
-  .st .stx>b{font-size:13px;font-weight:700;text-shadow:0 0 5px #000,0 1px 3px #000}
-  .st i,.seat i.bd{position:static!important;display:inline-block;margin:0;font-style:normal;font-size:11px;font-weight:700;padding:0 7px;border-radius:8px;background:#f0b64a;color:#2a1a00;text-shadow:none;transform:none!important;line-height:1.5}
+  /* کادر مشکی افکت‌دار: عکس، اسم، ادعا، میر/حاکم */
+  .av{width:56px;height:56px;border:3px solid #f0b64a;font-size:24px;line-height:50px;margin:0;flex:none;box-shadow:0 0 10px #f0b64a88}
+  .st,.seat{display:flex!important;flex-direction:column!important;align-items:center;gap:2px;padding:5px 8px!important;min-width:78px!important;max-width:108px;
+    background:rgba(6,10,14,.8)!important;border:1.5px solid #f0b64a99!important;border-radius:14px!important;
+    box-shadow:0 0 12px #f0b64a55,0 4px 10px #000a,inset 0 0 10px #f0b64a22!important}
+  .st.on,.seat.on{border-color:#ffe08a!important;box-shadow:0 0 20px 4px #f0b64acc,0 4px 10px #000a,inset 0 0 12px #f0b64a44!important;animation:frmP 1.1s ease-in-out infinite alternate}
+  @keyframes frmP{from{filter:brightness(1)}to{filter:brightness(1.25)}}
+  .st .av,.seat .av{margin:0}
+  .stx{display:flex;flex-direction:column;align-items:center;text-align:center;line-height:1.25}
+  .nl{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px;font-size:13px;font-weight:700;text-shadow:0 0 4px #000;white-space:nowrap}
+  .st u{text-decoration:none;font-size:13px;font-weight:700}
+  .st .stx>b{font-size:13px;font-weight:700;text-shadow:0 0 4px #000}
+  .st i,.seat i.bd{position:static!important;display:inline-block;margin:0;font-style:normal;font-size:10.5px;font-weight:700;padding:0 7px;border-radius:8px;background:#f0b64a;color:#2a1a00;text-shadow:none;transform:none!important;line-height:1.5}
   .st i.o,.seat i.w{background:#a33;color:#fff}
-  .st.p3,#s3{flex-direction:column-reverse}
-  .st.p1,#s1{flex-direction:column}
-  .st.p1 .stx,.st.p3 .stx,#s1 .stx,#s3 .stx{writing-mode:vertical-rl;transform:rotate(180deg);display:block;white-space:nowrap}
-  .st.p1 .nl,.st.p3 .nl,#s1 .nl,#s3 .nl{display:inline-flex}
-  .st.p1 .stx>b,.st.p3 .stx>b{display:inline;margin-inline-start:6px}
-  body.pg-mf .st.p0{bottom:0!important}body.pg-mf .st.p2{top:0!important}
-  body.pg-mf .st.p3{left:0!important}body.pg-mf .st.p1{right:0!important}
+  /* جای کادرها: کنار لبه‌ها و روی لبهٔ بالای کارت‌ها */
+  body.pg-mf .st.p2{top:0!important}body.pg-mf .st.p3{left:0!important}body.pg-mf .st.p1{right:0!important}body.pg-mf .st.p0{bottom:0!important}
   body.pg-fk #s2{top:0!important}body.pg-fk #s3{left:0!important}body.pg-fk #s1{right:0!important}
-  body.pg-fk #s0{bottom:calc(120px + env(safe-area-inset-bottom,0px))!important}
-  .st.on .av,.seat.on .av{box-shadow:0 0 0 2px #fff6,0 0 16px 5px #f0b64acc;border-color:#ffe08a}
+  body.pg-fk #s0{bottom:calc(66px + env(safe-area-inset-bottom,0px))!important}
+  /* کارت‌های خودت: چسبیده به لبهٔ پایین */
+  body.pg-fk #hand{bottom:calc(0px + env(safe-area-inset-bottom,0px))!important;height:64px!important;padding:0 4px!important}
+  body.pg-fk #msg{bottom:calc(66px + 112px + env(safe-area-inset-bottom,0px))!important;pointer-events:none}
+  body.pg-fk #ex{bottom:calc(70px + env(safe-area-inset-bottom,0px))!important;right:8px;left:auto}
+  body.pg-mf #game.on #pn{position:absolute;left:0;right:0;bottom:calc(var(--cw)*1.4 + 124px + env(safe-area-inset-bottom,0px));min-height:0;padding:0 12px;z-index:8;pointer-events:none}
+  body.pg-mf #game.on #pn button,body.pg-mf #game.on #pn .bn,body.pg-mf #game.on #pn input{pointer-events:auto}
+  /* دکمه‌های موزیک: گوشهٔ خلوت بالای کارت‌ها، کنار کادر */
+  body.ingame #musicBar{left:8px!important;bottom:calc(74px + env(safe-area-inset-bottom,0px))!important}
+  body.pg-mf.ingame #musicBar{bottom:calc(var(--cw)*1.4 + 18px + env(safe-area-inset-bottom,0px))!important}
+  /* دکمه‌های بیرون از تخته کوچک‌تر */
   body.pg-mf .scr .btn,body.pg-fk .scr .btn,#menu .btn,#lobby .btn{font-size:13.5px!important;padding:7px 14px!important;max-width:270px!important;border-radius:12px!important;min-height:0!important}
   body.pg-mf .scr,body.pg-fk .scr{gap:5px!important}
   body.pg-mf #menu .logo,body.pg-fk #menu .logo{font-size:32px!important}
