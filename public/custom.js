@@ -251,7 +251,7 @@ function openId() {
   const u = 'https://t.me/cactuc580';
   try { Telegram.WebApp.openTelegramLink(u); } catch (e) { window.open(u, '_blank'); }
 }
-document.addEventListener('click', e => { if (e.target.closest && e.target.closest('.idTag')) copyId(); });
+document.addEventListener('click', e => { if (e.target.closest && e.target.closest('.idTag')) { if (window.SOC && SOC.idMenu) SOC.idMenu(); else copyId(); } });
 (function () {
   const ov = document.getElementById('ov'); if (!ov) return;
   const add = () => {
@@ -275,8 +275,8 @@ document.addEventListener('click', e => { if (e.target.closest && e.target.close
   if (typeof sk !== 'undefined') sk.on('specJoin', window.showWelcome);
 })();
 (function () {
-  const b = document.createElement('div'); b.id = 'specBadge'; b.style.display = 'none'; document.body.appendChild(b);
-  window.setSpec = n => { b.textContent = '👁 تماشاچی ' + (n | 0); b.style.display = 'block'; };
+  const b = document.createElement('div'); b.id = 'specBadge'; document.body.appendChild(b);
+  window.setSpec = n => { b.textContent = '👁 تماشاچی ' + (n | 0); };
 })();
 
 applyLook(prefLook());
