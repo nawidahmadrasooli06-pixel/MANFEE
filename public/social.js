@@ -413,6 +413,24 @@
   `;
   document.head.appendChild(css4);
 
+  const css5 = document.createElement('style');
+  css5.textContent = `
+  /* اصلاح گوشی‌های کم‌قد (مثل سامسونگ در مرورگر داخلی): دکمه‌ها له نشوند، صفحه اسکرول شود */
+  body.pg-mf .scr:not(#game),body.pg-fk .scr:not(#game){overflow-y:auto!important;-webkit-overflow-scrolling:touch;justify-content:flex-start!important;padding-bottom:58px!important}
+  body.pg-mf .scr:not(#game)>*,body.pg-fk .scr:not(#game)>*{flex-shrink:0!important}
+  body.pg-mf .scr:not(#game) .btn,body.pg-fk .scr:not(#game) .btn,#menu .btn,#lobby .btn{flex:0 0 auto!important;min-height:36px!important;height:auto!important;line-height:1.35!important}
+  body.pg-mf .scr:not(#game) input,body.pg-fk .scr:not(#game) input{flex:0 0 auto!important;min-height:38px!important}
+  body:not(.ingame) #musicBar{bottom:6px!important;left:8px!important}
+  @media (max-height:720px){
+    body.pg-mf .scr:not(#game) .btn,body.pg-fk .scr:not(#game) .btn{padding:5px 12px!important;font-size:13px!important;min-height:32px!important}
+    body.pg-mf .scr:not(#game),body.pg-fk .scr:not(#game){gap:4px!important;padding-top:6px!important}
+    body.pg-mf #menu .logo,body.pg-fk #menu .logo{font-size:26px!important}
+    #menu .sub{display:none!important}
+    .vipH{font-size:13px}.vipId{margin-bottom:2px}
+  }
+  `;
+  document.head.appendChild(css5);
+
   /* ---------- بار اول: پنجرهٔ تکمیل پروفایل ---------- */
   S.openProfile = openProfile; S.toast = toast; S.profile = profile; S.ask = ask;
   window.SOC = S;
