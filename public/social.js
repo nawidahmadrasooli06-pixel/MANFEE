@@ -431,6 +431,23 @@
   `;
   document.head.appendChild(css5);
 
+  const css6 = document.createElement('style');
+  css6.textContent = `
+  /* کادر کوچک و هم‌اندازه برای همه؛ برچسب میر/حاکم روی لبهٔ عکس؛ نور فقط دور عکس */
+  .st,.seat{width:84px!important;min-width:84px!important;max-width:84px!important;padding:4px 3px 5px!important;gap:1px!important;border-radius:12px!important;box-sizing:border-box}
+  .st.on,.seat.on{animation:none!important;filter:none!important;border-color:#f0b64a99!important;box-shadow:0 0 12px #f0b64a55,0 4px 10px #000a,inset 0 0 10px #f0b64a22!important}
+  .av{width:46px!important;height:46px!important;font-size:20px!important;line-height:40px!important;border-width:3px!important}
+  .st.on .av,.seat.on .av{box-shadow:0 0 0 2px #fff7,0 0 18px 6px #f0b64add!important;border-color:#ffe08a!important}
+  .stx{width:100%;align-items:center}
+  .nl{width:100%;justify-content:center;flex-wrap:nowrap!important}
+  .st u,.seat .nl b{display:block;max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px!important}
+  .st .stx>b{font-size:12px!important;line-height:1.1}
+  .st i,.seat i.bd{position:absolute!important;top:34px;left:50%;transform:translateX(-50%)!important;z-index:3;font-size:10px!important;padding:0 8px!important;line-height:1.45!important;box-shadow:0 2px 5px #000a;white-space:nowrap}
+  body.pg-fk #msg{bottom:calc(66px + 92px + env(safe-area-inset-bottom,0px))!important}
+  body.pg-mf #game.on #pn{bottom:calc(var(--cw)*1.4 + 100px + env(safe-area-inset-bottom,0px))!important}
+  `;
+  document.head.appendChild(css6);
+
   /* ---------- بار اول: پنجرهٔ تکمیل پروفایل ---------- */
   S.openProfile = openProfile; S.toast = toast; S.profile = profile; S.ask = ask;
   window.SOC = S;
