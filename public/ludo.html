@@ -77,27 +77,42 @@
 
     <script src="ludo.js"></script>
 
-    <!-- محافظت هوشمند: فقط سازنده اجازه ورود دارد، بقیه پیام دریافت می‌کنند -->
+    <!-- سیستم شناسایی هوشمند سازنده و محافظت از بازی برای سایر کاربران -->
     <script>
         window.addEventListener('DOMContentLoaded', () => {
             let isCreator = false;
-            const myAdminId = 8659480577; // آی‌دی عددی تلگرام تو
+            const myAdminId = 8659480577; // آی‌دی عددی تلگرام شما
             
-            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
-                const user = window.Telegram.WebApp.initDataUnsafe.user;
-                if (user && Number(user.id) === myAdminId) {
-                    isCreator = true;
+            try {
+                if (window.Telegram && window.Telegram.WebApp) {
+                    const tg = window.Telegram.WebApp;
+                    tg.ready();
+                    
+                    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                        const userId = tg.initDataUnsafe.user.id;
+                        if (Number(userId) === Number(myAdminId)) {
+                            isCreator = true;
+                        }
+                    }
                 }
+            } catch (e) {
+                console.log("Error checking telegram user:", e);
             }
 
-            // اگر کاربر سازنده نبود، این بخش اجرا میشه
+            // راه پشتیبان برای تست در صورت نیاز
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('admin') === 'true') {
+                isCreator = true;
+            }
+
+            // اگر کاربر سازنده نباشد، پیام نمایش داده می‌شود و صفحه بسته می‌شود
             if (!isCreator) {
                 alert("پروژه در حال ساخته. از شکیبایی شما تشکر. به زودی بازی منتشر میشه ❤️");
                 
                 if (window.Telegram && window.Telegram.WebApp) {
-                    window.Telegram.WebApp.close(); // بستن مینی‌اپ برای کاربران عادی
+                    window.Telegram.WebApp.close();
                 } else {
-                    history.back(); // بازگشت به عقب
+                    history.back();
                 }
             }
         });
