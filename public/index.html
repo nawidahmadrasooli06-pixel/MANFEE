@@ -3,107 +3,54 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>CACTUC LUDO</title>
-    <link rel="stylesheet" href="ludo.css">
-    <script src="/socket.io/socket.io.js"></script>
+    <title>منفی | فیسکوت</title>
+    <!-- اینجا استایل‌های منوی اصلی خودت رو بذار -->
+    <link rel="stylesheet" href="style.css"> 
 </head>
 <body>
-    <main class="app">
-        <header>
-            <div class="brand">CACTUC <span>LUDO</span></div>
-            <div class="sub">لودوی کاکتوس · کلاسیک چهاررنگ</div>
-        </header>
+    <!-- محتویات منوی اصلی و دکمه‌های بازی‌ها (همون عکسی که فرستادی) -->
+    <div class="menu-container">
+        <h1>منفی ♠ فیسکوت</h1>
+        
+        <!-- دکمه‌های بازی‌های دیگر (بدون تغییر و سالم کار می‌کنند) -->
+        <a href="fiskoot.html" class="game-btn">شروع بازی منفی</a>
+        <a href=" حکم.html" class="game-btn">بازی حکم (فیسکوت)</a>
+        
+        <!-- دکمه لودو کاکتوس (با آی‌دی مخصوص برای کنترل کلیک) -->
+        <a href="#" id="ludoBtn" class="game-btn">لودو کینگ · CACTUC 🎲</a>
+        
+        <a href="settings.html" class="game-btn">تنظیمات، تم و موزیک</a>
+        <a href="profile.html" class="game-btn">پروفایل من</a>
+    </div>
 
-        <section id="lobby" class="panel">
-            <h1>شروع بازی</h1>
-            
-            <label>نام بازیکن
-                <input id="name" maxlength="18" placeholder="نام شما">
-            </label>
-            
-            <label>نوع بازی
-                <select id="mode">
-                    <option value="solo">بازی با هوش مصنوعی</option>
-                    <option value="private">اتاق خصوصی با دوستان</option>
-                    <option value="public">اتاق عمومی</option>
-                </select>
-            </label>
-            
-            <label>تعداد بازیکنان
-                <select id="count">
-                    <option value="2">۲ نفر</option>
-                    <option value="3">۳ نفر</option>
-                    <option value="4" selected>۴ نفر</option>
-                </select>
-            </label>
-            
-            <label class="team">
-                <input type="checkbox" id="teams"> بازی تیمی ۲ در برابر ۲
-            </label>
-            
-            <button id="create">ساخت بازی</button>
-            
-            <div class="join">
-                <input id="roomCode" maxlength="5" placeholder="کد اتاق">
-                <button id="join">ورود به اتاق</button>
-            </div>
-            
-            <p id="lobbyMsg" class="msg"></p>
-            <p class="hint">در نسخهٔ اولیه، اتاق‌های آنلاین آزمایشی‌اند. برای انتشار عمومی باید قوانین و هم‌زمانی چندبازیکنه کامل تست شوند.</p>
-        </section>
-
-        <section id="game" class="hidden">
-            <div class="bar">
-                <span id="roomLabel">اتاق —</span>
-                <span id="turnLabel">نوبت —</span>
-                <button id="back" class="secondary">منو</button>
-            </div>
-            
-            <div id="boardWrap">
-                <div id="board" aria-label="تخته لودو"></div>
-            </div>
-            
-            <div class="controls">
-                <button id="dice" class="dice">🎲 <span id="diceValue">تاس</span></button>
-                <div id="players"></div>
-            </div>
-            
-            <p id="gameMsg" class="msg"></p>
-            <div id="ranking" class="ranking hidden"></div>
-        </section>
-
-        <footer>CACTUC · طراحی مستقل با الهام از قوانین کلاسیک لودو</footer>
-    </main>
-
-    <script src="ludo.js"></script>
-
-    <!-- کدی که برای بررسی آی‌دی شما و نمایش پیام به بقیه کاربران اضافه شده -->
+    <!-- اسکریپت کنترل کلیک روی دکمه لودو کاکتوس -->
     <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            let isCreator = false;
-            
-            // بررسی اطلاعات کاربر در تلگرام وب‌اپ
-            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
-                const user = window.Telegram.WebApp.initDataUnsafe.user;
-                if (user && user.id) {
-                    // آی‌دی عددی شما
-                    const myAdminId = 8659480577; 
-                    
-                    if (Number(user.id) === myAdminId) {
-                        isCreator = true; // اگر خودتون بودید اجازه دسترسی میده
-                    }
-                }
-            }
+        document.addEventListener('DOMContentLoaded', () => {
+            const ludoButton = document.getElementById('ludoBtn');
 
-            // اگر کاربر سازنده نباشد، پیام نمایش داده می‌شود و صفحه بسته می‌شود
-            if (!isCreator) {
-                alert("پروژه در حال ساخته. از شکیبایی شما تشکر. به زودی بازی منتشر میشه ❤️");
-                
-                if (window.Telegram && window.Telegram.WebApp) {
-                    window.Telegram.WebApp.close(); // بستن مینی‌اپ و بازگشت به ربات
-                } else {
-                    history.back(); // بازگشت به صفحه قبل در حالت تست مرورگر
-                }
+            if (ludoButton) {
+                ludoButton.addEventListener('click', function(e) {
+                    e.preventDefault(); // جلوگیری از رفتن پیش‌فرض
+
+                    const myAdminId = 8659480577; // آی‌دی عددی تلگرام شما
+                    let isCreator = false;
+
+                    // بررسی اینکه آیا کاربرِ بازکننده ربات خودِ شما هستید یا خیر
+                    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
+                        const user = window.Telegram.WebApp.initDataUnsafe.user;
+                        if (user && Number(user.id) === myAdminId) {
+                            isCreator = true;
+                        }
+                    }
+
+                    if (isCreator) {
+                        // اگر خودت بودی، وارد صفحه بازی لودو میشی تا تست کنی
+                        window.location.href = 'ludo.html'; 
+                    } else {
+                        // اگر بازیکنان عادی بودن، این پیام خوشگل نمایش داده میشه
+                        alert("پروژه در حال ساخته. از شکیبایی شما تشکر. به زودی بازی منتشر میشه ❤️");
+                    }
+                });
             }
         });
     </script>
