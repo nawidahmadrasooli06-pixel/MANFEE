@@ -44,7 +44,9 @@ header {
   color: #fff;
 }
 
-.sub, footer, .hint {
+.sub,
+footer,
+.hint {
   color: var(--muted);
   font-size: 12px;
 }
@@ -69,7 +71,8 @@ label {
   margin: 12px 0;
 }
 
-input, select {
+input,
+select {
   width: 100%;
   background: #090c12;
   color: white;
@@ -92,7 +95,7 @@ button {
 }
 
 button:active {
-  transform: scale(.98);
+  transform: scale(0.98);
 }
 
 #create {
@@ -182,10 +185,21 @@ button:active {
   justify-content: center;
 }
 
-.home.red { background: #ef4444; }
-.home.green { background: #22a35a; }
-.home.yellow { background: #e9c52e; }
-.home.blue { background: #3679d8; }
+.home.red {
+  background: #ef4444;
+}
+
+.home.green {
+  background: #22a35a;
+}
+
+.home.yellow {
+  background: #e9c52e;
+}
+
+.home.blue {
+  background: #3679d8;
+}
 
 .yard {
   width: 78%;
@@ -206,10 +220,21 @@ button:active {
   box-shadow: inset 0 2px 3px #0002;
 }
 
-.lane.red { background: #f5a3a3; }
-.lane.green { background: #9cdbb0; }
-.lane.yellow { background: #f5e79a; }
-.lane.blue { background: #9ec5f7; }
+.lane.red {
+  background: #f5a3a3;
+}
+
+.lane.green {
+  background: #9cdbb0;
+}
+
+.lane.yellow {
+  background: #f5e79a;
+}
+
+.lane.blue {
+  background: #9ec5f7;
+}
 
 .safe:after {
   content: '★';
@@ -242,14 +267,29 @@ button:active {
   box-shadow: 0 2px 5px #0008, inset 0 -3px 2px #0004;
   z-index: 3;
   cursor: pointer;
-  animation: arrive .25s ease-out;
+  animation: arrive 0.25s ease-out;
 }
 
-.piece.red { background: radial-gradient(circle at 30% 25%, #ffb0b0, #e11d48 60%, #7f1d1d); }
-.piece.green { background: radial-gradient(circle at 30% 25%, #bbf7d0, #16a34a 60%, #14532d); }
-.piece.yellow { background: radial-gradient(circle at 30% 25%, #fff4b3, #eab308 60%, #854d0e); }
-.piece.blue { background: radial-gradient(circle at 30% 25%, #bfdbfe, #2563eb 60%, #1e3a8a); }
-.piece.movable { outline: 3px solid var(--gold); animation: pulse .8s infinite alternate; }
+.piece.red {
+  background: radial-gradient(circle at 30% 25%, #ffb0b0, #e11d48 60%, #7f1d1d);
+}
+
+.piece.green {
+  background: radial-gradient(circle at 30% 25%, #bbf7d0, #16a34a 60%, #14532d);
+}
+
+.piece.yellow {
+  background: radial-gradient(circle at 30% 25%, #fff4b3, #eab308 60%, #854d0e);
+}
+
+.piece.blue {
+  background: radial-gradient(circle at 30% 25%, #bfdbfe, #2563eb 60%, #1e3a8a);
+}
+
+.piece.movable {
+  outline: 3px solid var(--gold);
+  animation: pulse 0.8s infinite alternate;
+}
 
 .controls {
   display: flex;
@@ -313,11 +353,19 @@ footer {
 }
 
 @keyframes arrive {
-  from { transform: scale(.4); }
-  to { transform: scale(1); }
+  from {
+    transform: scale(0.4);
+  }
+  to {
+    transform: scale(1);
+  }
 }
 
-@media(min-width: 600px) {
-  .app { padding: 22px; }
-  #boardWrap { padding: 7px; }
+@media (min-width: 600px) {
+  .app {
+    padding: 22px;
+  }
+  #boardWrap {
+    padding: 7px;
+  }
 }
