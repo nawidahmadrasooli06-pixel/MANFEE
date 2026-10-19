@@ -1,1 +1,80 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>CACTUC LUDO</title>
+    <link rel="stylesheet" href="ludo.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <main class="app">
+        <header>
+            <div class="brand">CACTUC <span>LUDO</span></div>
+            <div class="sub">لودوی کاکتوس · کلاسیک چهاررنگ</div>
+        </header>
 
+        <section id="lobby" class="panel">
+            <h1>شروع بازی</h1>
+            
+            <label>نام بازیکن
+                <input id="name" maxlength="18" placeholder="نام شما">
+            </label>
+            
+            <label>نوع بازی
+                <select id="mode">
+                    <option value="solo">بازی با هوش مصنوعی</option>
+                    <option value="private">اتاق خصوصی با دوستان</option>
+                    <option value="public">اتاق عمومی</option>
+                </select>
+            </label>
+            
+            <label>تعداد بازیکنان
+                <select id="count">
+                    <option value="2">۲ نفر</option>
+                    <option value="3">۳ نفر</option>
+                    <option value="4" selected>۴ نفر</option>
+                </select>
+            </label>
+            
+            <label class="team">
+                <input type="checkbox" id="teams"> بازی تیمی ۲ در برابر ۲
+            </label>
+            
+            <button id="create">ساخت بازی</button>
+            
+            <div class="join">
+                <input id="roomCode" maxlength="5" placeholder="کد اتاق">
+                <button id="join">ورود به اتاق</button>
+            </div>
+            
+            <p id="lobbyMsg" class="msg"></p>
+            <p class="hint">در نسخهٔ اولیه، اتاق‌های آنلاین آزمایشی‌اند. برای انتشار عمومی باید قوانین و هم‌زمانی چندبازیکنه کامل تست شوند.</p>
+        </section>
+
+        <section id="game" class="hidden">
+            <div class="bar">
+                <span id="roomLabel">اتاق —</span>
+                <span id="turnLabel">نوبت —</span>
+                <button id="back" class="secondary">منو</button>
+            </div>
+            
+            <div id="boardWrap">
+                <div id="board" aria-label="تخته لودو"></div>
+            </div>
+            
+            <div class="controls">
+                <button id="dice" class="dice">🎲 <span id="diceValue">تاس</span></button>
+                <div id="players"></div>
+            </div>
+            
+            <p id="gameMsg" class="msg"></p>
+            <div id="ranking" class="ranking hidden"></div>
+        </section>
+
+        <footer>CACTUC · طراحی مستقل با الهام از قوانین کلاسیک لودو</footer>
+    </main>
+
+    <script src="ludo.js"></script>
+</body>
+</html>
