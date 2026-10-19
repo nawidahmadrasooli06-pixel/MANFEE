@@ -71,6 +71,5 @@ setInterval(() => {
   }
 }, 6e5);
 require('./fiskoot-server')(io); // بازی حکم (فیسکوت) - کانال جداگانه
-require('./ludo/server-addon')(io);
 srv.listen(process.env.PORT || 3000, () => console.log('Manfee server running'));
 tgbot(rooms);
