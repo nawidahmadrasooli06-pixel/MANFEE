@@ -13,7 +13,7 @@
         <a href="fiskoot.html" class="game-btn">شروع بازی منفی</a>
         <a href="حکم.html" class="game-btn">بازی حکم (فیسکوت)</a>
         
-        <!-- دکمه لودو کاکتوس با آی‌دی مشخص -->
+        <!-- دکمه لودو کاکتوس با آی‌دی مخصوص -->
         <a href="#" id="ludoBtn" class="game-btn">لودو کینگ · CACTUC 🎲</a>
         
         <a href="settings.html" class="game-btn">تنظیمات، تم و موزیک</a>
@@ -28,7 +28,7 @@
                 ludoButton.addEventListener('click', function(e) {
                     e.preventDefault();
 
-                    const myAdminId = 8659480577; // آی‌دی عددی شما
+                    const myAdminId = 8659480577; // آی‌دی عددی تلگرام شما
                     let isCreator = false;
 
                     if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
@@ -39,13 +39,10 @@
                     }
 
                     if (isCreator) {
-                        // اگر خودت بودی، به پوشه لودو هدایت میشی (فرض بر این است که نام فایل داخل پوشه ludo یا index.html یا ludo.html است)
-                        // اگر نام فایل داخل پوشه ludo برابر با index.html است، از خط زیر استفاده کن:
-                        window.location.href = 'ludo/index.html'; 
-                        
-                        // (نکته: اگر نام فایل داخل پوشه ludo به جای index.html، چیز دیگری مثل ludo.html است، خط بالا را به 'ludo/ludo.html' تغییر بده)
+                        // چون هر دو فایل کنار هم توی پوشه پابلیک هستند، مستقیم به ludo.html می‌ره
+                        window.location.href = 'ludo.html'; 
                     } else {
-                        // اگر بقیه کاربران بودند، پیام هشدار نمایش داده می‌شود
+                        // پیام هشدار برای سایر کاربران
                         alert("پروژه در حال ساخته. از شکیبایی شما تشکر. به زودی بازی منتشر میشه ❤️");
                     }
                 });
