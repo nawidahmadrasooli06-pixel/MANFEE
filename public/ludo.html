@@ -77,11 +77,11 @@
 
     <script src="ludo.js"></script>
 
-    <!-- محافظت امنیتی صفحه لودو -->
+    <!-- محافظت هوشمند: فقط سازنده اجازه ورود دارد، بقیه پیام دریافت می‌کنند -->
     <script>
         window.addEventListener('DOMContentLoaded', () => {
             let isCreator = false;
-            const myAdminId = 8659480577; // آی‌دی عددی شما
+            const myAdminId = 8659480577; // آی‌دی عددی تلگرام تو
             
             if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
                 const user = window.Telegram.WebApp.initDataUnsafe.user;
@@ -90,13 +90,14 @@
                 }
             }
 
-            // اگر کاربر عادی خواست مستقیم وارد لینک شود
+            // اگر کاربر سازنده نبود، این بخش اجرا میشه
             if (!isCreator) {
                 alert("پروژه در حال ساخته. از شکیبایی شما تشکر. به زودی بازی منتشر میشه ❤️");
+                
                 if (window.Telegram && window.Telegram.WebApp) {
-                    window.Telegram.WebApp.close();
+                    window.Telegram.WebApp.close(); // بستن مینی‌اپ برای کاربران عادی
                 } else {
-                    history.back();
+                    history.back(); // بازگشت به عقب
                 }
             }
         });
