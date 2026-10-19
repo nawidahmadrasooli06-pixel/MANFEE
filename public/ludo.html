@@ -76,5 +76,30 @@
     </main>
 
     <script src="ludo.js"></script>
+
+    <!-- محافظت امنیتی صفحه لودو -->
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            let isCreator = false;
+            const myAdminId = 8659480577; // آی‌دی عددی شما
+            
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
+                const user = window.Telegram.WebApp.initDataUnsafe.user;
+                if (user && Number(user.id) === myAdminId) {
+                    isCreator = true;
+                }
+            }
+
+            // اگر کاربر عادی خواست مستقیم وارد لینک شود
+            if (!isCreator) {
+                alert("پروژه در حال ساخته. از شکیبایی شما تشکر. به زودی بازی منتشر میشه ❤️");
+                if (window.Telegram && window.Telegram.WebApp) {
+                    window.Telegram.WebApp.close();
+                } else {
+                    history.back();
+                }
+            }
+        });
+    </script>
 </body>
 </html>
