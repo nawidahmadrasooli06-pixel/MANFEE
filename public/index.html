@@ -4,38 +4,33 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <title>منفی | فیسکوت</title>
-    <!-- اینجا استایل‌های منوی اصلی خودت رو بذار -->
     <link rel="stylesheet" href="style.css"> 
 </head>
 <body>
-    <!-- محتویات منوی اصلی و دکمه‌های بازی‌ها (همون عکسی که فرستادی) -->
     <div class="menu-container">
         <h1>منفی ♠ فیسکوت</h1>
         
-        <!-- دکمه‌های بازی‌های دیگر (بدون تغییر و سالم کار می‌کنند) -->
         <a href="fiskoot.html" class="game-btn">شروع بازی منفی</a>
-        <a href=" حکم.html" class="game-btn">بازی حکم (فیسکوت)</a>
+        <a href="حکم.html" class="game-btn">بازی حکم (فیسکوت)</a>
         
-        <!-- دکمه لودو کاکتوس (با آی‌دی مخصوص برای کنترل کلیک) -->
+        <!-- دکمه لودو کاکتوس با آی‌دی مشخص -->
         <a href="#" id="ludoBtn" class="game-btn">لودو کینگ · CACTUC 🎲</a>
         
         <a href="settings.html" class="game-btn">تنظیمات، تم و موزیک</a>
         <a href="profile.html" class="game-btn">پروفایل من</a>
     </div>
 
-    <!-- اسکریپت کنترل کلیک روی دکمه لودو کاکتوس -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const ludoButton = document.getElementById('ludoBtn');
 
             if (ludoButton) {
                 ludoButton.addEventListener('click', function(e) {
-                    e.preventDefault(); // جلوگیری از رفتن پیش‌فرض
+                    e.preventDefault();
 
-                    const myAdminId = 8659480577; // آی‌دی عددی تلگرام شما
+                    const myAdminId = 8659480577; // آی‌دی عددی شما
                     let isCreator = false;
 
-                    // بررسی اینکه آیا کاربرِ بازکننده ربات خودِ شما هستید یا خیر
                     if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
                         const user = window.Telegram.WebApp.initDataUnsafe.user;
                         if (user && Number(user.id) === myAdminId) {
@@ -44,10 +39,13 @@
                     }
 
                     if (isCreator) {
-                        // اگر خودت بودی، وارد صفحه بازی لودو میشی تا تست کنی
-                        window.location.href = 'ludo.html'; 
+                        // اگر خودت بودی، به پوشه لودو هدایت میشی (فرض بر این است که نام فایل داخل پوشه ludo یا index.html یا ludo.html است)
+                        // اگر نام فایل داخل پوشه ludo برابر با index.html است، از خط زیر استفاده کن:
+                        window.location.href = 'ludo/index.html'; 
+                        
+                        // (نکته: اگر نام فایل داخل پوشه ludo به جای index.html، چیز دیگری مثل ludo.html است، خط بالا را به 'ludo/ludo.html' تغییر بده)
                     } else {
-                        // اگر بازیکنان عادی بودن، این پیام خوشگل نمایش داده میشه
+                        // اگر بقیه کاربران بودند، پیام هشدار نمایش داده می‌شود
                         alert("پروژه در حال ساخته. از شکیبایی شما تشکر. به زودی بازی منتشر میشه ❤️");
                     }
                 });
