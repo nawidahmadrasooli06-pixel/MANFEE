@@ -116,11 +116,11 @@
     if (!force && key === S.avKey) return;
     S.avKey = key; sk.emit('av', av);
   };
-  const seatEl = (s, k) => { const r = (k - s.me + 4) % 4; return GAME === 'mf' ? document.querySelector('#tbl .st.p' + r) : $$('s' + r); };
+  const seatEl = (s, k) => { if (GAME === 'ld') return $$('ps' + k); const r = (k - s.me + 4) % 4; return GAME === 'mf' ? document.querySelector('#tbl .st.p' + r) : $$('s' + r); };
   function avatarEl(k, x) {
     const src = S.avs[k];
     if (src) { const i = document.createElement('img'); i.className = 'av'; i.src = src; return i; }
-    const s = document.createElement('div'); s.className = 'av'; s.textContent = x.bot ? '🤖' : (String(x.name || x.n || '?').trim()[0] || '?');
+    const s = document.createElement('div'); s.className = 'av'; s.textContent = (x.bot || x.b) ? '🤖' : (String(x.name || x.n || '?').trim()[0] || '?');
     return s;
   }
   function ensureBar() {
@@ -157,7 +157,7 @@
     s = s || (hasSt() ? st : null); if (!s || !s.seats) return;
     for (let k = 0; k < 4; k++) {
       const e = seatEl(s, k), x = s.seats[k]; if (!e || !x) continue;
-      if (!e.querySelector('.av')) e.insertBefore(avatarEl(k, x), e.firstChild);
+      if (!e.querySelector('.av')) { const a = avatarEl(k, x), nb = GAME === 'ld' ? e.querySelector('b') : null; e.insertBefore(a, nb || e.firstChild); }
     }
     Object.keys(S.rx).forEach(k => placeRx(S.rx[k]));
   };
@@ -184,7 +184,7 @@
   function shareBot() {
     fetch('/config').then(r => r.json()).catch(() => ({})).then(c => {
       const l = c && c.bot ? 'https://t.me/' + c.bot : location.origin;
-      openLink('https://t.me/share/url?url=' + encodeURIComponent(l) + '&text=' + encodeURIComponent('بیا بازی منفی و حکم (فیسکوت) را با هم بازی کنیم! 🃏♠️'));
+      openLink('https://t.me/share/url?url=' + encodeURIComponent(l) + '&text=' + encodeURIComponent('بیا بازی منفی، حکم (فیسکوت) و لودو را با هم بازی کنیم! 🃏🎲'));
     });
   }
   function popup(html, extra) {
@@ -210,10 +210,11 @@
   /* ---------- راهنما ---------- */
   const GUIDE = {
     mf: `<b>♠ بازی منفی</b><br>• ۴ نفر، دو تیم دونفره؛ هم‌تیمی‌ها روبه‌روی هم می‌نشینند.<br>• هر دست، هر نفر می‌گوید چند دست می‌گیرد (ادعا). آخرین نفر (میر) ادعای باقی‌مانده را می‌گیرد تا جمع همه ۱۳ شود؛ او می‌تواند «قبول» یا «بچرخون» را بزند.<br>• ادعای هر تیم = جمع ادعای دو هم‌تیمی.<br>• پیک حکم است. باید از خال شروع‌شده بازی کنی؛ اگر نداری، هر پری می‌توانی بیندازی. پر را بگیر و روی میز بکش.<br>• تیمی که بیشتر از ادعای خودش دست بگیرد، آن دست را می‌برد. اگر هر دو تیم دقیقاً به ادعایشان برسند، مساوی است.<br>• هر تیمی که به ۵ برد برسد، مسابقه را می‌برد.`,
+    ld: `<b>🎲 لودو</b><br>• ۲، ۳ یا ۴ نفر؛ هر نفر ۴ مهره‌ی رنگ خودش را دارد. در بازی ۲ نفره حریف‌ها گوشه‌های روبه‌رو را می‌گیرند.<br>• تاس را بزن؛ با ۶ مهره از خانه بیرون می‌آید.<br>• مهره‌ها را دور تخته بچرخان؛ اگر روی مهره‌ی حریف بیفتی (به‌جز خانه‌های شروع و ستاره‌ها ★) آن مهره به خانه برمی‌گردد.<br>• ۶، زدن مهره و رساندن مهره به وسط، یک تاس دوباره می‌دهد؛ سه ۶ پشت‌سرهم نوبت را می‌سوزاند.<br>• برای رسیدن به وسط باید تاس دقیق بیاید.<br>• هر کس هر ۴ مهره‌اش را به وسط برساند تمام می‌کند: اول 👑، دوم 🥈، سوم 🥉. بازی ادامه دارد تا یک نفر بماند و او بازنده است.`,
     fk: `<b>♥ بازی حکم (فیسکوت)</b><br>• ۴ نفر، دو تیم؛ هم‌تیمی روبه‌روی توست.<br>• اول کارت‌ها پشت‌رو می‌آیند؛ هر کس توس (آس) بیاورد حاکم می‌شود.<br>• حاکم ۵ کارت می‌گیرد و رنگ (حکم) را می‌گوید؛ بعد همه به ۱۳ کارت می‌رسند.<br>• باید از خال شروع‌شده بازی کنی؛ نداری، می‌توانی حکم یا خال دیگری بزنی. حکم همهٔ خال‌های دیگر را می‌برد.<br>• هر تیم که به ۷ دست برسد، دست را می‌برد: برد عادی ۱ امتیاز، کت‌فیسی (حاکم ۷–۰ ببرد) ۳ امتیاز، کدرنگ (تیم حاکم هیچ دستی نگیرد) ۷ امتیاز.<br>• اگر تیم حاکم ببرد، حاکم همان می‌ماند، وگرنه به سمت راست می‌چرخد.<br>• اولین تیمی که به ۱۳ امتیاز برسد، مسابقه را می‌برد.`
   };
   S.guideMenu = function () {
-    const d = popup(`<h3>📘 راهنما</h3><div class="col"><button class="go" data-g="fk">♥ راهنمای حکم (فیسکوت)</button><button class="go" data-g="mf">♠ راهنمای منفی</button><button data-g="x">بستن</button></div>`);
+    const d = popup(`<h3>📘 راهنما</h3><div class="col"><button class="go" data-g="fk">♥ راهنمای حکم (فیسکوت)</button><button class="go" data-g="mf">♠ راهنمای منفی</button><button class="go" data-g="ld">🎲 راهنمای لودو</button><button data-g="x">بستن</button></div>`);
     d.querySelector('.col').addEventListener('click', e => {
       const g = e.target.dataset.g; if (!g) return; d.remove();
       if (g !== 'x') S.guideText(g);
@@ -224,7 +225,7 @@
     d.querySelector('.row').addEventListener('click', e => { const a = e.target.dataset.g; if (!a) return; d.remove(); if (a === 'b') S.guideMenu(); });
   };
   S.about = function () {
-    const d = popup(`<h3>ℹ️ درباره ربات</h3><div>🃏 ربات بازی منفی و حکم (فیسکوت)؛ بازی ورق چهارنفره با دوستان یا ربات‌ها.</div>
+    const d = popup(`<h3>ℹ️ درباره ربات</h3><div>🃏 ربات بازی منفی، حکم (فیسکوت) و لودو؛ بازی با دوستان یا ربات‌ها.</div>
       <div style="margin-top:8px">طراح: <b>نــوید = Cactuc</b></div>
       <div class="pid" style="font-size:15px;margin:4px 0;cursor:pointer" data-a="id">${BOT_ID}</div>
       <div style="font-size:12px;color:#9fcfc0;margin-top:8px">اگر نیاز به راهنما داری یا چیزی نمی‌فهمی، روی دکمهٔ راهنما کلیک کن ⬇️</div>
@@ -241,13 +242,14 @@
     if (!s) return null;
     if (GAME === 'mf' && s.g && s.g.phase === 'series') { const t = s.g.ser[0] >= 5 ? 0 : 1; return { win: t, a: s.g.ser[t], b: s.g.ser[1 - t], key: s.code + '|mf|' + s.g.ser.join('-'), unit: 'سری' }; }
     if (GAME === 'fk' && s.ph === 'over' && s.res) { const t = s.res.w; return { win: t, a: s.sc[t], b: s.sc[1 - t], key: s.code + '|fk|' + s.sc.join('-'), unit: 'امتیاز' }; }
+    if (GAME === 'ld' && s.ph === 'over' && s.rank && s.rank.length > 1) return { ld: true, key: s.code + '|ld|' + s.rank.join('') };
     return null;
   }
   const nameOf = x => (x && (x.name || x.n)) || 'بازیکن';
   function avHTML(k, x, big) {
     const src = S.avs[k], sz = big ? 68 : 44;
     const st1 = `width:${sz}px;height:${sz}px;border-radius:50%;border:3px solid ${big ? '#ffd76a' : '#ffffff55'};object-fit:cover;background:#0b1f1e;display:flex;align-items:center;justify-content:center;font-size:${sz / 2}px;color:#ffd76a;margin:0 auto`;
-    return src ? `<img src="${src}" style="${st1};display:block">` : `<div style="${st1}">${x && x.bot ? '🤖' : (nameOf(x)[0] || '?')}</div>`;
+    return src ? `<img src="${src}" style="${st1};display:block">` : `<div style="${st1}">${x && (x.bot || x.b) ? '🤖' : (nameOf(x)[0] || '?')}</div>`;
   }
   function fireworks(cv, stopAt) {
     if (!cv || !cv.getContext) return;
@@ -293,7 +295,37 @@
     document.body.appendChild(d);
     fireworks($$('endCv'), performance.now() + 11000);
   }
-  S.checkEnd = function (s) { const i = endInfo(s); if (!i) { if (S.endKey) S.hideEnd(); return; } if (S.endKey !== i.key) showEnd(s, i); };
+  function showEndLd(s, i) {
+    S.hideEnd(); S.endKey = i.key;
+    const rk = s.rank || [], n = rk.length, king = rk[0], loser = rk[n - 1], mids = rk.slice(1, n - 1), MED = ['🥈', '🥉'], LAB = ['نفر دوم', 'نفر سوم'];
+    const mid = (k, j) => { const x = s.seats[k]; return `<div class="ldC">${avHTML(k, x, false)}<div class="ldM">${MED[j]}</div><div class="ldN">${nameOf(x)}</div><div class="ldL">${LAB[j]}</div></div>`; };
+    const kx = s.seats[king], lx = s.seats[loser];
+    const d = document.createElement('div'); d.id = 'endScr'; d.className = 'endS ldE';
+    d.innerHTML = `<canvas id="endCv"></canvas><div class="endBox">
+      <div class="vipH">VIP · CACTUC 🎲</div><div class="vipId" data-a="id">${BOT_ID}</div>
+      <div class="endT">🎲 پایان بازی لودو</div>
+      <div class="ldK"><div class="ldCr">👑</div>${avHTML(king, kx, true)}<div class="ldKN">${nameOf(kx)}</div><div class="ldKL">قهرمان · نفر اول</div></div>
+      ${mids.length ? `<div class="endW">${mids.map(mid).join('')}</div>` : ''}
+      <div class="ldB"><div class="ldBT">💀 بازنده</div><div class="ldBA">${avHTML(loser, lx, false)}</div><div class="ldBN">${nameOf(lx)}</div><div class="ldBL">${n === 2 ? 'نفر دوم' : 'نفر آخر'} · بازی را باخت</div></div>
+      <div class="endBtns"><button data-a="home">↩ بازگشت به انتخاب بازی</button><button data-a="set">⚙️ تنظیمات</button><button class="go" data-a="again">🔄 شروع مجدد</button><button data-a="share">🔗 اشتراک‌گذاری ربات</button></div></div>`;
+    d.addEventListener('click', e => {
+      const a = e.target.dataset.a; if (!a) return;
+      if (a === 'id') S.idMenu();
+      else if (a === 'home') location.href = '/';
+      else if (a === 'set') { if (typeof openSettingsModal === 'function') openSettingsModal(); }
+      else if (a === 'share') shareBot();
+      else if (a === 'again') { if (hasSt() && st.host && hasSk()) sk.emit('again'); else toast('فقط میزبان می‌تواند شروع مجدد بزند'); }
+    });
+    document.body.appendChild(d);
+    fireworks($$('endCv'), performance.now() + 11000);
+  }
+  S.checkEnd = function (s) {
+    const i = endInfo(s);
+    if (!i) { clearTimeout(S.ldT); S.ldT = null; if (S.endKey) S.hideEnd(); return; }
+    if (S.endKey === i.key) return;
+    if (i.ld) { if (S.ldT) return; S.ldT = setTimeout(() => { S.ldT = null; const c = hasSt() ? endInfo(st) : null; if (c && c.ld && S.endKey !== c.key) showEndLd(st, c); }, 2600); return; }
+    showEnd(s, i);
+  };
   S.onState = function (s) {
     S.sendAv(); S.checkEnd(s);
     const inG = GAME === 'mf' ? !!s.g : s.ph !== 'lobby';
@@ -304,6 +336,27 @@
   /* ---------- ظاهر سه‌بعدی صفحهٔ شروع و کادرها ---------- */
   const svg = enc => `url("data:image/svg+xml,${encodeURIComponent(enc)}")`;
   const pat = svg("<svg xmlns='http://www.w3.org/2000/svg' width='150' height='150'><g font-size='46' fill='white' opacity='.045'><text x='12' y='56'>♠</text><text x='86' y='60'>♥</text><text x='20' y='128'>♦</text><text x='92' y='134'>♣</text></g></svg>");
+  const css7 = document.createElement('style');
+  css7.textContent = `
+  body.pg-ld #menu.scr{background:radial-gradient(ellipse at 50% -10%,#8a4be0 0%,#2b1163 55%,#0a0420 100%),${pat}}
+  body.pg-ld #menu .logo{text-shadow:0 0 22px #c9a0ff99,0 4px 0 #1b0a47}
+  body.pg-ld #menu .btn{border-radius:16px;color:#fff;font-weight:700;transition:transform .08s,box-shadow .08s;border:1px solid #ffffff40;background:linear-gradient(#7a46cf,#3b1a85);box-shadow:0 5px 0 #1d0a47,0 12px 20px #000a,inset 0 1px 0 #ffffff66;font-size:13.5px;padding:7px 14px;max-width:270px;min-height:36px}
+  body.pg-ld #menu .btn.go{background:linear-gradient(#ffdc7a,#d99a1c);color:#2a1a00;box-shadow:0 5px 0 #7a4e00,0 12px 20px #000a,inset 0 1px 0 #ffffffaa}
+  body.pg-ld #menu .btn:active{transform:translateY(4px);box-shadow:0 1px 0 #00000088,0 4px 8px #000a,inset 0 1px 0 #ffffff55}
+  .ldE{background:radial-gradient(ellipse at 50% 0%,#5b2cb0,#10062c 72%)}
+  .ldK{position:relative;margin:26px auto 0;padding:28px 22px 10px;border-radius:20px;background:linear-gradient(#ffdc7a33,#ffdc7a0d);border:2px solid #ffd76a;box-shadow:0 0 28px #ffd76a88,inset 0 0 18px #ffd76a33;width:100%}
+  .ldK>div:not(.ldCr){margin-top:2px}.ldK img,.ldK .ldKav{margin:0 auto}
+  .ldCr{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:46px;line-height:1;filter:drop-shadow(0 4px 8px #000b);animation:ldcr 1.4s ease-in-out infinite alternate}
+  @keyframes ldcr{from{transform:translateX(-50%) rotate(-8deg) scale(1)}to{transform:translateX(-50%) rotate(8deg) scale(1.12)}}
+  .ldKN{font-size:22px;font-weight:900;color:#ffd76a;text-shadow:0 0 12px #ffd76a88}.ldKL{font-size:12px;color:#ffe9a8}
+  .ldC{flex:1;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1px}
+  .ldM{font-size:26px;line-height:1.1}.ldN{font-weight:800;font-size:14px;color:#e8e8e8}.ldL{font-size:11px;color:#bcd}
+  .ldB{margin-top:4px;padding:10px;border-radius:16px;background:#3a0a14aa;border:2px solid #d8382f;box-shadow:0 0 14px #d8382f66}
+  .ldBT{font-size:15px;font-weight:900;color:#ff7b7b}.ldBA{filter:grayscale(1) brightness(.8);display:flex;justify-content:center;margin:4px 0}
+  .ldBN{font-weight:800;font-size:15px;color:#ffb3ae;text-decoration:line-through;text-decoration-color:#d8382f99}.ldBL{font-size:11px;color:#ff9c94}
+  `;
+  document.head.appendChild(css7);
+
   const css2 = document.createElement('style');
   css2.textContent = `
   .vipH{font-weight:900;letter-spacing:.18em;color:#ffd76a;font-size:15px;text-shadow:0 2px 10px #000b}
