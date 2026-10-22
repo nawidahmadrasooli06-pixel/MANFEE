@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
@@ -6,7 +7,7 @@
 <title>منفی</title>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap" rel="stylesheet">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>try{var sp=Telegram.WebApp.initDataUnsafe.start_param||'';if(sp.indexOf('fk_')==0)location.replace('/fiskoot.html?room='+encodeURIComponent(sp.slice(3)))}catch(e){}</script>
+<script>try{var sp=Telegram.WebApp.initDataUnsafe.start_param||'';if(sp.indexOf('fk_')==0)location.replace('/fiskoot.html?room='+encodeURIComponent(sp.slice(3)));else if(sp.indexOf('ld_')==0)location.replace('/ludo.html?room='+encodeURIComponent(sp.slice(3)))}catch(e){}</script>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="theme.css">
 <link rel="stylesheet" href="fk-theme.css">
@@ -17,13 +18,14 @@
   <div class="vipId" onclick="SOC.idMenu()">@cactuc580</div>
   <div class="logo">♠ منفی</div>
   <div class="sub">بازی ورق چهار نفره</div>
-  
+
   <button class="btn go" onclick="show('join')">شروع بازی منفی</button>
   <button class="btn" onclick="location.href='/fiskoot.html'" style="border:3px solid #ffd76a;border-radius:14px">♠ بازی حکم (فیسکوت)</button>
+  <button class="btn" onclick="location.href='/ludo.html'" style="border:3px solid #ffd76a;border-radius:14px">🎲 لودو</button>
   <button class="btn" onclick="openSettingsModal()">⚙️ تنظیمات، تم و موزیک</button>
   <button class="btn" onclick="SOC.openProfile()">👤 پروفایل من</button>
   <button class="btn" onclick="SOC.about()">ℹ️ درباره ربات</button>
-  
+
   <div id="resumeBox">
     <button class="btn" onclick="shareWatch()" style="margin-bottom:8px">👁 دعوت تماشاچی</button>
     <p style="margin:0 0 10px 0; font-size:12px; color:#f0b64a; font-weight:bold;">بازگشت به بازی نیمه‌کاره:</p>
