@@ -10,8 +10,8 @@ const FK_CARPETS = [['f1', 'زمرد شب'], ['f2', 'یاقوتی'], ['f3', 'آ�
 const FK_CARDS = [['g1', 'عاج کلاسیک'], ['g2', 'نیمه‌شب'], ['g3', 'جوکر طلایی'], ['g4', 'جوکر بنفش'], ['g5', 'یاقوت'], ['g6', 'زمرد'], ['g7', 'نقره‌ای'], ['g8', 'نئونی'], ['g9', 'طلای ناب'], ['g10', 'یخی']];
 const MF_CARPETS = [['c1', 'سبز لوزی'], ['c2', 'قرمز گل'], ['c3', 'سرمه‌ای'], ['c4', 'طلایی ترنج'], ['c5', 'مشکی طلایی']].concat(FK_CARPETS);
 const MF_CARDS = [['k1', 'سفید کلاسیک'], ['k2', 'مشکی دارک'], ['k3', 'جوکر قرمز'], ['k4', 'سبز گل‌گلی'], ['k5', 'مشکی طلایی']].concat(FK_CARDS);
-const PAGE_GAME = location.pathname.indexOf('fiskoot') >= 0 ? 'fk' : 'mf';
-const GAMES = { mf: { c: MF_CARPETS, k: MF_CARDS, kc: 'carpet', kk: 'cards', dc: 'c1', dk: 'k1' }, fk: { c: FK_CARPETS, k: FK_CARDS, kc: 'fk_carpet', kk: 'fk_cards', dc: 'f1', dk: 'g1' } };
+const PAGE_GAME = location.pathname.indexOf('fiskoot') >= 0 ? 'fk' : (location.pathname.indexOf('ludo') >= 0 ? 'ld' : 'mf');
+const GAMES = { ld: { c: [], k: [], kc: 'ld_carpet', kk: 'ld_cards', dc: 'c1', dk: 'k1' }, mf: { c: MF_CARPETS, k: MF_CARDS, kc: 'carpet', kk: 'cards', dc: 'c1', dk: 'k1' }, fk: { c: FK_CARPETS, k: FK_CARDS, kc: 'fk_carpet', kk: 'fk_cards', dc: 'f1', dk: 'g1' } };
 let tabGame = PAGE_GAME;
 const modalGame = () => inRoom() ? PAGE_GAME : tabGame;
 
@@ -52,6 +52,7 @@ const SAMPLE = '<div class="c"><em>A</em><b>♠</b></div><div class="c r heart">
 
 function lookPickerHTML() {
   const g = modalGame(), G = GAMES[g];
+  if (g === 'ld') return '<div class="lkNote">لودو فرش و پر ندارد؛ اینجا فقط موزیک و ولوم تنظیم می‌شود 🎵</div>';
   const l = g === PAGE_GAME ? (lookNow || prefLook(g)) : prefLook(g);
   const can = !inRoom() || st.host;
   const dis = can ? '' : ' disabled';
@@ -213,7 +214,7 @@ function openSettingsModal() {
   const html = `
     <div id="customSettingsModal" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; display:flex; align-items:center; justify-content:center; padding:14px;">
       <div style="background:#0b1f1e; border:2px solid #f0b64a; border-radius:18px; padding:16px; width:100%; max-width:320px; max-height:92vh; overflow-y:auto; -webkit-overflow-scrolling:touch; color:#fff; text-align:center; display:flex; flex-direction:column; gap:10px;">
-        <h3 style="margin:0; color:#f0b64a;">⚙️ فرش، پر و موزیک</h3>
+        <h3 style="margin:0; color:#f0b64a;">${PAGE_GAME === 'ld' ? '⚙️ تنظیمات و موزیک' : '⚙️ فرش، پر و موزیک'}</h3>
         <div id="lookPicker">${lookPickerHTML()}</div>
         <div style="${row}">
           <span>🎵 موزیک:</span>
