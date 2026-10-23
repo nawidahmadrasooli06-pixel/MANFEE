@@ -17,7 +17,7 @@ module.exports = function (io) {
   const view = (r, i, sp) => ({
     code: r.code, ph: r.phase, me: sp ? -1 : i, host: !sp && r.seats[i].token === r.host, n: r.n, act: act(r),
     seats: r.seats.map(s => s && { n: s.name, b: s.bot, on: s.on }), pos: r.pos, turn: r.turn, stage: r.stage,
-    dice: r.dice, rs: r.rollSeq, mv: r.mv, mov: (!sp && r.phase === 'play' && r.turn === i && r.stage === 'move') ? r.mov : [],
+    dice: r.dice, rs: r.rollSeq, mv: r.mv, mov: (!sp && r.phase === 'play' && r.turn === i && r.stage === 'move') ? r.mov : [], mv2: (r.phase === 'play' && r.stage === 'move') ? r.mov : [],
     winner: r.winner, rank: r.rank, fin: r.fin, wait: r.wait, six: r.forfeit ? 1 : 0, spec: r.spec.size, isSpec: !!sp, track: r.track, playing: !!r.playing
   });
   const sendAvs = r => {
@@ -39,26 +39,31 @@ module.exports = function (io) {
   function botPick(r, s) {
     const v = r.dice; let best = r.mov[0], bs = -1e9;
     const threat = (idx, me) => { let d = 0; for (const s2 of act(r)) if (s2 !== me) for (let t2 = 0; t2 < 4; t2++) { const p2 = r.pos[s2][t2]; if (p2 >= 0 && p2 <= 50) { const df = (idx - ring(s2, p2) + 52) % 52; if (df >= 1 && df <= 6) d++; } } return d; };
+    const mine = r.pos[s].filter(p => p >= 0 && p < 56), onBoard = mine.length, mx = Math.max(...mine, -1), mn = Math.min(...mine, 99);
     for (const t of r.mov) {
-      const f = r.pos[s][t], to = f === -1 ? 0 : f + v; let sc = to * 0.4 + Math.random() * 2;
-      if (f === -1) sc += 45; if (to === 56) sc += 100; if (to >= 51 && f < 51) sc += 25;
+      const f = r.pos[s][t], to = f === -1 ? 0 : f + v; let sc = Math.random() * 3;
+      if (f === -1) { sc += 55; if (onBoard <= 1) sc += 30; } else sc += to * 0.25;
+      if (to === 56) sc += 90; else if (to >= 51 && f < 51) sc += 35;
       if (to <= 50) {
-        const idx = ring(s, to); let cap = 0;
-        for (const s2 of act(r)) if (s2 !== s) for (let t2 = 0; t2 < 4; t2++) { const p2 = r.pos[s2][t2]; if (p2 >= 0 && p2 <= 50 && ring(s2, p2) === idx) cap += p2; }
-        if (!SAFE.has(idx)) { if (cap) sc += 60 + cap * 0.5; sc -= threat(idx, s) * 12; } else sc += 15;
+        const idx = ring(s, to); let cap = 0, capP = 0;
+        for (const s2 of act(r)) if (s2 !== s) for (let t2 = 0; t2 < 4; t2++) { const p2 = r.pos[s2][t2]; if (p2 >= 0 && p2 <= 50 && ring(s2, p2) === idx) { cap++; capP += p2; } }
+        if (SAFE.has(idx)) sc += 20;
+        else { if (cap) sc += 70 + capP * 0.8; else sc -= threat(idx, s) * 22; }
       }
-      if (f >= 0 && f <= 50 && !SAFE.has(ring(s, f))) sc += threat(ring(s, f), s) * 8;
+      if (f >= 0 && f <= 50 && !SAFE.has(ring(s, f))) sc += threat(ring(s, f), s) * 18;
+      if (f >= 0 && f < 56 && onBoard >= 2 && to < 51) { if (f === mx) sc -= 8; if (f === mn) sc += 6; }
       if (sc > bs) { bs = sc; best = t; }
     }
     return best;
   }
+  const later = (r, fn, ms) => { r.t = setTimeout(() => { try { fn(); } catch (e) { console.log('ludo error', e); r.errs = (r.errs || 0) + 1; if (r.errs < 30) setTimeout(() => { try { step(r); } catch (e2) { } }, 1500); } }, ms); };
   function step(r) {
     clearTimeout(r.t); r.wait = null; r.at = Date.now();
     if (r.phase !== 'play') return send(r);
     const s = r.turn, seat = r.seats[s], busy = Math.max(0, (r.busy || 0) - Date.now());
-    if (r.stage === 'pass') { r.t = setTimeout(() => { r.turn = nextSeat(r, r.turn); r.stage = 'roll'; r.six = 0; r.forfeit = false; r.mov = []; step(r); }, busy + 1400); return send(r); }
+    if (r.stage === 'pass') { later(r, () => { r.turn = nextSeat(r, r.turn); r.stage = 'roll'; r.six = 0; r.forfeit = false; r.mov = []; step(r); }, busy + 300); return send(r); }
     if (!seat.bot && !seat.on) { r.wait = s; return send(r); }
-    if (seat.bot) r.t = setTimeout(() => { if (r.stage === 'roll') doRoll(r); else if (r.stage === 'move') doMove(r, s, botPick(r, s)); }, busy + (r.stage === 'roll' ? 900 : 1000));
+    if (seat.bot) later(r, () => { if (r.stage === 'roll') doRoll(r); else if (r.stage === 'move') doMove(r, s, botPick(r, s)); }, busy + (r.stage === 'roll' ? 650 : 900));
     send(r);
   }
   function doRoll(r) {
@@ -150,5 +155,6 @@ module.exports = function (io) {
     });
   });
   setInterval(() => { for (const c in rooms) { const r = rooms[c]; if (r.phase === 'lobby') { r.seats.forEach((x, k) => { if (x && !x.on && x.off && Date.now() - x.off > 12e4) r.seats[k] = null; }); if (!r.seats.some(x => x && x.token === r.host)) { const h = r.seats.find(x => x); if (h) r.host = h.token; } send(r); } } }, 3e4);
+  setInterval(() => { for (const c in rooms) { const r = rooms[c]; if (r.phase !== 'play') continue; const seat = r.seats[r.turn]; if (seat && (seat.bot || r.stage === 'pass') && Date.now() - r.at > 9000 && Date.now() > (r.busy || 0) + 3000) { try { step(r); } catch (e) { console.log('ludo watchdog', e); } } } }, 3000);
   setInterval(() => { for (const c in rooms) { const r = rooms[c]; if (!r.seats.some(s => s && s.on && !s.bot) && Date.now() - r.at > 36e5) { clearTimeout(r.t); delete rooms[c]; } } }, 6e5);
 };
