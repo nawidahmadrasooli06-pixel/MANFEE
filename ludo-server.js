@@ -12,7 +12,32 @@ module.exports = function (io) {
   const ids = r => [...r.seats.filter(s => s && s.sid && s.on).map(s => s.sid), ...r.spec];
   const act = r => ACT[r.n];
   const nextSeat = (r, s) => { const a = act(r); let i = a.indexOf(s); for (let k = 0; k < a.length; k++) { i = (i + 1) % a.length; if (!r.fin.includes(a[i])) return a[i]; } return s; };
-  const movable = (r, s, v) => { const m = []; for (let t = 0; t < 4; t++) { const p = r.pos[s][t]; if (p === -1 ? v === 6 : p + v <= 56) m.push(t); } return m; };
+  const movable = (r, s, v) => {
+    const m = [], own = r.pos[s];
+    for (let t = 0; t < 4; t++) {
+      const p = own[t]; if (p === 56 || (p === -1 && v !== 6)) continue;
+      const to = p === -1 ? 0 : p + v; if (to > 56) continue;
+      if (to < 56) { const safe = to <= 50 && SAFE.has(ring(s, to)); if (!safe && own.some((q, u) => u !== t && q === to)) continue; }
+      m.push(t);
+    }
+    return m;
+  };
+  // تاس هوشمند و منصف: جلوگیری از خشکسالی ۶، سه ۶ پشت‌سرهم، تکرار یک عدد و گیر کردن‌های طولانی
+  const pickDice = (r, s) => {
+    r.dry = r.dry || [0, 0, 0, 0]; r.stuck = r.stuck || [0, 0, 0, 0]; r.hist = r.hist || [[], [], [], []];
+    const pos = r.pos[s], out = pos.filter(p => p >= 0 && p < 56).length, h = r.hist[s];
+    let v = crypto.randomInt(1, 7);
+    if (out === 0 && !pos.every(p => p === 56)) {
+      const d = r.dry[s], p6 = d >= 6 ? 0.95 : d >= 4 ? 0.6 : d >= 2 ? 0.34 : 0.17;
+      v = Math.random() < p6 ? 6 : crypto.randomInt(1, 6);
+    } else if (v === 6 && r.six === 2 && Math.random() < 0.6) v = crypto.randomInt(1, 6);
+    const need = pos.filter(p => p >= 51 && p < 56).map(p => 56 - p);
+    if (r.stuck[s] >= 3 && need.length && Math.random() < 0.45) v = need[crypto.randomInt(0, need.length)];
+    if (h.length >= 2 && h[0] === v && h[1] === v && v !== 6) { let w = v; while (w === v) w = crypto.randomInt(1, 7); v = w; }
+    h.unshift(v); h.length = Math.min(h.length, 2);
+    r.dry[s] = (out === 0 && v !== 6) ? r.dry[s] + 1 : 0;
+    return v;
+  };
   const capMs = caps => caps.length ? Math.max(...caps.map(c => Math.min(1900, c[2] * 90))) + 300 : 0;
   const animMs = (f, to, caps) => (f === -1 ? 460 : (to - f) * 240) + capMs(caps) + 250;
   const view = (r, i, sp) => ({
@@ -69,9 +94,9 @@ module.exports = function (io) {
     send(r);
   }
   function doRoll(r) {
-    const v = crypto.randomInt(1, 7); r.dice = v; r.rollSeq++; r.forfeit = false; r.six = v === 6 ? r.six + 1 : 0; r.busy = Date.now() + 720;
+    const v = pickDice(r, r.turn); r.dice = v; r.rollSeq++; r.forfeit = false; r.six = v === 6 ? r.six + 1 : 0; r.busy = Date.now() + 780;
     if (r.six === 3) { r.six = 0; r.forfeit = true; r.stage = 'pass'; r.mov = []; }
-    else { r.mov = movable(r, r.turn, v); r.stage = r.mov.length ? 'move' : 'pass'; }
+    else { r.mov = movable(r, r.turn, v); r.stage = r.mov.length ? 'move' : 'pass'; r.stuck[r.turn] = r.mov.length ? 0 : r.stuck[r.turn] + 1; }
     step(r);
   }
   function doMove(r, s, t) {
@@ -95,7 +120,7 @@ module.exports = function (io) {
   function startGame(r, bots) {
     let n = 0; act(r).forEach(i => { if (!r.seats[i]) r.seats[i] = { name: BOTS[n++], token: null, sid: null, bot: true, auto: true, on: true }; });
     r.pos = [0, 1, 2, 3].map(() => [-1, -1, -1, -1]); r.phase = 'play'; r.turn = act(r)[0]; r.stage = 'roll'; r.dice = 0; r.rollSeq = 0; r.mseq = 0; r.mv = null; r.mov = [];
-    r.six = 0; r.winner = -1; r.rank = []; r.fin = []; r.busy = 0;
+    r.six = 0; r.winner = -1; r.rank = []; r.fin = []; r.busy = 0; r.dry = [0, 0, 0, 0]; r.stuck = [0, 0, 0, 0]; r.hist = [[], [], [], []];
     if (r.oneOut) act(r).forEach(i => { r.pos[i][0] = 0; });
     step(r);
   }
