@@ -98,8 +98,8 @@ body{display:block}
 
 #game{position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px 8px calc(64px + env(safe-area-inset-bottom,0px));background:radial-gradient(ellipse at 50% 0%,#1d3b78,#07101f 75%);overflow:auto}
 #bdw{width:min(100%,calc(100vh - 250px),420px);aspect-ratio:1}#bd{width:100%;height:100%;display:block;filter:drop-shadow(0 6px 14px #000a)}
-.prow{display:flex;justify-content:space-between;width:min(100%,420px);gap:8px}
-.pl{display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:14px;background:#0008;border:1.5px solid #ffffff22;color:#fff;max-width:49%;min-width:0}
+.prow{direction:ltr;display:flex;justify-content:space-between;width:min(100%,420px);gap:8px}
+.pl{direction:rtl;display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:14px;background:#0008;border:1.5px solid #ffffff22;color:#fff;max-width:49%;min-width:0}
 .pl.on{border-color:#f0b64a;box-shadow:0 0 16px #f0b64acc}
 .pl b{font-size:12px;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 0 4px #000}
 .pl .dot{width:9px;height:9px;border-radius:50%;flex:none}
@@ -108,7 +108,20 @@ body{display:block}
 .dice i{border-radius:50%}.dice i.on{background:#222}
 .dice.roll{animation:dr .17s linear infinite}@keyframes dr{from{transform:rotate(-14deg) scale(1.05)}to{transform:rotate(14deg) scale(1.05)}}
 .dice.can{animation:dp .8s ease-in-out infinite alternate;cursor:pointer;border-color:#ffe08a;box-shadow:0 0 16px #ffd76add}@keyframes dp{from{transform:scale(1)}to{transform:scale(1.14)}}
-.tk.mvb{cursor:pointer}.tk.mvb .in{animation:bob .55s ease-in-out infinite alternate}@keyframes bob{from{transform:translateY(0)}to{transform:translateY(-5px)}}
+.tk.mvb{cursor:pointer}
+.tk.mvb .in,.tk.pop .in{animation:lift .3s ease-out forwards,bob .6s .3s ease-in-out infinite alternate}
+@keyframes lift{from{transform:translateY(0)}to{transform:translateY(-8px)}}
+@keyframes bob{from{transform:translateY(-8px)}to{transform:translateY(-12px)}}
+.spin{transform-box:fill-box;transform-origin:center;animation:spn 1.3s linear infinite}
+@keyframes spn{to{transform:rotate(360deg)}}
+.pvc{animation:pvp .9s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center}
+@keyframes pvp{from{transform:scale(.8);opacity:.6}to{transform:scale(1.12);opacity:1}}
+.fxg{transform-box:fill-box;transform-origin:center;animation:fxg 2.2s ease-out forwards}
+@keyframes fxg{0%{transform:scale(.3);opacity:.9}60%{opacity:.45}100%{transform:scale(5.5);opacity:0}}
+.fxr{transform-box:fill-box;transform-origin:center;opacity:0;animation:fxr 1.8s ease-out forwards}
+@keyframes fxr{0%{transform:scale(.4);opacity:1}100%{transform:scale(4.4);opacity:0}}
+.fxs{animation:fxs 1.9s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes fxs{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
 #lmsg{color:#ffd76a;font-size:14px;text-align:center;min-height:20px;text-shadow:0 0 4px #000}
 #exg{position:fixed;right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));font-size:12px;padding:5px 10px;background:#ffffff22;color:#fff;border:0;border-radius:10px;z-index:8}
 #wt{position:fixed;inset:0;z-index:25;background:#000b;display:none;align-items:center;justify-content:center;padding:16px}
@@ -139,9 +152,9 @@ body.pg-ld #lobby #cntRow .btn{min-height:0!important}
 <div id="cntRow" style="display:flex;gap:6px;justify-content:center"></div><div id="room"></div>
 <small id="lm" style="color:#9fcfc0"></small><button id="go" class="btn go" onclick="sk.emit('start')">شروع بازی</button><button id="gob" class="btn" onclick="sk.emit('start',{bots:1})">شروع با ربات‌ها 🤖</button><a class="lnk" href="/">خروج</a></div>
 <div id="game" style="display:none">
-  <div class="prow"><div class="pl" id="ps0"><span class="dot" style="background:#2e9d46"></span><b id="pn0"></b><span class="cr" id="cr0"></span><div class="dice" id="d0"></div></div><div class="pl" id="ps1"><span class="dot" style="background:#f2b01e"></span><b id="pn1"></b><span class="cr" id="cr1"></span><div class="dice" id="d1"></div></div></div>
+  <div class="prow" id="rowT"><div class="pl" id="ps0"><span class="dot" style="background:#2e9d46"></span><b id="pn0"></b><span class="cr" id="cr0"></span><div class="dice" id="d0"></div></div><div class="pl" id="ps1"><span class="dot" style="background:#f2b01e"></span><b id="pn1"></b><span class="cr" id="cr1"></span><div class="dice" id="d1"></div></div></div>
   <div id="bdw"><svg id="bd" viewBox="0 0 360 360"></svg></div>
-  <div class="prow"><div class="pl" id="ps3"><span class="dot" style="background:#d8382f"></span><b id="pn3"></b><span class="cr" id="cr3"></span><div class="dice" id="d3"></div></div><div class="pl" id="ps2"><span class="dot" style="background:#2b7fe0"></span><b id="pn2"></b><span class="cr" id="cr2"></span><div class="dice" id="d2"></div></div></div>
+  <div class="prow" id="rowB"><div class="pl" id="ps3"><span class="dot" style="background:#d8382f"></span><b id="pn3"></b><span class="cr" id="cr3"></span><div class="dice" id="d3"></div></div><div class="pl" id="ps2"><span class="dot" style="background:#2b7fe0"></span><b id="pn2"></b><span class="cr" id="cr2"></span><div class="dice" id="d2"></div></div></div>
   <div id="lmsg"></div><button id="exg" onclick="exitG()">خروج ✕</button><div class="idTag" style="position:static;margin-top:4px">@cactuc580</div>
 </div>
 <div id="fnb"></div><div id="toast"></div><div id="wt"></div><div id="ov"></div>
@@ -196,35 +209,45 @@ function coord(s,p,t){
  if(p<=55){const q=HOME[s][p-51];return cc(q[0],q[1])}
  const o=[[-1,0],[0,-1],[1,0],[0,1]][s];return{x:7.5*C+o[0]*10,y:7.5*C+o[1]*10}}
 const NS='http://www.w3.org/2000/svg';
-function E(t,a,p){const n=document.createElementNS(NS,t);for(const k in a)n.setAttribute(k,a[k]);(p||$('bd')).appendChild(n);return n}
+let RT=null,ROT=0;const STT=[];
+function E(t,a,p){const n=document.createElementNS(NS,t);for(const k in a)n.setAttribute(k,a[k]);(p||RT||$('bd')).appendChild(n);return n}
 const el={},cur={};let built=false;
-function build(){if(built)return;built=true;const bd=$('bd');bd.innerHTML='';
+function build(){if(built)return;built=true;const bd=$('bd');bd.innerHTML='';RT=E('g',{id:'rt'},bd);
  E('rect',{x:-4,y:-4,width:368,height:368,rx:14,fill:'#fff',stroke:'#d4af37','stroke-width':3});
  YARD.forEach((y,s)=>{E('rect',{x:y[0]*C,y:y[1]*C,width:6*C,height:6*C,fill:COL[s]});E('rect',{x:(y[0]+1)*C,y:(y[1]+1)*C,width:4*C,height:4*C,rx:12,fill:'#fff'});
   for(let t=0;t<4;t++){const q=coord(s,-1,t);E('circle',{cx:q.x,cy:q.y,r:11,fill:'none',stroke:COL[s],'stroke-opacity':.5,'stroke-width':1.5})}});
  RING.forEach((q,i)=>{const s=START.indexOf(i);E('rect',{x:q[1]*C,y:q[0]*C,width:C,height:C,fill:s>=0?COL[s]:'#fff',stroke:'#cfcfcf','stroke-width':.6})});
  HOME.forEach((h,s)=>h.forEach(q=>E('rect',{x:q[1]*C,y:q[0]*C,width:C,height:C,fill:COL[s],stroke:'#fff','stroke-opacity':.5,'stroke-width':.6})));
- STARS.forEach(i=>{const q=RING[i],t=E('text',{x:q[1]*C+C/2,y:q[0]*C+C/2+5,'text-anchor':'middle','font-size':15,fill:'#e5a100'});t.textContent='★'});
+ STARS.forEach(i=>{const q=RING[i],t=E('text',{x:q[1]*C+C/2,y:q[0]*C+C/2+5,'text-anchor':'middle','font-size':15,fill:'#e5a100'});t.textContent='★';STT.push([t,q[1]*C+C/2,q[0]*C+C/2+5])});
  [[7,0,'M4,6 L20,12 L4,18Z',0],[0,7,'M6,4 L12,20 L18,4Z',1],[7,14,'M20,6 L4,12 L20,18Z',2],[14,7,'M6,20 L12,4 L18,20Z',3]].forEach(([r,c,d,s])=>E('path',{d,fill:COL[s],transform:`translate(${c*C},${r*C})`,opacity:.9}));
  const m=7.5*C,L=6*C,R=9*C,T=6*C,B=9*C;
  [[0,[L,T,L,B]],[1,[L,T,R,T]],[2,[R,T,R,B]],[3,[L,B,R,B]]].forEach(([s,p])=>E('polygon',{points:`${p[0]},${p[1]} ${p[2]},${p[3]} ${m},${m}`,fill:COL[s]}));
  E('rect',{x:0,y:0,width:360,height:360,rx:10,fill:'none',stroke:'#d4af37','stroke-width':2});
- const tl=E('g',{id:'tl'});
+ E('g',{id:'pv'});const tl=E('g',{id:'tl'});
  for(let s=0;s<4;s++)for(let t=0;t<4;t++){
-  const g=E('g',{class:'tk'},tl),i=E('g',{class:'in'},g);
-  E('ellipse',{cx:0,cy:7,rx:7,ry:2.6,fill:'#000','fill-opacity':.28},i);
-  E('circle',{class:'hl',cx:0,cy:-4,r:13,fill:'none',stroke:'#d4af37','stroke-width':2,'stroke-dasharray':'4 3',opacity:0},i);
+  const g=E('g',{class:'tk'},tl),gr=E('g',{class:'gr'},g);
+  E('ellipse',{cx:0,cy:7,rx:7,ry:2.6,fill:'#000','fill-opacity':.28},gr);
+  const hl=E('g',{class:'hl',transform:'translate(0,7) scale(1,.42)',opacity:0},gr);E('circle',{class:'spin',cx:0,cy:0,r:15,fill:'none',stroke:'#ffd76a','stroke-width':3.4,'stroke-dasharray':'7 5'},hl);
+  const i=E('g',{class:'in'},g);
   E('path',{d:'M0,7 C-3,3 -9,0 -9,-8 A9,9 0 0 1 9,-8 C9,0 3,3 0,7Z',fill:COL[s],stroke:DK[s],'stroke-width':1.4},i);
   E('circle',{cx:0,cy:-8,r:3.8,fill:'#fff','fill-opacity':.9},i);E('circle',{cx:-3.5,cy:-12.5,r:2,fill:'#fff','fill-opacity':.6},i);
   E('circle',{cx:0,cy:-6,r:16,fill:'transparent'},i);
-  g.onclick=()=>{if(g.classList.contains('mvb'))sk.emit('move',t)};el[s*4+t]=g;cur[s*4+t]={x:0,y:0}}}
-function setPos(k,x,y,lift){el[k].setAttribute('transform',`translate(${x},${y-6-(lift||0)})`);cur[k]={x,y}}
+  g.onclick=()=>{if(g.classList.contains('mvb'))sk.emit('move',t)};el[s*4+t]=g;cur[s*4+t]={x:0,y:0,sc:1}}}
+function setPos(k,x,y,lift,sc){if(sc==null)sc=(cur[k]&&cur[k].sc)||1;el[k].setAttribute('transform',`translate(${x},${y}) rotate(${-ROT*90}) translate(0,${-6-(lift||0)}) translate(0,7) scale(${sc}) translate(0,-7)`);cur[k]={x,y,sc}}
 const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
-function tween(k,to,ms,hop){return new Promise(res=>{const a={...cur[k]},t0=performance.now();const f=now=>{const u=Math.min(1,(now-t0)/ms),e=ease(u);setPos(k,a.x+(to.x-a.x)*e,a.y+(to.y-a.y)*e,hop?Math.sin(Math.PI*u)*7:0);if(u<1)requestAnimationFrame(f);else{setPos(k,to.x,to.y,0);res()}};requestAnimationFrame(f)})}
-async function animateMove(mv){const k=mv.s*4+mv.t,pts=[];$('tl').appendChild(el[k]);
- if(mv.f===-1)pts.push(coord(mv.s,0));else for(let p=mv.f+1;p<=mv.to;p++)pts.push(coord(mv.s,p,mv.t));
- for(const pt of pts)await tween(k,pt,mv.f===-1?520:260,true);
- if(mv.caps.length)await Promise.all(mv.caps.map(c=>tween(c[0]*4+c[1],coord(c[0],-1,c[1]),600,true)))}
+function tween(k,to,ms,hop,sc1){return new Promise(res=>{const a={...cur[k]},sc0=a.sc||1;if(sc1==null)sc1=sc0;const t0=performance.now();const f=now=>{const u=Math.min(1,(now-t0)/ms),e=ease(u);setPos(k,a.x+(to.x-a.x)*e,a.y+(to.y-a.y)*e,hop?Math.sin(Math.PI*u)*7:0,sc0+(sc1-sc0)*e);if(u<1)requestAnimationFrame(f);else{setPos(k,to.x,to.y,0,sc1);res()}};requestAnimationFrame(f)})}
+const HOMESC=.72,AX=[[-1,0],[0,-1],[1,0],[0,1]];
+function finPos(sd,t,pos){const arr=pos&&pos[sd]?pos[sd].map((p,i)=>p===56?i:-1).filter(i=>i>=0):[t],n=Math.max(1,arr.length),idx=Math.max(0,arr.indexOf(t)),m=7.5*C,o=AX[sd],pe=(idx-(n-1)/2)*7;return{x:m+o[0]*11+(o[0]?0:pe),y:m+o[1]*11+(o[1]?0:pe)}}
+function finishFx(sd){const g=E('g',{}),m=7.5*C,col=COL[sd];
+ E('circle',{cx:m,cy:m,r:14,fill:col,class:'fxg'},g);
+ for(let i=0;i<3;i++)E('circle',{cx:m,cy:m,r:12,fill:'none',stroke:i===1?'#fff':col,'stroke-width':3,class:'fxr',style:`animation-delay:${i*.28}s`},g);
+ for(let i=0;i<16;i++){const an=i/16*Math.PI*2+Math.random()*.3,d=38+Math.random()*34;E('circle',{cx:m,cy:m,r:2+Math.random()*2.4,fill:i%2?'#ffd76a':col,class:'fxs',style:`--dx:${Math.cos(an)*d}px;--dy:${Math.sin(an)*d}px;animation-delay:${Math.random()*.25}s`},g)}
+ setTimeout(()=>g.remove(),2900)}
+async function animateMove(mv,s){const k=mv.s*4+mv.t,pts=[];$('tl').appendChild(el[k]);
+ if(mv.f===-1)pts.push(coord(mv.s,0));else for(let p=mv.f+1;p<=mv.to;p++)pts.push(p===56?finPos(mv.s,mv.t,s&&s.pos):coord(mv.s,p,mv.t));
+ for(let i=0;i<pts.length;i++)await tween(k,pts[i],mv.f===-1?520:260,true,(i===pts.length-1&&mv.to===56)?HOMESC:1);
+ if(mv.to===56)finishFx(mv.s);
+ if(mv.caps.length)await Promise.all(mv.caps.map(c=>tween(c[0]*4+c[1],coord(c[0],-1,c[1]),600,true,1)))}
 
 /* ---------- تاس ---------- */
 const lastDice=[0,0,0,0],ON={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
@@ -234,40 +257,49 @@ async function diceAnim(seat,v){const d=$('d'+seat);d.classList.add('roll');for(
 $('d0').onclick=$('d1').onclick=$('d2').onclick=$('d3').onclick=function(){const i=+this.id[1];if(st&&!st.isSpec&&st.me===i&&st.turn===i&&st.stage==='roll'&&!pendN)sk.emit('roll')};
 
 /* ---------- صف انیمیشن‌ها و نمایش ---------- */
-let Q=Promise.resolve(),lastSeq=-1,lastRs=-1,pendN=0,lastFin=0;
-function resetGame(){lastSeq=-1;lastRs=-1;lastFin=0;for(let i=0;i<4;i++)lastDice[i]=0}
+let Q=Promise.resolve(),lastSeq=-1,lastRs=-1,pendN=0,lastFin=0,autoKey=-1,qAt=Date.now(),lastLay='';
+const qn=fn=>{Q=Q.then(fn).catch(e=>console.log(e)).then(()=>{qAt=Date.now()})};
+function resetGame(){lastSeq=-1;lastRs=-1;lastFin=0;autoKey=-1;for(let i=0;i<4;i++)lastDice[i]=0}
 function clearGame(){$('bw').style.display='none'}
 function onGame(s){
- build();
- if(lastSeq===-1){lastSeq=s.mv?s.mv.seq:0;lastRs=s.rs;lastFin=(s.fin||[]).length;if(s.dice)lastDice[s.turn]=s.dice;pendN++;Q=Q.then(()=>renderAll(s)).then(()=>pendN--);return}
+ build();qAt=Date.now();
+ if(lastSeq===-1){lastSeq=s.mv?s.mv.seq:0;lastRs=s.rs;lastFin=(s.fin||[]).length;if(s.dice)lastDice[s.turn]=s.dice;pendN++;qn(()=>renderAll(s));qn(()=>{pendN--});return}
  pendN++;
- if(s.rs!==lastRs){lastRs=s.rs;const seat=s.turn,v=s.dice;Q=Q.then(()=>diceAnim(seat,v))}
- if(s.mv&&s.mv.seq!==lastSeq){lastSeq=s.mv.seq;const mv=s.mv;Q=Q.then(()=>animateMove(mv))}
- Q=Q.then(()=>renderAll(s)).then(()=>pendN--);
+ if(s.rs!==lastRs){lastRs=s.rs;const seat=s.turn,v=s.dice;qn(()=>diceAnim(seat,v))}
+ if(s.mv&&s.mv.seq!==lastSeq){lastSeq=s.mv.seq;const mv=s.mv;qn(()=>animateMove(mv,s))}
+ qn(()=>renderAll(s));qn(()=>{pendN--});
  announceFin(s);
 }
+setInterval(()=>{if(st&&pendN>0&&Date.now()-qAt>6500){Q=Promise.resolve();pendN=0;if(st.mv)lastSeq=st.mv.seq;lastRs=st.rs;try{renderAll(st)}catch(e){}}},2000);
 const CROWN=['👑','🥈','🥉'],ORDN=['اول','دوم','سوم'];
-function announceFin(s){const f=s.fin||[];if(f.length>lastFin){const k=f[f.length-1],n=(s.seats[k]&&s.seats[k].n)||NAMES[k],b=$('fnb');lastFin=f.length;Q=Q.then(()=>{b.textContent=CROWN[f.length-1]+' '+n+' '+ORDN[f.length-1]+' شد!';b.style.display='block';b.style.animation='none';void b.offsetWidth;b.style.animation='';clearTimeout(announceFin.t);announceFin.t=setTimeout(()=>b.style.display='none',2800)})}else lastFin=f.length}
+function announceFin(s){const f=s.fin||[];if(f.length>lastFin){const k=f[f.length-1],n=(s.seats[k]&&s.seats[k].n)||NAMES[k],b=$('fnb');lastFin=f.length;qn(()=>{b.textContent=CROWN[f.length-1]+' '+n+' '+ORDN[f.length-1]+' شد!';b.style.display='block';b.style.animation='none';void b.offsetWidth;b.style.animation='';clearTimeout(announceFin.t);announceFin.t=setTimeout(()=>b.style.display='none',2800)})}else lastFin=f.length}
 function renderAll(s){
  if(st!==s&&st&&st.code!==s.code)return;
  const act=s.act,groups={};
- for(let q=0;q<4;q++){const on=act.includes(q);$('ps'+q).style.display=on?'flex':'none';
+ let rk=0;if(!s.isSpec&&s.me>=0){const hum=act.filter(i=>s.seats[i]&&!s.seats[i].b).length;if(hum<=1)rk=(3-s.me+4)%4}
+ if(rk!==ROT||!RT.getAttribute('transform')){ROT=rk;RT.setAttribute('transform',`rotate(${rk*90} 180 180)`);STT.forEach(([t,x,y])=>t.setAttribute('transform',`rotate(${-rk*90} ${x} ${y})`))}
+ if(lastLay!==''+rk){lastLay=''+rk;[['rowT',[0,1]],['rowB',[3,2]]].forEach(([id,sl])=>sl.forEach(c=>$(id).appendChild($('ps'+((c-rk+4)%4)))))}
+ for(let q=0;q<4;q++){const on=act.includes(q);$('ps'+q).style.display='flex';$('ps'+q).style.visibility=on?'visible':'hidden';
   const sd=s.seats[q];$('pn'+q).textContent=sd?sd.n:NAMES[q];
   const fi=(s.fin||[]).indexOf(q);$('cr'+q).textContent=fi>=0?CROWN[fi]||'':'';$('ps'+q).classList.toggle('fin',fi>=0);
   $('ps'+q).classList.toggle('on',s.ph==='play'&&s.turn===q);
   const d=$('d'+q);if(!d.classList.contains('roll'))d.innerHTML=face(lastDice[q]);
   d.classList.toggle('can',!s.isSpec&&s.me===q&&s.turn===q&&s.stage==='roll'&&s.ph==='play');
   for(let t=0;t<4;t++){const k=q*4+t,g=el[k];g.style.display=on?'':'none';if(!on)continue;
-   const p=s.pos?s.pos[q][t]:-1,c=coord(q,p,t),key=Math.round(c.x)+','+Math.round(c.y);(groups[key]=groups[key]||[]).push([k,c,p])}}
- for(const key in groups){const a=groups[key],n=a.length;a.forEach(([k,c,p],i)=>{const off=p===-1?0:(i-(n-1)/2)*5;setPos(k,c.x+off,c.y)})}
+   const p=s.pos?s.pos[q][t]:-1;if(p===56){const c=finPos(q,t,s.pos);setPos(k,c.x,c.y,0,HOMESC);continue}const c=coord(q,p,t),key=Math.round(c.x)+','+Math.round(c.y);(groups[key]=groups[key]||[]).push([k,c,p])}}
+ for(const key in groups){const a=groups[key],n=a.length;a.forEach(([k,c,p],i)=>{const off=p===-1?0:(i-(n-1)/2)*5;setPos(k,c.x+off,c.y,0,1)})}
  const mov=s.mov||[];
- for(let q=0;q<4;q++)for(let t=0;t<4;t++){const g=el[q*4+t],on=!s.isSpec&&q===s.me&&mov.includes(t)&&s.stage==='move';g.classList.toggle('mvb',on);g.querySelector('.hl').setAttribute('opacity',on?1:0)}
+ for(let q=0;q<4;q++)for(let t=0;t<4;t++){const g=el[q*4+t],on=!s.isSpec&&q===s.me&&mov.includes(t)&&s.stage==='move'&&s.ph==='play',pop=!on&&s.ph==='play'&&s.stage==='move'&&q===s.turn&&(s.mv2||[]).includes(t);g.classList.toggle('mvb',on);g.classList.toggle('pop',pop);g.querySelector('.hl').setAttribute('opacity',(on||pop)?1:0)}
+ const pv=$('pv');pv.innerHTML='';
+ if(!s.isSpec&&s.me>=0&&s.ph==='play'&&s.stage==='move'&&s.turn===s.me&&mov.length){mov.forEach(t=>{const f=s.pos[s.me][t],to=f===-1?0:f+s.dice,c=to>=56?finPos(s.me,t,s.pos):coord(s.me,to,t);E('circle',{cx:c.x,cy:c.y,r:9,fill:'#ffd76a','fill-opacity':.28,stroke:'#ffd76a','stroke-width':2,'stroke-dasharray':'3 3',class:'pvc'},pv)});
+  const ps=new Set(mov.map(t=>s.pos[s.me][t]));
+  if(ps.size===1&&autoKey!==s.rs){autoKey=s.rs;const t0=mov[0],rs0=s.rs;setTimeout(()=>{if(st&&st.rs===rs0&&st.stage==='move'&&st.turn===st.me&&!pendN)sk.emit('move',t0)},650)}}
  const nm=q=>(s.seats[q]&&s.seats[q].n)||NAMES[q];let m='';
  if(s.ph==='over')m='🏆 بازی تمام شد';
  else if((s.fin||[]).includes(s.me)&&!s.isSpec)m='تو تمام کردی 👑؛ بقیه هنوز بازی می‌کنند';
  else if(s.stage==='roll')m=(!s.isSpec&&s.me===s.turn)?'نوبت توست؛ تاس را بزن 🎲':'نوبت '+nm(s.turn);
  else if(s.stage==='move')m=(!s.isSpec&&s.me===s.turn)?'یکی از مهره‌های چشمک‌زن را انتخاب کن':nm(s.turn)+' در حال انتخاب مهره…';
- else m=s.six?'سه شش پشت‌سرهم؛ نوبت رد می‌شود':'حرکتی ممکن نیست؛ نوبت رد می‌شود';
+ else m='';
  $('lmsg').textContent=m;
  const W=$('wt');if(s.wait!=null&&!s.isSpec&&dis!==s.wait){W.innerHTML=`<div class="box"><h2>${nm(s.wait)} قطع شد</h2>بازی منتظر او می‌ماند.<br><button onclick="dis=st.wait;$('wt').style.display='none'">منتظر می‌مانیم</button><button class="btn go" style="margin-top:8px" onclick="sk.emit('replace')">جایگزینش ربات</button></div>`;W.style.display='flex'}else{W.style.display='none';if(s.wait==null)dis=null}
  try{SOC.afterDraw(s)}catch(e){}
