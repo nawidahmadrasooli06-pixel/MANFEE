@@ -13,10 +13,11 @@ module.exports = function (io) {
   const act = r => ACT[r.n];
   const nextSeat = (r, s) => { const a = act(r); let i = a.indexOf(s); for (let k = 0; k < a.length; k++) { i = (i + 1) % a.length; if (!r.fin.includes(a[i])) return a[i]; } return s; };
   const movable = (r, s, v) => { const m = []; for (let t = 0; t < 4; t++) { const p = r.pos[s][t]; if (p === -1 ? v === 6 : p + v <= 56) m.push(t); } return m; };
-  const animMs = (f, to, caps) => ((f === -1 ? 1 : to - f) * 300) + (caps.length ? 800 : 0) + 500;
+  const capMs = caps => caps.length ? Math.max(...caps.map(c => Math.min(1900, c[2] * 90))) + 300 : 0;
+  const animMs = (f, to, caps) => (f === -1 ? 460 : (to - f) * 240) + capMs(caps) + 250;
   const view = (r, i, sp) => ({
     code: r.code, ph: r.phase, me: sp ? -1 : i, host: !sp && r.seats[i].token === r.host, n: r.n, act: act(r),
-    seats: r.seats.map(s => s && { n: s.name, b: s.bot, on: s.on }), pos: r.pos, turn: r.turn, stage: r.stage,
+    seats: r.seats.map(s => s && { n: s.name, b: s.bot, on: s.on, tk: s.tk | 0 }), mode: r.oneOut ? 1 : 0, pos: r.pos, turn: r.turn, stage: r.stage,
     dice: r.dice, rs: r.rollSeq, mv: r.mv, mov: (!sp && r.phase === 'play' && r.turn === i && r.stage === 'move') ? r.mov : [], mv2: (r.phase === 'play' && r.stage === 'move') ? r.mov : [],
     winner: r.winner, rank: r.rank, fin: r.fin, wait: r.wait, six: r.forfeit ? 1 : 0, spec: r.spec.size, isSpec: !!sp, track: r.track, playing: !!r.playing
   });
@@ -61,13 +62,14 @@ module.exports = function (io) {
     clearTimeout(r.t); r.wait = null; r.at = Date.now();
     if (r.phase !== 'play') return send(r);
     const s = r.turn, seat = r.seats[s], busy = Math.max(0, (r.busy || 0) - Date.now());
-    if (r.stage === 'pass') { later(r, () => { r.turn = nextSeat(r, r.turn); r.stage = 'roll'; r.six = 0; r.forfeit = false; r.mov = []; step(r); }, busy + 300); return send(r); }
+    if (r.stage === 'pass') { later(r, () => { r.turn = nextSeat(r, r.turn); r.stage = 'roll'; r.six = 0; r.forfeit = false; r.mov = []; step(r); }, busy + 250); return send(r); }
     if (!seat.bot && !seat.on) { r.wait = s; return send(r); }
-    if (seat.bot) later(r, () => { if (r.stage === 'roll') doRoll(r); else if (r.stage === 'move') doMove(r, s, botPick(r, s)); }, busy + (r.stage === 'roll' ? 650 : 900));
+    if (seat.bot) later(r, () => { if (r.stage === 'roll') doRoll(r); else if (r.stage === 'move') doMove(r, s, botPick(r, s)); }, busy + (r.stage === 'roll' ? 350 : 250));
+    else if (r.stage === 'move' && new Set(r.mov.map(t => r.pos[s][t])).size === 1) later(r, () => { if (r.stage === 'move' && r.turn === s) doMove(r, s, r.mov[0]); }, busy + 200);
     send(r);
   }
   function doRoll(r) {
-    const v = crypto.randomInt(1, 7); r.dice = v; r.rollSeq++; r.forfeit = false; r.six = v === 6 ? r.six + 1 : 0; r.busy = Date.now() + 900;
+    const v = crypto.randomInt(1, 7); r.dice = v; r.rollSeq++; r.forfeit = false; r.six = v === 6 ? r.six + 1 : 0; r.busy = Date.now() + 720;
     if (r.six === 3) { r.six = 0; r.forfeit = true; r.stage = 'pass'; r.mov = []; }
     else { r.mov = movable(r, r.turn, v); r.stage = r.mov.length ? 'move' : 'pass'; }
     step(r);
@@ -93,9 +95,11 @@ module.exports = function (io) {
   function startGame(r, bots) {
     let n = 0; act(r).forEach(i => { if (!r.seats[i]) r.seats[i] = { name: BOTS[n++], token: null, sid: null, bot: true, auto: true, on: true }; });
     r.pos = [0, 1, 2, 3].map(() => [-1, -1, -1, -1]); r.phase = 'play'; r.turn = act(r)[0]; r.stage = 'roll'; r.dice = 0; r.rollSeq = 0; r.mseq = 0; r.mv = null; r.mov = [];
-    r.six = 0; r.winner = -1; r.rank = []; r.fin = []; r.busy = 0; step(r);
+    r.six = 0; r.winner = -1; r.rank = []; r.fin = []; r.busy = 0;
+    if (r.oneOut) act(r).forEach(i => { r.pos[i][0] = 0; });
+    step(r);
   }
-  const back = (so, r, i, tok) => { const s = r.seats[i]; s.sid = so.id; s.on = true; if (s.rep) { s.bot = false; s.rep = false; } so.data = { code: r.code, tok }; step(r); };
+  const back = (so, r, i, tok) => { const s = r.seats[i]; clearTimeout(s.gt); s.sid = so.id; s.on = true; if (s.rep) { s.bot = false; s.rep = false; } so.data = { code: r.code, tok }; step(r); };
 
   nsp.on('connection', so => {
     const R = () => rooms[so.data && so.data.code], tk = () => so.data && so.data.tok;
@@ -139,19 +143,21 @@ module.exports = function (io) {
       startGame(r);
     });
     so.on('roll', () => { const r = R(), i = r ? seatOf(r, tk()) : -1; if (!r || i < 0 || r.phase !== 'play' || r.turn !== i || r.stage !== 'roll' || Date.now() < (r.busy || 0) - 150) return; doRoll(r); });
-    so.on('move', t => { const r = R(), i = r ? seatOf(r, tk()) : -1; t = t | 0; if (!r || i < 0 || r.phase !== 'play' || r.turn !== i || r.stage !== 'move' || !r.mov.includes(t) || Date.now() < (r.busy || 0) - 150) return; doMove(r, i, t); });
+    so.on('move', t => { const r = R(), i = r ? seatOf(r, tk()) : -1; t = t | 0; if (!r || i < 0 || r.phase !== 'play' || r.turn !== i || r.stage !== 'move' || !r.mov.includes(t)) return; doMove(r, i, t); });
     so.on('replace', () => { const r = R(); if (r && r.wait != null && seatOf(r, tk()) >= 0) { const s = r.seats[r.wait]; s.bot = true; s.rep = true; step(r); } });
     so.on('again', () => {
       const r = R(); if (!r || r.phase !== 'over' || tk() !== r.host) return; clearTimeout(r.t);
       r.seats = r.seats.map(s => (s && !s.auto && !s.rep && s.on) ? s : null); r.phase = 'lobby'; r.pos = null; r.mv = null; r.winner = -1; r.rank = []; r.fin = []; r.turn = -1; send(r);
     });
+    so.on('tk', n => { const r = R(), i = r ? seatOf(r, tk()) : -1; if (i < 0) return; n = n | 0; if (n < 0 || n > 3 || (r.seats[i].tk | 0) === n) return; r.seats[i].tk = n; send(r); });
+    so.on('mode', n => { const r = R(); if (!r || r.phase !== 'lobby' || tk() !== r.host) return; r.oneOut = (n | 0) === 1; send(r); });
     so.on('av', av => { const r = R(), i = r ? seatOf(r, tk()) : -1; if (i < 0) return; av = typeof av === 'string' ? av : ''; if (av && !(/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(av) || /^https:\/\/t\.me\//.test(av))) av = ''; if (av.length > 7000) av = ''; r.seats[i].av = av || undefined; send(r); });
     so.on('track', n => { const r = R(); n = n | 0; if (r && seatOf(r, tk()) >= 0 && n >= 1 && n <= 21) { r.track = n; r.playing = true; ids(r).forEach(id => { if (id !== so.id) { const o = nsp.sockets.get(id); if (o) o.emit('track', n); } }); } });
     so.on('disconnect', () => {
       const r = R(); if (!r) return; if (so.data.spec) { r.spec.delete(so.id); return send(r); }
       const i = seatOf(r, tk()); if (i < 0 || r.seats[i].sid !== so.id) return;
       if (r.phase === 'lobby') { r.seats[i].on = false; r.seats[i].sid = null; r.seats[i].off = Date.now(); send(r); }
-      else { r.seats[i].on = false; r.seats[i].sid = null; step(r); }
+      else { const sx = r.seats[i]; sx.sid = null; clearTimeout(sx.gt); sx.gt = setTimeout(() => { if (!sx.sid && r.seats[i] === sx) { sx.on = false; try { step(r); } catch (e) { } } }, 25000); }
     });
   });
   setInterval(() => { for (const c in rooms) { const r = rooms[c]; if (r.phase === 'lobby') { r.seats.forEach((x, k) => { if (x && !x.on && x.off && Date.now() - x.off > 12e4) r.seats[k] = null; }); if (!r.seats.some(x => x && x.token === r.host)) { const h = r.seats.find(x => x); if (h) r.host = h.token; } send(r); } } }, 3e4);
