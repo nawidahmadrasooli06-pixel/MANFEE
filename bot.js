@@ -11,7 +11,7 @@ function start(rooms) {
   if (!T || !URL_) return console.log('Telegram bot disabled: set BOT_TOKEN and PUBLIC_URL');
   const kb = code => ({ inline_keyboard: [
     ...(code ? [[{ text: '✉️ ورود به اتاق دعوت', web_app: { url: URL_ + '/?r=' + code + '&invite=1' } }]] : []),
-    [{ text: '🎮 شروع بازی‌ها', web_app: { url: URL_ + '/games.html' } }],
+    [{ text: '🎮 شروع بازی‌ها', web_app: { url: URL_ } }],
     [{ text: '👤 پروفایل من', callback_data: 'me' }, { text: 'ℹ️ درباره ربات', callback_data: 'about' }]
   ] });
   const SHARE = 'https://t.me/share/url?url=' + encodeURIComponent('https://t.me/cactuc580') + '&text=' + encodeURIComponent('آیدی سازندهٔ ربات: @cactuc580');
@@ -83,7 +83,7 @@ function start(rooms) {
     console.log('Telegram bot:', me.username || 'getMe failed (check BOT_TOKEN)');
     await api('deleteWebhook');
     await api('setMyCommands', { commands: [{ command: 'start', description: 'شروع بازی' }, { command: 'profile', description: 'پروفایل من' }, { command: 'guide', description: 'راهنمای بازی‌ها' }, { command: 'about', description: 'درباره ربات' }] });
-    await api('setChatMenuButton', { menu_button: { type: 'web_app', text: '🎮 بازی‌ها', web_app: { url: URL_ + '/games.html' } } });
+    await api('setChatMenuButton', { menu_button: { type: 'web_app', text: '🎮 بازی منفی', web_app: { url: URL_ } } });
     let off = 0;
     for (;;) {
       const r = await api('getUpdates', { offset: off, timeout: 30, allowed_updates: ['message', 'callback_query'] });
