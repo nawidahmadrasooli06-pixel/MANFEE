@@ -192,6 +192,16 @@ body.pg-ld #menu.scr.kg,body.pg-ld #lobby.scr.kg{background:radial-gradient(elli
 .rb{border:0;border-radius:14px;min-width:68px;padding:8px 10px;background:linear-gradient(#2a67d6,#164096);color:#fff;font-weight:900;font-size:14px;border-bottom:4px solid #0a2a6a}
 .rb.on{background:linear-gradient(#ffd35a,#f2a30f);color:#1b2a6b;border-bottom-color:#9a6200}.rb:disabled{opacity:.85}
 .rb.tkb{min-width:62px;padding:5px 4px;display:flex;flex-direction:column;align-items:center;gap:0;font-size:11px}
+
+/* ===== round 2 ===== */
+#game,body.pg-ld #menu.scr.kg,body.pg-ld #lobby.scr.kg{background:var(--lpb),radial-gradient(ellipse at 50% 20%,#4c8df0 0%,#2a62c8 48%,#123a8a 100%)!important;background-size:300px 300px,auto!important}
+#game .idTag{background:none;padding:0;color:#ffffff47;font-size:10px;font-weight:700;letter-spacing:.06em;margin-top:2px}
+.gb{padding:4px 10px;font-size:10.5px;border-radius:9px;border-bottom-width:2px;opacity:.88}.grow{gap:6px}
+#exg{font-size:10.5px;padding:3px 9px;opacity:.85}
+body.pg-ld #specBadge{font-size:9px!important;padding:1px 7px!important;left:auto!important;right:10px!important;top:auto!important;bottom:calc(env(safe-area-inset-bottom,0px) + 46px)!important;opacity:.7;background:#0b1f1e99!important}
+.dice.roll{animation:none!important;transition:none!important;border-color:#ffd76a;box-shadow:0 8px 14px #0007}.dice{touch-action:manipulation;will-change:transform}
+.tk{touch-action:manipulation}
+#lmsg{font-size:13px}
 </style><link rel="stylesheet" href="fk-theme.css"></head><body>
 <div id="bw" style="display:none"></div>
 <svg width="0" height="0" style="position:absolute;pointer-events:none" id="gdefs"></svg>
@@ -199,20 +209,21 @@ body.pg-ld #menu.scr.kg,body.pg-ld #lobby.scr.kg{background:radial-gradient(elli
 <div class="scr kg" id="menu"><div class="fit"><div class="ktop"><button class="kic" onclick="SOC.openProfile()">👤</button><button class="kic" onclick="SOC.guideText('ld')">❓</button><button class="kic" onclick="openSettingsModal()">⚙️</button></div>
 <div class="vipH">VIP · CACTUC 🎲</div><div class="vipId" onclick="SOC.idMenu()">@cactuc580</div>
 <div class="klogo"><span class="kcr">👑</span><div class="kl"><i style="background:#fff;color:#2457b8">ل</i><i style="background:#e33a30;color:#fff">و</i><i style="background:#3aa655;color:#fff">د</i><i style="background:#f6c928;color:#fff">و</i></div><div class="kk">V I P</div></div>
-<div id="rsm" class="kpanel" style="display:none"><div class="kt">بازی قبلی با کد <b id="rcode" dir="ltr"></b> هنوز هست</div><div><div class="krow2"><button class="kbtn sm" onclick="resume()">▶ برگشت به بازی</button><button class="kbtn sm alt" onclick="inviteWatch()">👁 لینک تماشا</button></div></div></div>
+<div id="rsm" class="kpanel" style="display:none"><div class="kt">بازی قبلی با کد <b id="rcode" dir="ltr"></b> هنوز هست</div><div><div class="krow2"><button class="kbtn sm" onclick="resume()">▶ ادامه بازی قبلی</button><button class="kbtn sm alt" onclick="freshGame()">🆕 بازی جدید</button></div></div></div>
 <div id="inv" style="display:none;color:#ffd76a;font-weight:700">دوستت تو را به بازی دعوت کرده است 💌</div>
 <input id="nm" class="kinp" maxlength="14" placeholder="اسمت را بنویس">
 <div class="ktiles"><button class="ktile" onclick="soloBots()"><b>🤖</b>با ربات‌ها</button><button class="ktile" onclick="mkRoom()"><b>👥</b>با دوستان</button></div>
 <div class="kpanel"><div class="kt">ورود با کد دوستت</div><div style="display:flex;gap:8px"><input id="cin" class="kinp" style="flex:1;direction:ltr;text-transform:uppercase;padding:10px" maxlength="4" placeholder="کد اتاق"><button class="rb on" onclick="joinCode()">ورود</button></div></div>
-<button class="lnk" onclick="SOC.about()">ℹ️ درباره ربات</button><a class="lnk" href="/">⬅ بازگشت به انتخاب بازی</a></div></div>
+<button class="lnk" onclick="SOC.about()">ℹ️ درباره ربات</button><a class="lnk" href="/games.html">⬅ بازگشت به انتخاب بازی</a></div></div>
 <div class="scr kg" id="lobby" style="display:none"><div class="fit"><div class="kh">اتاق <span id="rc"></span></div>
 <div class="krow2"><button class="kbtn sm" onclick="invite()">📨 دعوت دوستان</button><button class="kbtn sm alt" onclick="inviteWatch()">👁 تماشاچی</button></div>
 <div class="kpanel"><div class="kt">رنگ و بازیکنان</div><div id="room"></div></div>
 <div class="kpanel"><div class="kt">تعداد بازیکن</div><div id="cntRow" class="rbs"></div></div>
+<div class="kpanel" id="teamP" style="display:none"><div class="kt">⚔️</div><div id="teamRow" class="rbs"></div></div>
 <div class="kpanel"><div class="kt">نوع بازی</div><div id="modeRow" class="rbs"></div></div>
 <div class="kpanel"><div class="kt">مهرهٔ من</div><div id="tkRow" class="rbs"></div></div>
 <small id="lm" style="color:#dfe9ff"></small><button id="go" class="kbtn" onclick="sk.emit('start')">▶ شروع بازی</button><button id="gob" class="kbtn alt" onclick="sk.emit('start',{bots:1})">🤖 شروع با ربات‌ها</button>
-<div class="krow2"><button class="kbtn sm alt" onclick="SOC.openProfile()">👤 پروفایل</button><button class="kbtn sm alt" onclick="openSettingsModal()">⚙️ موزیک</button></div><a class="lnk" href="/">خروج</a></div></div>
+<div class="krow2"><button class="kbtn sm alt" onclick="SOC.openProfile()">👤 پروفایل</button><button class="kbtn sm alt" onclick="openSettingsModal()">⚙️ موزیک</button></div><a class="lnk" href="/games.html">خروج</a></div></div>
 <div id="game" style="display:none">
   <div class="prow" id="rowT"><div class="pl" id="ps0"><span class="dot" style="background:#2e9d46"></span><b id="pn0"></b><span class="cr" id="cr0"></span><div class="dice" id="d0"></div></div><div class="pl" id="ps1"><span class="dot" style="background:#f2b01e"></span><b id="pn1"></b><span class="cr" id="cr1"></span><div class="dice" id="d1"></div></div></div>
   <div id="bdw"><svg id="bd" viewBox="0 0 360 360"></svg></div>
@@ -232,7 +243,12 @@ sk.on('connect',()=>{$('net').style.display='none';try{if(Telegram.WebApp.initDa
 let away=false;
 sk.on('st',s=>{pv=st?st.ph:null;st=s;if(!s.isSpec)SV('ld_room',s.code);try{setSpec(s.spec||0);syncTrackFromState(s.track,s.playing)}catch(e){}if(away){$('rsm').style.display='block';$('rcode').textContent=s.code;return}try{SOC.onState(s)}catch(e){}onSt()});
 sk.on('err',m=>toast(m));
-sk.on('gone',()=>{away=false;SV('ld_room',null);st=null;$('rsm').style.display='none';scr('menu');toast('این اتاق دیگر وجود ندارد')});
+sk.on('gone',()=>{away=false;SV('ld_room',null);st=null;$('rsm').style.display='none';scr('menu');showEnded()});
+function freshGame(){SV('ld_room',null);away=false;st=null;$('rsm').style.display='none'}
+function showEnded(){const W=$('wt');W.innerHTML='<div class="box"><h2>⌛</h2>این بازی تمام شده یا منقضی شده است.<br>برای ادامه، یک بازی جدید شروع کن.<br><button class="kbtn" onclick="$(\'wt\').style.display=\'none\'">🎲 شروع بازی جدید</button></div>';W.style.display='flex'}
+let chkDone=0;
+sk.on('connect',()=>{if(!chkDone&&LD('ld_room')){chkDone=1;sk.emit('chk',{code:LD('ld_room'),token:tok})}});
+sk.on('chk',d=>{if(d.s==='alive'&&d.code===LD('ld_room')){$('rsm').style.display='block';$('rcode').textContent=d.code}else{SV('ld_room',null);$('rsm').style.display='none';if(!rq&&!wq)showEnded()}});
 let pend=null;
 sk.on('pick',d=>{pend={code:d.code};const W=$('wt');W.innerHTML='<div class="box"><h2>به کدام صندلی می‌نشینی؟</h2>بازی شروع شده؛ جای یکی از ربات‌ها می‌نشینی:'+d.list.map(x=>`<button class="btn go" style="margin-top:8px" onclick="takeSeat(${x.k})">${NAMES[x.k]}: ${x.n} (bot)</button>`).join('')+'</div>';W.style.display='flex'});
 function takeSeat(k){$('wt').style.display='none';sk.emit('take',{code:pend.code,name:nameV()||'بازیکن',token:tok,seat:k})}
@@ -240,18 +256,26 @@ function toast(t){const e=$('toast');e.textContent=t;e.style.display='block';cle
 function scr(n){$('menu').style.display=n=='menu'?'flex':'none';$('lobby').style.display=n=='lobby'?'flex':'none';$('game').style.display=n=='game'?'flex':'none';fit()}
 function fit(){['menu','lobby'].forEach(id=>{const sc=$(id);if(sc.style.display==='none')return;const w=sc.querySelector('.fit');if(!w)return;w.style.transform='none';const h=w.offsetHeight,wd=Math.max(w.scrollWidth,300),k=Math.min(1,(window.innerHeight-86)/h,(window.innerWidth-12)/wd);w.style.transform=k<.999?`scale(${k})`:'none'})}
 addEventListener('resize',fit);try{Telegram.WebApp.onEvent('viewportChanged',fit)}catch(e){}setTimeout(fit,400);setTimeout(fit,1200);
-(()=>{const q='<g stroke="#fff" stroke-opacity=".14" stroke-width="3" fill="none"><rect x="22" y="22" width="112" height="112" rx="15"/><rect x="196" y="176" width="124" height="124" rx="15"/><rect x="214" y="30" width="70" height="70" rx="12"/></g><g fill="#fff" fill-opacity=".12"><circle cx="54" cy="54" r="9"/><circle cx="102" cy="102" r="9"/><circle cx="102" cy="54" r="9"/><circle cx="54" cy="102" r="9"/><circle cx="240" cy="216" r="9"/><circle cx="276" cy="252" r="9"/><circle cx="258" cy="234" r="9"/><circle cx="249" cy="64" r="9"/><path d="M76 190l9 21 23 2-17 15 5 22-20-12-20 12 5-22-17-15 23-2z"/></g>';const svg='<svg xmlns="http://www.w3.org/2000/svg" width="340" height="340"><g transform="rotate(-18 170 170)">'+q+'</g></svg>';document.documentElement.style.setProperty('--lp','url("data:image/svg+xml,'+encodeURIComponent(svg)+'")')})();
+(()=>{const pip=(x,y,r,o)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" fill-opacity="${o}"/>`;
+const tl=(cx,cy,a,inner)=>`<g transform="rotate(${a} ${cx} ${cy})">${inner}</g>`;
+const one='<g>'
++tl(86,86,-16,'<rect x="22" y="22" width="128" height="128" rx="20" fill="#fff" fill-opacity=".06" stroke="#fff" stroke-opacity=".2" stroke-width="5"/>'+pip(56,56,10,.2)+pip(116,56,10,.2)+pip(86,86,10,.2)+pip(56,116,10,.2)+pip(116,116,10,.2))
++tl(246,246,14,'<rect x="190" y="190" width="112" height="112" rx="18" fill="#000" fill-opacity=".08" stroke="#fff" stroke-opacity=".16" stroke-width="5"/>'+pip(220,220,9,.18)+pip(246,246,9,.18)+pip(272,272,9,.18))
++tl(250,70,-8,'<rect x="214" y="34" width="72" height="72" rx="14" fill="none" stroke="#fff" stroke-opacity=".17" stroke-width="4"/>')
++'<path d="M80 196l9 21 23 2-17 15 5 22-20-12-20 12 5-22-17-15 23-2z" fill="#fff" fill-opacity=".14"/>'
++'<polygon points="168,168 200,168 184,196" fill="#ffd54a" fill-opacity=".16"/><polygon points="22,282 52,282 37,256" fill="#ff6a5a" fill-opacity=".14"/></g>';
+const svg='<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320">'+one+'</svg>';const u='url("data:image/svg+xml,'+encodeURIComponent(svg)+'")';document.documentElement.style.setProperty('--lp',u);document.documentElement.style.setProperty('--lpb',u)})();
 function nameV(){const n=($('nm').value||'').trim();if(!n){toast('اسمت را بنویس');return null}SV('fk_nm',n);return n}
 function mkRoom(){const n=nameV();if(n)sk.emit('create',{name:n,token:tok})}
 function joinCode(){const n=nameV(),c=$('cin').value.trim().toUpperCase();if(n&&c)sk.emit('join',{code:c,name:n,token:tok})}
 function goBack(){away=true;$('dcb').style.display='none';scr('menu');$('rsm').style.display='block';$('rcode').textContent=(st&&st.code)||LD('ld_room')}
 function resume(){if(away&&st){away=false;pv=null;try{SOC.onState(st)}catch(e){}onSt();sk.emit('rejoin',{code:st.code,token:tok})}else sk.emit('rejoin',{code:LD('ld_room'),token:tok})}
 function sit(k){sk.emit('sit',k)}
-function exitG(){if(confirm('از بازی خارج می‌شوی؟ بعداً با همان کد برمی‌گردی.'))location.href='/'}
+function exitG(){if(confirm('از بازی خارج می‌شوی؟ بعداً با همان کد برمی‌گردی.'))location.href='/games.html'}
 function shareTo(code,pre,text){const go=l=>{const u='https://t.me/share/url?url='+encodeURIComponent(l)+'&text='+encodeURIComponent(text);try{Telegram.WebApp.openTelegramLink(u)}catch(e){window.open(u,'_blank')}};fetch('/config').then(r=>r.json()).then(c=>go(c.bot?'https://t.me/'+c.bot+'?start='+pre+code:location.origin+'/ludo.html?'+(pre=='ldw_'?'watch':'room')+'='+code)).catch(()=>go(location.origin+'/ludo.html?'+(pre=='ldw_'?'watch':'room')+'='+code))}
 function invite(){shareTo(st.code,'ld_','بیا لودو بازی کنیم! 🎲 کد اتاق: '+st.code)}
 function inviteWatch(){shareTo(st.code,'ldw_','بیا بازی لودو را زنده تماشا کن! 👁 کد اتاق: '+st.code)}
-function onSt(){if(st.ph=='lobby'){scr('lobby');rLobby();clearGame();if(autoBots&&st.host){autoBots=0;const n=+LD('ld_n')||4;if(st.n!==n)sk.emit('cnt',n);sk.emit('start',{bots:1})}}else{autoBots=0;scr('game');if(pv==='lobby'||pv==null)resetGame();onGame(st)}
+function onSt(){if(st.ph=='lobby'){scr('lobby');rLobby();clearGame();if(autoBots&&st.host){autoBots=0;const n=+LD('ld_n')||4;if(st.n!==n)sk.emit('cnt',n);if(n===4&&+LD('ld_team'))sk.emit('team',1);sk.emit('start',{bots:1})}}else{autoBots=0;scr('game');if(pv==='lobby'||pv==null)resetGame();onGame(st)}
  if(!st.isSpec&&st.me>=0&&st.seats[st.me]&&(st.seats[st.me].tk|0)!==myTk)sk.emit('tk',myTk)}
 
 /* ---------- لابی ---------- */
@@ -260,15 +284,19 @@ let myTk=+LD('ld_tk')||0,autoBots=0;
 function soloBots(){const n=nameV();if(!n)return;autoBots=1;sk.emit('create',{name:n,token:tok})}
 function setCnt(n){SV('ld_n',n);sk.emit('cnt',n)}
 function pickTk(i){myTk=i;SV('ld_tk',i);sk.emit('tk',i);if(st&&st.ph==='lobby')rLobby()}
+const TB=k=>st.team&&st.n==4?(k%2?'🌙 ':'⭐ '):'';
+function setTeam(m){SV('ld_team',m);sk.emit('team',m)}
 function rLobby(){$('rc').textContent=st.code;
  $('cntRow').innerHTML=[2,3,4].map(n=>`<button class="rb ${st.n==n?'on':''}" ${st.host?`onclick="setCnt(${n})"`:'disabled'}>${PD(n)} نفره</button>`).join('');
+ $('teamP').style.display=st.n==4?'':'none';
+ $('teamRow').innerHTML=[['🙂🙂🙂🙂',0],['🙂🙂⚔️🙂🙂',1]].map(([x,m])=>`<button class="rb ${(st.team|0)==m?'on':''}" ${st.host?`onclick="setTeam(${m})"`:'disabled'}>${x}</button>`).join('');
  $('modeRow').innerHTML=[['کلاسیک',0],['یک مهره بیرون',1]].map(([t,m])=>`<button class="rb ${(st.mode|0)==m?'on':''}" ${st.host?`onclick="sk.emit('mode',${m})"`:'disabled'}>${t}</button>`).join('');
  $('tkRow').innerHTML=TKN.map((t,i)=>`<button class="rb tkb ${myTk==i?'on':''}" onclick="pickTk(${i})">${tokSvg(i,Math.max(0,st.me),30)}<span>${t}</span></button>`).join('');
  $('room').innerHTML=st.act.map(k=>{const s=st.seats[k],ic=tokSvg(s?s.tk|0:0,k,24),dot=`<i class="dot2" style="background:${COL[k]}"></i>`;
-  return s?`<div class="kr ${k==st.me?'me':''}" ${k!=st.me&&s.on?`onclick="SOC.swap(${k})"`:''}>${ic}<span style="flex:1;text-align:right">${s.n}${k==st.me?' (تو)':''}${s.b?' 🤖':''}${!s.on?' ⚠ قطع':''}</span>${dot}</div>`:`<div class="kr em" onclick="sit(${k})">${ic}<span style="flex:1;text-align:right">خالی (بزن تا بنشینی)</span>${dot}</div>`}).join('');
+  return s?`<div class="kr ${k==st.me?'me':''}" ${k!=st.me&&s.on?`onclick="SOC.swap(${k})"`:''}>${ic}<span style="flex:1;text-align:right">${TB(k)}${s.n}${k==st.me?' (تو)':''}${s.b?' 🤖':''}${!s.on?' ⚠ قطع':''}</span>${dot}</div>`:`<div class="kr em" onclick="sit(${k})">${ic}<span style="flex:1;text-align:right">${TB(k)}خالی (بزن تا بنشینی)</span>${dot}</div>`}).join('');
  const full=st.act.every(k=>st.seats[k]&&st.seats[k].on);
  $('go').style.display=$('gob').style.display=st.host?'block':'none';$('go').disabled=!full;
- $('lm').textContent=st.isSpec?'👁 تو تماشاچی هستی؛ منتظر شروع بازی…':st.host?(full?'همه آمده‌اند؛ شروع کن.':'تا همهٔ صندلی‌ها پر نشود «شروع بازی» فعال نمی‌شود. یا با ربات شروع کن.'):'منتظر شروع بازی توسط میزبان…'}
+ $('lm').textContent=st.isSpec?'👁 تو تماشاچی هستی؛ منتظر شروع بازی…':st.host?(full?'همه آمده‌اند؛ شروع کن.':'تا همهٔ صندلی‌ها پر نشود «شروع بازی» فعال نمی‌شود. یا با ربات شروع کن.'):'منتظر شروع بازی توسط میزبان…';fit()}
 
 /* ---------- هندسهٔ تخته ---------- */
 const COL=['#23863a','#efbe0a','#1f63c0','#c0261f'],DK=['#0f5223','#8f6a00','#0f428a','#7a1612'],NAMES=['سبز','زرد','آبی','قرمز'];
@@ -277,7 +305,7 @@ document.getElementById('gdefs').innerHTML='<defs>'+COL.map((c,s)=>`<radialGradi
  if(style===1)return `<rect x="-9" y="-9" width="18" height="10" fill="${d}"/><ellipse cx="0" cy="1" rx="9" ry="4" fill="${d}"/><ellipse cx="0" cy="-9" rx="9" ry="4.2" fill="${c}" stroke="${d}" stroke-width="1"/><ellipse cx="0" cy="-9" rx="5.4" ry="2.2" fill="none" stroke="#fff" stroke-opacity=".8"/><ellipse cx="-3" cy="-10.2" rx="2.2" ry=".9" fill="#fff" fill-opacity=".8"/>`;
  if(style===2)return `<path d="M-8,3 Q-8,-2 -4,-4 Q-6.5,-9 -2.6,-11 A5.4,5.4 0 1 1 2.6,-11 Q6.5,-9 4,-4 Q8,-2 8,3Z" fill="${g}" stroke="${d}" stroke-width="1.2"/><circle cx="-1.8" cy="-17" r="1.8" fill="#fff" fill-opacity=".8"/>`;
  if(style===3)return `<polygon points="0,-23 9,-13 6,-2 0,4 -6,-2 -9,-13" fill="${g}" stroke="${d}" stroke-width="1.2" stroke-linejoin="round"/><path d="M-9,-13 L0,-9 L9,-13 M0,-9 L0,4 M-6,-2 L0,-9 L6,-2" fill="none" stroke="#fff" stroke-opacity=".55"/><polygon points="-3,-18 0,-21 -1,-14" fill="#fff" fill-opacity=".7"/>`;
- return `<path d="M0,4 C-3.5,-1 -9,-5 -9,-13 A9,9 0 0 1 9,-13 C9,-5 3.5,-1 0,4Z" fill="url(#pbody)" stroke="#59606b"/><circle cx="0" cy="-13" r="5.8" fill="${g}" stroke="${d}" stroke-width=".9"/><ellipse cx="-2" cy="-15.4" rx="1.9" ry="1.2" fill="#fff" fill-opacity=".85"/>`}
+ return `<path d="M0,4 C-3,-.5 -7.6,-3.5 -7.6,-10.5 A7.6,7.6 0 0 1 7.6,-10.5 C7.6,-3.5 3,-.5 0,4Z" fill="url(#pbody)" stroke="#59606b"/><circle cx="0" cy="-10.5" r="4.9" fill="${g}" stroke="${d}" stroke-width=".9"/><ellipse cx="-1.7" cy="-12.5" rx="1.6" ry="1" fill="#fff" fill-opacity=".85"/>`}
 const tokSvg=(style,s,sz)=>`<svg viewBox="-14 -27 28 34" width="${sz}" height="${Math.round(sz*34/28)}">${tokShape(style,s)}</svg>`;
 const C=24,RING=[],add=(r,c)=>RING.push([r,c]);
 for(let c=1;c<=5;c++)add(6,c);for(let r=5;r>=0;r--)add(r,6);add(0,7);add(0,8);
@@ -312,18 +340,20 @@ function build(){if(built)return;built=true;const bd=$('bd');bd.innerHTML='';RT=
   const c1=E('text',{x:cx,y:cy-2,'text-anchor':'middle','font-size':52},g),l1=E('text',{x:cx,y:cy+42,'text-anchor':'middle','font-size':16,'font-weight':900,fill:'#fff','font-family':'Vazirmatn,Tahoma,sans-serif','style':'paint-order:stroke'},g);YO[s]={g,c:c1,l:l1,cx,cy}}
  E('g',{id:'tr'});E('g',{id:'pv'});const tl=E('g',{id:'tl'});
  for(let s=0;s<4;s++)for(let t=0;t<4;t++){const k=s*4+t,g=E('g',{class:'tk'},tl),gr=E('g',{class:'gr'},g);
-  E('ellipse',{cx:0,cy:4,rx:9.8,ry:4.2,fill:COL[s],stroke:'#6b1a14','stroke-width':1.5},gr);E('ellipse',{cx:0,cy:4,rx:6,ry:2.3,fill:'#000','fill-opacity':.18},gr);
-  const hl=E('ellipse',{class:'hl rg',cx:0,cy:4,rx:12.8,ry:5.6,fill:'none',stroke:'#ffe27a','stroke-width':2,'stroke-dasharray':'5 4'},gr);hl.style.opacity=0;
+  E('ellipse',{cx:0,cy:4,rx:6.2,ry:2.2,fill:'#000','fill-opacity':.22},gr);
+  const hh=E('ellipse',{class:'hl hh',cx:0,cy:4,rx:12,ry:5.2,fill:'none',stroke:'#fff','stroke-opacity':.55,'stroke-width':4.6},gr);hh.style.opacity=0;
+  const hl=E('ellipse',{class:'hl rg',cx:0,cy:4,rx:12,ry:5.2,fill:'none',stroke:'#0a0a0a','stroke-width':2.3,'stroke-dasharray':'6 4'},gr);hl.style.opacity=0;
   const inn=E('g',{class:'in'},g);inn.innerHTML=tokShape(0,s);E('circle',{cx:0,cy:-8,r:16,fill:'transparent'},g);
-  g.onclick=()=>{if(g.classList.contains('mvb'))sk.emit('move',t)};el[k]=g;IN[k]=inn;cur[k]={x:0,y:0,sc:1,lv:0}}}
-const BASE=.95,HOMESC=.82;
+  g.addEventListener('pointerdown',e=>{if(!g.classList.contains('mvb'))return;e.preventDefault();pickTok(t)});el[k]=g;IN[k]=inn;cur[k]={x:0,y:0,sc:1,lv:0}}}
+const BASE=.9,HOMESC=.5;
+function pickTok(t){sk.emit('move',t);hap('light');for(let k=0;k<16;k++){const g=el[k];g.classList.remove('mvb');SEL[k]=false;LF[k]=false;g.querySelectorAll('.hl').forEach(h=>h.style.opacity=0)}}
 function setPos(k,x,y,sc){if(sc==null)sc=cur[k].sc||1;el[k].setAttribute('transform',`translate(${x},${y}) rotate(${-ROT*90}) scale(${sc*BASE})`);cur[k].x=x;cur[k].y=y;cur[k].sc=sc}
 function lift(k,v){IN[k].setAttribute('transform',`translate(0,${-v.toFixed(2)})`);cur[k].lv=v}
 function tick(now){if(built)for(let k=0;k<16;k++){if(MV.has(k)||!cur[k])continue;const tgt=LF[k]?4.5+Math.sin(now/200+k)*1.1:0,l=cur[k].lv||0,nl=l+(tgt-l)*.2;if(Math.abs(nl-l)>.015||LF[k])lift(k,nl)}requestAnimationFrame(tick)}requestAnimationFrame(tick);
 const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
 function tween(k,to,ms,hop,sc1,lin){return new Promise(res=>{const a={...cur[k]},sc0=a.sc||1,l0=a.lv||0;if(sc1==null)sc1=sc0;const t0=performance.now();const f=now=>{const u=Math.min(1,(now-t0)/ms),e=lin?u:ease(u);const hv=hop?Math.sin(Math.PI*u):0;setPos(k,a.x+(to.x-a.x)*e,a.y+(to.y-a.y)*e,sc0+(sc1-sc0)*e+hv*.07*(hop>1?1.6:1));lift(k,hv*(hop>1?3.6:2.1)+l0*(1-e));if(u<1)requestAnimationFrame(f);else{setPos(k,to.x,to.y,sc1);lift(k,0);res()}};requestAnimationFrame(f)})}
 const AX=[[-1,0],[0,-1],[1,0],[0,1]];
-  function finPos(sd,t,pos){const arr=pos&&pos[sd]?pos[sd].map((p,i)=>p===56?i:-1).filter(i=>i>=0):[t],n=Math.max(1,arr.length),idx=Math.max(0,arr.indexOf(t)),m=7.5*C,o=AX[sd],pe=(idx-(n-1)/2)*6.5;return{x:m+o[0]*11+(o[0]?0:pe),y:m+o[1]*11+(o[1]?0:pe)}}
+  function finPos(sd,t,pos){const arr=pos&&pos[sd]?pos[sd].map((p,i)=>p===56?i:-1).filter(i=>i>=0):[t],n=Math.max(1,arr.length),idx=Math.max(0,arr.indexOf(t)),m=7.5*C,o=AX[sd],pe=(idx-(n-1)/2)*7.4;return{x:m+o[0]*17+(o[0]?0:pe),y:m+o[1]*17+(o[1]?0:pe)}}
 const hap=t=>{try{const h=Telegram.WebApp.HapticFeedback;t==='success'?h.notificationOccurred('success'):h.impactOccurred(t)}catch(e){}};
 function finishFx(sd){const g=E('g',{}),m=7.5*C,col=COL[sd];
  E('circle',{cx:m,cy:m,r:14,fill:col,class:'fxg'},g);
@@ -331,11 +361,11 @@ function finishFx(sd){const g=E('g',{}),m=7.5*C,col=COL[sd];
  for(let i=0;i<16;i++){const an=i/16*Math.PI*2+Math.random()*.3,d=38+Math.random()*34;E('circle',{cx:m,cy:m,r:2+Math.random()*2.4,fill:i%2?'#ffd76a':col,class:'fxs',style:`--dx:${Math.cos(an)*d}px;--dy:${Math.sin(an)*d}px;animation-delay:${Math.random()*.25}s`},g)}
  setTimeout(()=>g.remove(),2900)}
 function trail(c,sd){const g=E('circle',{cx:c.x,cy:c.y,r:13,fill:`url(#tg${sd})`,class:'trl'},$('tr'));setTimeout(()=>g.remove(),1100)}
-async function backTween(c){const[s2,t2,p2]=c,k=s2*4+t2,per=Math.min(90,1900/Math.max(1,p2));MV.add(k);try{const L=$('tl');if(L.lastChild!==el[k])L.appendChild(el[k]);for(let p=p2-1;p>=0;p--)await tween(k,coord(s2,p,t2),per,false,1,true);await tween(k,coord(s2,-1,t2),260,1,1)}finally{MV.delete(k)}}
+async function backTween(c){const[s2,t2,p2]=c,k=s2*4+t2,per=Math.min(40,900/Math.max(1,p2));MV.add(k);try{const L=$('tl');if(L.lastChild!==el[k])L.appendChild(el[k]);for(let p=p2-1;p>=0;p--)await tween(k,coord(s2,p,t2),per,false,1,true);await tween(k,coord(s2,-1,t2),220,1,1)}finally{MV.delete(k)}}
 async function animateMove(mv,s){const k=mv.s*4+mv.t;MV.add(k);
  try{const L=$('tl');if(L.lastChild!==el[k])L.appendChild(el[k]);const pts=[];
   if(mv.f===-1)pts.push(coord(mv.s,0));else for(let p=mv.f+1;p<=mv.to;p++)pts.push(p===56?finPos(mv.s,mv.t,s&&s.pos):coord(mv.s,p,mv.t));
-  let prev=mv.f===-1?null:coord(mv.s,mv.f,mv.t);for(let i=0;i<pts.length;i++){if(prev)trail(prev,mv.s);await tween(k,pts[i],mv.f===-1?460:240,mv.f===-1?2:1,(i===pts.length-1&&mv.to===56)?HOMESC:1);prev=pts[i]}
+  let prev=mv.f===-1?null:coord(mv.s,mv.f,mv.t);for(let i=0;i<pts.length;i++){if(prev)trail(prev,mv.s);await tween(k,pts[i],mv.f===-1?300:130,mv.f===-1?2:1,(i===pts.length-1&&mv.to===56)?HOMESC:1,mv.f!==-1&&i<pts.length-1);prev=pts[i]}
   if(mv.to===56){finishFx(mv.s);hap('success')}}finally{MV.delete(k)}
  if(mv.caps.length){hap('medium');const b=$('bdw');b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');await Promise.all(mv.caps.map(backTween))}}
 
@@ -345,18 +375,31 @@ const face=v=>Array.from({length:9},(_,i)=>`<i${(ON[v]||[]).includes(i)?' class=
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const FIN={1:[0,0],2:[0,-90],3:[-90,0],4:[90,0],5:[0,90],6:[0,180]};
 $('cube').innerHTML=[1,2,3,4,5,6].map(n=>`<div class="cf cf${n}">${face(n)}</div>`).join('');
-async function diceAnim(seat,v){const d=$('d'+seat),big=$('bigd'),cube=$('cube');lastDice[seat]=v;d.classList.add('roll');
- try{const dr=d.getBoundingClientRect(),br=$('bdw').getBoundingClientRect(),y=YARD[seat],a=ROT*Math.PI/2,dx=(y[0]+3)*C-180,dy=(y[1]+3)*C-180,rx=180+dx*Math.cos(a)-dy*Math.sin(a),ry=180+dx*Math.sin(a)+dy*Math.cos(a);
-  const tx=br.left+rx/360*br.width-38,ty=br.top+ry/360*br.height-38,fx=dr.left+dr.width/2-38,fy=dr.top+dr.height/2-38,F=FIN[v];
-  cube.getAnimations().forEach(x=>x.cancel());cube.style.transform='rotateX(-28deg) rotateY(32deg)';big.style.display='block';
-  await big.animate([{transform:`translate(${fx}px,${fy}px) scale(.5)`},{transform:`translate(${tx}px,${ty}px) scale(1)`}],{duration:130,easing:'ease-out',fill:'forwards'}).finished;
-  cube.animate([{transform:'rotateX(-28deg) rotateY(32deg)'},{transform:`rotateX(${F[0]+720}deg) rotateY(${F[1]+1080}deg)`}],{duration:470,easing:'cubic-bezier(.12,.6,.22,1)',fill:'forwards'});
-  await big.animate([{transform:`translate(${tx}px,${ty}px) scale(1)`},{transform:`translate(${tx}px,${ty-34}px) scale(1.12)`,offset:.42},{transform:`translate(${tx}px,${ty}px) scale(1)`}],{duration:470,easing:'ease-in-out',fill:'forwards'}).finished;
-  hap('light');await sleep(110);
-  big.animate([{transform:`translate(${tx}px,${ty}px) scale(1)`,opacity:1},{transform:`translate(${fx}px,${fy}px) scale(.5)`,opacity:0}],{duration:190,easing:'ease-in',fill:'forwards'}).finished.then(()=>{big.style.display='none'}).catch(()=>{})
- }catch(e){big.style.display='none';await sleep(300)}
- d.classList.remove('roll');d.innerHTML=face(v)}
-$('d0').onclick=$('d1').onclick=$('d2').onclick=$('d3').onclick=function(){const i=+this.id[1];if(st&&!st.isSpec&&st.me===i&&st.turn===i&&st.stage==='roll'&&!pendN)sk.emit('roll')};
+const RV=[null,null,null,null],MINT=360,LAND=270,eo=u=>1-Math.pow(1-u,3);let pre=0;
+function rollStart(seat){
+  if(RV[seat])return RV[seat];
+  const d=$('d'+seat);d.classList.remove('can');d.classList.add('roll');
+  const R=RV[seat]={t0:performance.now(),v:0,tl:0,ang:0,fl:0};R.p=new Promise(res=>R.res=res);
+  const end=v=>{if(RV[seat]!==R)return;RV[seat]=null;d.style.transform='';d.style.zIndex='';d.classList.remove('roll');d.innerHTML=face(v||lastDice[seat]);R.res()};
+  const f=now=>{
+    if(RV[seat]!==R)return;
+    const t=now-R.t0;if(!R.v&&t>3500)return end(0);
+    if(!R.tl&&now-R.fl>62){R.fl=now;d.innerHTML=face(1+(Math.random()*6|0))}
+    let lift,ang,lu=0;
+    if(R.v&&t>=MINT){if(!R.tl){R.tl=now;R.a0=R.ang;R.tg=(Math.floor((R.a0+240)/360)+1)*360;d.innerHTML=face(R.v)}
+      lu=Math.min(1,(now-R.tl)/LAND);ang=R.a0+(R.tg-R.a0)*eo(lu);lift=Math.pow(1-lu,2)+(lu>.72?Math.sin((lu-.72)/.28*Math.PI)*.1:0)}
+    else{lift=eo(Math.min(1,t/120));ang=t*.8}
+    R.ang=ang;const w=1-lu;
+    d.style.zIndex=30;d.style.transform=`translateY(${(-lift*20).toFixed(1)}px) scale(${(1+lift*.55).toFixed(3)}) perspective(150px) rotateX(${(Math.sin(t/75)*26*w).toFixed(1)}deg) rotateY(${(Math.cos(t/95)*20*w).toFixed(1)}deg) rotateZ(${ang.toFixed(1)}deg)`;
+    if(R.tl&&lu>=1)return end(R.v);
+    requestAnimationFrame(f)};
+  requestAnimationFrame(f);return R}
+async function diceAnim(seat,v){lastDice[seat]=v;const R=RV[seat]||rollStart(seat);R.v=v||lastDice[seat]||1;hap('light');await Promise.race([R.p,sleep(1800)])}
+function tapDice(i){
+  if(!st||st.isSpec||st.me!==i||st.ph!=='play')return;
+  if(st.turn===i&&st.stage==='roll'&&!RV[i]){rollStart(i);sk.emit('roll');return}
+  if(!RV[i])pre=Date.now()+1200}
+[0,1,2,3].forEach(i=>$('d'+i).addEventListener('pointerdown',e=>{e.preventDefault();tapDice(i)}));
 
 /* ---------- صف انیمیشن‌ها و نمایش ---------- */
 let Q=Promise.resolve(),lastSeq=-1,lastRs=-1,pendN=0,lastFin=0,autoKey=-1,qAt=Date.now(),lastLay='';
@@ -372,7 +415,7 @@ function onGame(s){
  qn(()=>renderAll(s));qn(()=>{pendN--});
  announceFin(s);
 }
-setInterval(()=>{if(st&&pendN>0&&Date.now()-qAt>6500){Q=Promise.resolve();pendN=0;if(st.mv)lastSeq=st.mv.seq;lastRs=st.rs;try{renderAll(st)}catch(e){}}},2000);
+setInterval(()=>{if(st&&pendN>0&&Date.now()-qAt>3500){Q=Promise.resolve();pendN=0;if(st.mv)lastSeq=st.mv.seq;lastRs=st.rs;try{renderAll(st)}catch(e){}}},2000);
   const CROWN=['👑','🥈','🥉'],ORDN=['اول','دوم','سوم'];
 function announceFin(s){const f=s.fin||[];if(f.length>lastFin){const k=f[f.length-1],n=(s.seats[k]&&s.seats[k].n)||NAMES[k],b=$('fnb');lastFin=f.length;qn(()=>{b.textContent=CROWN[f.length-1]+' '+n+' '+ORDN[f.length-1]+' شد!';b.style.display='block';b.style.animation='none';void b.offsetWidth;b.style.animation='';clearTimeout(announceFin.t);announceFin.t=setTimeout(()=>b.style.display='none',2800)})}else lastFin=f.length}
 function renderAll(s){
@@ -382,11 +425,11 @@ function renderAll(s){
  if(rk!==ROT||!RT.getAttribute('transform')){ROT=rk;RT.setAttribute('transform',`rotate(${rk*90} 180 180)`);STT.forEach(([t,x,y])=>t.setAttribute('transform',`rotate(${-rk*90} ${x} ${y})`))}
  if(lastLay!==''+rk){lastLay=''+rk;[['rowT',[0,1]],['rowB',[3,2]]].forEach(([id,sl])=>sl.forEach(c=>$(id).appendChild($('ps'+((c-rk+4)%4)))))}
  for(let q=0;q<4;q++){const on=act.includes(q),sd=s.seats[q],bx=$('ps'+q);bx.style.display='flex';bx.style.visibility=on?'visible':'hidden';bx.style.setProperty('--c',COL[q]);
-  $('pn'+q).textContent=sd?sd.n:NAMES[q];
+  $('pn'+q).textContent=(s.team?(q%2?'🌙 ':'⭐ '):'')+(sd?sd.n:NAMES[q]);
   const fi=(s.fin||[]).indexOf(q);$('cr'+q).textContent=fi>=0?CROWN[fi]||'':'';bx.classList.toggle('fin',fi>=0);
   bx.classList.toggle('on',s.ph==='play'&&s.turn===q);
   const d=$('d'+q);if(!d.classList.contains('roll'))d.innerHTML=face(lastDice[q]);
-  d.classList.toggle('can',!s.isSpec&&s.me===q&&s.turn===q&&s.stage==='roll'&&s.ph==='play');
+  d.classList.toggle('can',!s.isSpec&&s.me===q&&s.turn===q&&s.stage==='roll'&&s.ph==='play'&&!RV[q]);
   const sty=sd?sd.tk|0:0;if(TS[q]!==sty){TS[q]=sty;for(let t=0;t<4;t++)IN[q*4+t].innerHTML=tokShape(sty,q)}
   const Y=YO[q];let cr='',lab='';
   if(on&&s.ph==='over'&&rank.length&&rank[rank.length-1]===q){cr='💀';lab='نفر آخر'}else if(on&&fi>=0){cr=CROWN[fi]||'🏅';lab='نفر '+ORDN[fi]}
@@ -395,25 +438,26 @@ function renderAll(s){
    const p=s.pos?s.pos[q][t]:-1;if(p===56){const c=finPos(q,t,s.pos);if(!MV.has(k))setPos(k,c.x,c.y,HOMESC);continue}const c=coord(q,p,t),key=Math.round(c.x)+','+Math.round(c.y);(groups[key]=groups[key]||[]).push([k,c,p])}}
  const LAY={1:[[0,0]],2:[[-7,1],[7,1]],3:[[-8,4],[8,4],[0,-6]],4:[[-8,-6],[8,-6],[-8,6],[8,6]]};
  for(const key in groups){const a=groups[key],n=a.length;a.forEach(([k,c,p],i)=>{if(MV.has(k))return;const o=p===-1?[0,0]:(LAY[Math.min(n,4)][i]||[0,0]);setPos(k,c.x+o[0],c.y+o[1],(p===-1||n===1)?1:.8)})}
- const mov=s.mov||[];
- for(let q=0;q<4;q++)for(let t=0;t<4;t++){const k=q*4+t,g=el[k],on=!s.isSpec&&q===s.me&&mov.includes(t)&&s.stage==='move'&&s.ph==='play',pop=!on&&s.ph==='play'&&s.stage==='move'&&q===s.turn&&(s.mv2||[]).includes(t);g.classList.toggle('mvb',on);SEL[k]=on||pop;LF[k]=(on||pop)&&s.pos&&s.pos[q][t]===-1;g.querySelector('.hl').style.opacity=(on||pop)?1:0}
+ const mov=s.mov||[],CT=s.ctl==null?s.turn:s.ctl;
+ for(let q=0;q<4;q++)for(let t=0;t<4;t++){const k=q*4+t,g=el[k],on=!s.isSpec&&s.me===s.turn&&q===CT&&mov.includes(t)&&s.stage==='move'&&s.ph==='play',pop=!on&&s.ph==='play'&&s.stage==='move'&&q===CT&&(s.mv2||[]).includes(t);g.classList.toggle('mvb',on);SEL[k]=on||pop;LF[k]=(on||pop)&&s.pos&&s.pos[q][t]===-1;g.querySelectorAll('.hl').forEach(h=>h.style.opacity=(on||pop)?1:0)}
  const pv=$('pv');pv.innerHTML='';
- if(!s.isSpec&&s.me>=0&&s.ph==='play'&&s.stage==='move'&&s.turn===s.me&&mov.length)mov.forEach(t=>{const f=s.pos[s.me][t],to=f===-1?0:f+s.dice,c=to>=56?finPos(s.me,t,s.pos):coord(s.me,to,t);E('circle',{cx:c.x,cy:c.y,r:9,fill:'#ffd76a','fill-opacity':.28,stroke:'#ffd76a','stroke-width':2,'stroke-dasharray':'3 3',class:'pvc'},pv)});
  const nm=q=>(s.seats[q]&&s.seats[q].n)||NAMES[q];let m='';
  if(s.ph==='over')m='🏆 بازی تمام شد';
  else if((s.fin||[]).includes(s.me)&&!s.isSpec)m='تو تمام کردی 👑؛ بقیه هنوز بازی می‌کنند';
- else if(s.stage==='roll')m=(!s.isSpec&&s.me===s.turn)?'نوبت توست؛ تاس را بزن 🎲':'نوبت '+nm(s.turn);
+ else if(s.team&&s.stage==='move'&&!s.isSpec&&s.me===s.turn&&CT!==s.me)m='مهرهٔ یارت را حرکت بده 🤝';
+  else if(s.stage==='roll')m=(!s.isSpec&&s.me===s.turn)?'نوبت توست؛ تاس را بزن 🎲':'نوبت '+nm(s.turn);
  else if(s.stage==='move')m=(!s.isSpec&&s.me===s.turn)?'یکی از مهره‌های چشمک‌زن را انتخاب کن':nm(s.turn)+' در حال انتخاب مهره…';
  $('lmsg').textContent=m;
  const DB=$('dcb');if(s.wait!=null&&!s.isSpec){DB.innerHTML=`<span>⚠️ ${nm(s.wait)} اینترنتش قطع شد؛ منتظر اتصالش هستیم…</span><button onclick="sk.emit('replace')">🤖 جایگزین ربات</button>`;DB.style.display='flex'}else DB.style.display='none'
- try{SOC.afterDraw(s)}catch(e){}
+ if(pre>Date.now()&&!s.isSpec&&s.me===s.turn&&s.stage==='roll'&&s.ph==='play'&&!RV[s.me]){pre=0;rollStart(s.me);sk.emit('roll')}
+  try{SOC.afterDraw(s)}catch(e){}
 }
 const u=new URLSearchParams(location.search),wq=u.get('watch'),rq=u.get('room');
 try{Telegram.WebApp.ready();Telegram.WebApp.expand()}catch(e){}
 $('nm').value=LD('fk_nm')||(()=>{try{return Telegram.WebApp.initDataUnsafe.user.first_name}catch(e){return ''}})()||'';
 if(rq){$('cin').value=rq.toUpperCase();$('inv').style.display='block'}
 if(wq){const go=()=>sk.emit('watch',{code:wq});sk.connected?go():sk.once('connect',go)}
-if(LD('ld_room')){$('rsm').style.display='block';$('rcode').textContent=LD('ld_room')}
+
 </script>
 <script src="custom.js"></script>
 <script src="social.js"></script></body></html>
