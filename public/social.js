@@ -242,6 +242,7 @@
     if (!s) return null;
     if (GAME === 'mf' && s.g && s.g.phase === 'series') { const t = s.g.ser[0] >= 5 ? 0 : 1; return { win: t, a: s.g.ser[t], b: s.g.ser[1 - t], key: s.code + '|mf|' + s.g.ser.join('-'), unit: 'سری' }; }
     if (GAME === 'fk' && s.ph === 'over' && s.res) { const t = s.res.w; return { win: t, a: s.sc[t], b: s.sc[1 - t], key: s.code + '|fk|' + s.sc.join('-'), unit: 'امتیاز' }; }
+    if (GAME === 'ld' && s.ph === 'over' && s.team && s.th && s.rank && s.rank.length > 1) { const w = s.rank[0] & 1; return { win: w, a: s.th[w], b: s.th[1 - w], key: s.code + '|ldt|' + s.rank.join(''), unit: 'مهره' }; }
     if (GAME === 'ld' && s.ph === 'over' && s.rank && s.rank.length > 1) return { ld: true, key: s.code + '|ld|' + s.rank.join('') };
     return null;
   }
