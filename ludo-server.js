@@ -6,7 +6,7 @@ const SAFE = new Set([0, 13, 26, 39, 8, 21, 34, 47]); // خانهٔ شروع و 
 const ACT = { 2: [0, 2], 3: [0, 1, 2], 4: [0, 1, 2, 3] };
 const ORD = { 2: [0, 2], 3: [0, 1, 2], 4: [0, 2, 1, 3] };
 const ring = (s, p) => (START[s] + p) % 52;
-const STEP_MS = 130, OUT_MS = 300, ROLL_BUSY = 640;   // باید با ludo.html هماهنگ باشد
+const STEP_MS = 130, OUT_MS = 520, ROLL_BUSY = 900;   // باید با ludo.html هماهنگ باشد
 const mate = s => (s + 2) % 4;
 const FC = ['f1','f2','f3','f4','f5','f6','f7','f8','f9','f10'], GC = ['g1','g2','g3','g4','g5','g6','g7','g8','g9','g10'];
 module.exports = function (io) {
@@ -24,7 +24,6 @@ module.exports = function (io) {
     for (let t = 0; t < 4; t++) {
       const p = own[t]; if (p === 56 || (p === -1 && v !== 6)) continue;
       const to = p === -1 ? 0 : p + v; if (to > 56) continue;
-      if (to < 56) { const safe = to <= 50 && SAFE.has(ring(s, to)); if (!safe && own.some((q, u) => u !== t && q === to)) continue; }
       m.push(t);
     }
     return m;
@@ -84,6 +83,7 @@ module.exports = function (io) {
       }
       return Math.min(pr, .95);
     };
+    const cnt = (s2, idx, skip) => { let n = 0; for (let t2 = 0; t2 < 4; t2++) { const p2 = r.pos[s2][t2]; if (t2 !== skip && p2 >= 0 && p2 <= 50 && ring(s2, p2) === idx) n++; } return n; };
     let best = r.mov[0], bs = -1e9;
     for (const t of r.mov) {
       const f = mine[t], to = f === -1 ? 0 : f + v; let sc = Math.random() * 2;
@@ -91,13 +91,16 @@ module.exports = function (io) {
       if (to <= 50) {
         const idx = ring(s, to), safe = SAFE.has(idx);
         if (!safe) {
-          for (const s2 of enemies) for (let t2 = 0; t2 < 4; t2++) { const p2 = r.pos[s2][t2]; if (p2 >= 0 && p2 <= 50 && ring(s2, p2) === idx) sc += 85 + p2 * 2; }
-          after = danger(idx);
-          // پشت سر مهرهٔ حریف بودن = تهدید برای او
-          for (const s2 of enemies) for (let t2 = 0; t2 < 4; t2++) { const p2 = r.pos[s2][t2]; if (p2 < 0 || p2 > 50) continue; const ie = ring(s2, p2), d = (ie - idx + 52) % 52; if (d >= 1 && d <= 6 && to + d <= 50 && !SAFE.has(ie)) sc += (30 + p2 * .7) / 6 * .7; }
+          for (const s2 of enemies) if (cnt(s2, idx, -1) === 1) for (let t2 = 0; t2 < 4; t2++) { const p2 = r.pos[s2][t2]; if (p2 >= 0 && p2 <= 50 && ring(s2, p2) === idx) sc += 85 + p2 * 2; }
+          if (cnt(s, idx, t) >= 1) { after = 0; sc += 12; } else after = danger(idx);   // کنار مهرهٔ خودم = دیوار
+          for (const s2 of enemies) for (let t2 = 0; t2 < 4; t2++) { const p2 = r.pos[s2][t2]; if (p2 < 0 || p2 > 50) continue; const ie = ring(s2, p2), d = (ie - idx + 52) % 52; if (d >= 1 && d <= 6 && to + d <= 50 && !SAFE.has(ie) && cnt(s2, ie, -1) === 1) sc += (30 + p2 * .7) / 6 * .7; }
         } else if (f < 0 || !SAFE.has(ring(s, f))) sc += 9;
       }
-      if (f >= 0 && f <= 50 && !SAFE.has(ring(s, f))) before = danger(ring(s, f));
+      if (f >= 0 && f <= 50 && !SAFE.has(ring(s, f))) {
+        const stacked = cnt(s, ring(s, f), t) >= 1;
+        if (stacked) { const dg = danger(ring(s, f)); sc -= val(f) * dg; }   // با رفتن یکی، آن یکی بدون دیوار می‌ماند
+        else before = danger(ring(s, f));
+      }
       if (to === 56) sc += 100; else if (to >= 51 && f < 51) sc += 38;
       if (f === -1) sc += outN === 0 ? 70 : outN === 1 ? 48 : outN === 2 ? 34 : 24;
       sc += val(Math.max(f, 0)) * before - val(to) * after;
@@ -131,7 +134,11 @@ module.exports = function (io) {
     const caps = []; let bonus = v === 6;
     if (to <= 50) {
       const idx = ring(s, to);
-      if (!SAFE.has(idx)) for (const s2 of act(r)) { if (!foe(r, s, s2)) continue; for (let t2 = 0; t2 < 4; t2++) { const p2 = r.pos[s2][t2]; if (p2 >= 0 && p2 <= 50 && ring(s2, p2) === idx) { caps.push([s2, t2, p2]); r.pos[s2][t2] = -1; } } }
+      if (!SAFE.has(idx)) for (const s2 of act(r)) {
+        if (!foe(r, s, s2)) continue;
+        const here = [0, 1, 2, 3].filter(t2 => { const p2 = r.pos[s2][t2]; return p2 >= 0 && p2 <= 50 && ring(s2, p2) === idx; });
+        if (here.length === 1) { caps.push([s2, here[0], r.pos[s2][here[0]]]); r.pos[s2][here[0]] = -1; }   // دو مهرهٔ هم‌رنگ روی یک خانه = دیوار، زده نمی‌شود
+      }
     }
     if (caps.length || to === 56) bonus = true;
     r.mv = { s, t, f, to, caps, v, seq: ++r.mseq }; r.mov = []; r.busy = Date.now() + animMs(f, to, caps);
