@@ -194,6 +194,7 @@ body.pg-ld #menu.scr.kg,body.pg-ld #lobby.scr.kg{background:radial-gradient(elli
 .rb.tkb{min-width:62px;padding:5px 4px;display:flex;flex-direction:column;align-items:center;gap:0;font-size:11px}
 
 /* ===== round 2 ===== */
+html,body{overflow:hidden!important;overscroll-behavior:none}#game{overflow:hidden;max-width:100vw}
 #game,body.pg-ld #menu.scr.kg,body.pg-ld #lobby.scr.kg{background:var(--lpb),radial-gradient(ellipse at 50% 20%,#4c8df0 0%,#2a62c8 48%,#123a8a 100%)!important;background-size:300px 300px,auto!important}
 #game .idTag{background:none;padding:0;color:#ffffff47;font-size:10px;font-weight:700;letter-spacing:.06em;margin-top:2px}
 .gb{padding:4px 10px;font-size:10.5px;border-radius:9px;border-bottom-width:2px;opacity:.88}.grow{gap:6px}
@@ -214,7 +215,7 @@ body.pg-ld #specBadge{font-size:9px!important;padding:1px 7px!important;left:aut
 <input id="nm" class="kinp" maxlength="14" placeholder="اسمت را بنویس">
 <div class="ktiles"><button class="ktile" onclick="soloBots()"><b>🤖</b>با ربات‌ها</button><button class="ktile" onclick="mkRoom()"><b>👥</b>با دوستان</button></div>
 <div class="kpanel"><div class="kt">ورود با کد دوستت</div><div style="display:flex;gap:8px"><input id="cin" class="kinp" style="flex:1;direction:ltr;text-transform:uppercase;padding:10px" maxlength="4" placeholder="کد اتاق"><button class="rb on" onclick="joinCode()">ورود</button></div></div>
-<button class="lnk" onclick="SOC.about()">ℹ️ درباره ربات</button><a class="lnk" href="/games.html">⬅ بازگشت به انتخاب بازی</a></div></div>
+<button class="lnk" onclick="SOC.about()">ℹ️ درباره ربات</button><a class="lnk" href="/">⬅ بازگشت به انتخاب بازی</a></div></div>
 <div class="scr kg" id="lobby" style="display:none"><div class="fit"><div class="kh">اتاق <span id="rc"></span></div>
 <div class="krow2"><button class="kbtn sm" onclick="invite()">📨 دعوت دوستان</button><button class="kbtn sm alt" onclick="inviteWatch()">👁 تماشاچی</button></div>
 <div class="kpanel"><div class="kt">رنگ و بازیکنان</div><div id="room"></div></div>
@@ -223,7 +224,7 @@ body.pg-ld #specBadge{font-size:9px!important;padding:1px 7px!important;left:aut
 <div class="kpanel"><div class="kt">نوع بازی</div><div id="modeRow" class="rbs"></div></div>
 <div class="kpanel"><div class="kt">مهرهٔ من</div><div id="tkRow" class="rbs"></div></div>
 <small id="lm" style="color:#dfe9ff"></small><button id="go" class="kbtn" onclick="sk.emit('start')">▶ شروع بازی</button><button id="gob" class="kbtn alt" onclick="sk.emit('start',{bots:1})">🤖 شروع با ربات‌ها</button>
-<div class="krow2"><button class="kbtn sm alt" onclick="SOC.openProfile()">👤 پروفایل</button><button class="kbtn sm alt" onclick="openSettingsModal()">⚙️ موزیک</button></div><a class="lnk" href="/games.html">خروج</a></div></div>
+<div class="krow2"><button class="kbtn sm alt" onclick="SOC.openProfile()">👤 پروفایل</button><button class="kbtn sm alt" onclick="openSettingsModal()">⚙️ موزیک</button></div><a class="lnk" href="/">خروج</a></div></div>
 <div id="game" style="display:none">
   <div class="prow" id="rowT"><div class="pl" id="ps0"><span class="dot" style="background:#2e9d46"></span><b id="pn0"></b><span class="cr" id="cr0"></span><div class="dice" id="d0"></div></div><div class="pl" id="ps1"><span class="dot" style="background:#f2b01e"></span><b id="pn1"></b><span class="cr" id="cr1"></span><div class="dice" id="d1"></div></div></div>
   <div id="bdw"><svg id="bd" viewBox="0 0 360 360"></svg></div>
@@ -234,6 +235,7 @@ body.pg-ld #specBadge{font-size:9px!important;padding:1px 7px!important;left:aut
 
 <script>const SV=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}},LD=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
 const $=id=>document.getElementById(id);
+  const SS=(k,v)=>{try{v==null?sessionStorage.removeItem(k):sessionStorage.setItem(k,v)}catch(e){}},LS=k=>{try{return sessionStorage.getItem(k)}catch(e){return null}};
   let tok=LD('fk_tok');if(!tok){tok=Math.random().toString(36).slice(2)+Date.now().toString(36);SV('fk_tok',tok)}
 let st=null,pv=null,dis=null;
 const sk=io('/ludo');
@@ -243,12 +245,13 @@ sk.on('connect',()=>{$('net').style.display='none';try{if(Telegram.WebApp.initDa
 let away=false;
 sk.on('st',s=>{pv=st?st.ph:null;st=s;if(!s.isSpec)SV('ld_room',s.code);try{setSpec(s.spec||0);syncTrackFromState(s.track,s.playing)}catch(e){}if(away){$('rsm').style.display='block';$('rcode').textContent=s.code;return}try{SOC.onState(s)}catch(e){}onSt()});
 sk.on('err',m=>toast(m));
-sk.on('gone',()=>{away=false;SV('ld_room',null);st=null;$('rsm').style.display='none';scr('menu');showEnded()});
-function freshGame(){SV('ld_room',null);away=false;st=null;$('rsm').style.display='none'}
+sk.on('gone',()=>{SS('ld_play',null);away=false;SV('ld_room',null);st=null;$('rsm').style.display='none';scr('menu');showEnded()});
+function freshGame(){SS('ld_play',null);SV('ld_room',null);away=false;st=null;$('rsm').style.display='none'}
 function showEnded(){const W=$('wt');W.innerHTML='<div class="box"><h2>⌛</h2>این بازی تمام شده یا منقضی شده است.<br>برای ادامه، یک بازی جدید شروع کن.<br><button class="kbtn" onclick="$(\'wt\').style.display=\'none\'">🎲 شروع بازی جدید</button></div>';W.style.display='flex'}
 let chkDone=0;
 sk.on('connect',()=>{if(!chkDone&&LD('ld_room')){chkDone=1;sk.emit('chk',{code:LD('ld_room'),token:tok})}});
-sk.on('chk',d=>{if(d.s==='alive'&&d.code===LD('ld_room')){$('rsm').style.display='block';$('rcode').textContent=d.code}else{SV('ld_room',null);$('rsm').style.display='none';if(!rq&&!wq)showEnded()}});
+sk.on('chk',d=>{if(d.s==='alive'&&d.code===LD('ld_room')&&LS('ld_play')==='1'&&!rq&&!wq){resume();return}
+  if(d.s==='alive'&&d.code===LD('ld_room')){$('rsm').style.display='block';$('rcode').textContent=d.code}else{SV('ld_room',null);$('rsm').style.display='none';if(!rq&&!wq)showEnded()}});
 let pend=null;
 sk.on('pick',d=>{pend={code:d.code};const W=$('wt');W.innerHTML='<div class="box"><h2>به کدام صندلی می‌نشینی؟</h2>بازی شروع شده؛ جای یکی از ربات‌ها می‌نشینی:'+d.list.map(x=>`<button class="btn go" style="margin-top:8px" onclick="takeSeat(${x.k})">${NAMES[x.k]}: ${x.n} (bot)</button>`).join('')+'</div>';W.style.display='flex'});
 function takeSeat(k){$('wt').style.display='none';sk.emit('take',{code:pend.code,name:nameV()||'بازیکن',token:tok,seat:k})}
@@ -268,20 +271,20 @@ const svg='<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320">'+on
 function nameV(){const n=($('nm').value||'').trim();if(!n){toast('اسمت را بنویس');return null}SV('fk_nm',n);return n}
 function mkRoom(){const n=nameV();if(n)sk.emit('create',{name:n,token:tok})}
 function joinCode(){const n=nameV(),c=$('cin').value.trim().toUpperCase();if(n&&c)sk.emit('join',{code:c,name:n,token:tok})}
-function goBack(){away=true;$('dcb').style.display='none';scr('menu');$('rsm').style.display='block';$('rcode').textContent=(st&&st.code)||LD('ld_room')}
+function goBack(){SS('ld_play',null);away=true;$('dcb').style.display='none';scr('menu');$('rsm').style.display='block';$('rcode').textContent=(st&&st.code)||LD('ld_room')}
 function resume(){if(away&&st){away=false;pv=null;try{SOC.onState(st)}catch(e){}onSt();sk.emit('rejoin',{code:st.code,token:tok})}else sk.emit('rejoin',{code:LD('ld_room'),token:tok})}
 function sit(k){sk.emit('sit',k)}
-function exitG(){if(confirm('از بازی خارج می‌شوی؟ بعداً با همان کد برمی‌گردی.'))location.href='/games.html'}
+function exitG(){if(confirm('از بازی خارج می‌شوی؟ بعداً با همان کد برمی‌گردی.')){SS('ld_play',null);location.href='/'}}
 function shareTo(code,pre,text){const go=l=>{const u='https://t.me/share/url?url='+encodeURIComponent(l)+'&text='+encodeURIComponent(text);try{Telegram.WebApp.openTelegramLink(u)}catch(e){window.open(u,'_blank')}};fetch('/config').then(r=>r.json()).then(c=>go(c.bot?'https://t.me/'+c.bot+'?start='+pre+code:location.origin+'/ludo.html?'+(pre=='ldw_'?'watch':'room')+'='+code)).catch(()=>go(location.origin+'/ludo.html?'+(pre=='ldw_'?'watch':'room')+'='+code))}
 function invite(){shareTo(st.code,'ld_','بیا لودو بازی کنیم! 🎲 کد اتاق: '+st.code)}
 function inviteWatch(){shareTo(st.code,'ldw_','بیا بازی لودو را زنده تماشا کن! 👁 کد اتاق: '+st.code)}
-function onSt(){if(st.ph=='lobby'){scr('lobby');rLobby();clearGame();if(autoBots&&st.host){autoBots=0;const n=+LD('ld_n')||4;if(st.n!==n)sk.emit('cnt',n);if(n===4&&+LD('ld_team'))sk.emit('team',1);sk.emit('start',{bots:1})}}else{autoBots=0;scr('game');if(pv==='lobby'||pv==null)resetGame();onGame(st)}
+function onSt(){if(st.ph=='lobby'||st.ph=='over')SS('ld_play',null);if(st.ph=='lobby'){scr('lobby');rLobby();clearGame();if(autoBots&&st.host){autoBots=0;const n=+LD('ld_n')||4;if(st.n!==n)sk.emit('cnt',n);if(n===4&&+LD('ld_team'))sk.emit('team',1);sk.emit('start',{bots:1})}}else{autoBots=0;if(st.ph=='play'&&!st.isSpec)SS('ld_play','1');scr('game');if(pv==='lobby'||pv==null)resetGame();onGame(st)}
  if(!st.isSpec&&st.me>=0&&st.seats[st.me]&&(st.seats[st.me].tk|0)!==myTk)sk.emit('tk',myTk)}
 
 /* ---------- لابی ---------- */
 const PD=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]),TKN=['کلاسیک','سکه','پیاده','الماس'];
 let myTk=+LD('ld_tk')||0,autoBots=0;
-function soloBots(){const n=nameV();if(!n)return;autoBots=1;sk.emit('create',{name:n,token:tok})}
+function soloBots(){const n=nameV();if(!n)return;sk.emit('create',{name:n,token:tok})}
 function setCnt(n){SV('ld_n',n);sk.emit('cnt',n)}
 function pickTk(i){myTk=i;SV('ld_tk',i);sk.emit('tk',i);if(st&&st.ph==='lobby')rLobby()}
 const TB=k=>st.team&&st.n==4?(k%2?'🌙 ':'⭐ '):'';
@@ -346,7 +349,7 @@ function build(){if(built)return;built=true;const bd=$('bd');bd.innerHTML='';RT=
   const inn=E('g',{class:'in'},g);inn.innerHTML=tokShape(0,s);E('circle',{cx:0,cy:-8,r:16,fill:'transparent'},g);
   g.addEventListener('pointerdown',e=>{if(!g.classList.contains('mvb'))return;e.preventDefault();pickTok(t)});el[k]=g;IN[k]=inn;cur[k]={x:0,y:0,sc:1,lv:0}}}
 const BASE=.9,HOMESC=.5;
-function pickTok(t){sk.emit('move',t);hap('light');for(let k=0;k<16;k++){const g=el[k];g.classList.remove('mvb');SEL[k]=false;LF[k]=false;g.querySelectorAll('.hl').forEach(h=>h.style.opacity=0)}}
+function pickTok(t){sk.emit('move',t);for(let k=0;k<16;k++){const g=el[k];g.classList.remove('mvb');SEL[k]=false;LF[k]=false;g.querySelectorAll('.hl').forEach(h=>h.style.opacity=0)}}
 function setPos(k,x,y,sc){if(sc==null)sc=cur[k].sc||1;el[k].setAttribute('transform',`translate(${x},${y}) rotate(${-ROT*90}) scale(${sc*BASE})`);cur[k].x=x;cur[k].y=y;cur[k].sc=sc}
 function lift(k,v){IN[k].setAttribute('transform',`translate(0,${-v.toFixed(2)})`);cur[k].lv=v}
 function tick(now){if(built)for(let k=0;k<16;k++){if(MV.has(k)||!cur[k])continue;const tgt=LF[k]?4.5+Math.sin(now/200+k)*1.1:0,l=cur[k].lv||0,nl=l+(tgt-l)*.2;if(Math.abs(nl-l)>.015||LF[k])lift(k,nl)}requestAnimationFrame(tick)}requestAnimationFrame(tick);
@@ -365,7 +368,7 @@ async function backTween(c){const[s2,t2,p2]=c,k=s2*4+t2,per=Math.min(40,900/Math
 async function animateMove(mv,s){const k=mv.s*4+mv.t;MV.add(k);
  try{const L=$('tl');if(L.lastChild!==el[k])L.appendChild(el[k]);const pts=[];
   if(mv.f===-1)pts.push(coord(mv.s,0));else for(let p=mv.f+1;p<=mv.to;p++)pts.push(p===56?finPos(mv.s,mv.t,s&&s.pos):coord(mv.s,p,mv.t));
-  let prev=mv.f===-1?null:coord(mv.s,mv.f,mv.t);for(let i=0;i<pts.length;i++){if(prev)trail(prev,mv.s);await tween(k,pts[i],mv.f===-1?300:130,mv.f===-1?2:1,(i===pts.length-1&&mv.to===56)?HOMESC:1,mv.f!==-1&&i<pts.length-1);prev=pts[i]}
+  let prev=mv.f===-1?null:coord(mv.s,mv.f,mv.t);for(let i=0;i<pts.length;i++){if(prev)trail(prev,mv.s);await tween(k,pts[i],mv.f===-1?520:130,mv.f===-1?2:1,(i===pts.length-1&&mv.to===56)?HOMESC:1,mv.f!==-1&&i<pts.length-1);prev=pts[i]}
   if(mv.to===56){finishFx(mv.s);hap('success')}}finally{MV.delete(k)}
  if(mv.caps.length){hap('medium');const b=$('bdw');b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');await Promise.all(mv.caps.map(backTween))}}
 
@@ -375,7 +378,7 @@ const face=v=>Array.from({length:9},(_,i)=>`<i${(ON[v]||[]).includes(i)?' class=
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const FIN={1:[0,0],2:[0,-90],3:[-90,0],4:[90,0],5:[0,90],6:[0,180]};
 $('cube').innerHTML=[1,2,3,4,5,6].map(n=>`<div class="cf cf${n}">${face(n)}</div>`).join('');
-const RV=[null,null,null,null],MINT=360,LAND=270,eo=u=>1-Math.pow(1-u,3);let pre=0;
+const RV=[null,null,null,null],MINT=500,LAND=360,SPIN=.38,eo=u=>1-Math.pow(1-u,3);let pre=0;
 function rollStart(seat){
   if(RV[seat])return RV[seat];
   const d=$('d'+seat);d.classList.remove('can');d.classList.add('roll');
@@ -384,17 +387,20 @@ function rollStart(seat){
   const f=now=>{
     if(RV[seat]!==R)return;
     const t=now-R.t0;if(!R.v&&t>3500)return end(0);
-    if(!R.tl&&now-R.fl>62){R.fl=now;d.innerHTML=face(1+(Math.random()*6|0))}
+    if(!R.tl&&now-R.fl>90){R.fl=now;d.innerHTML=face(1+(Math.random()*6|0))}
     let lift,ang,lu=0;
-    if(R.v&&t>=MINT){if(!R.tl){R.tl=now;R.a0=R.ang;R.tg=(Math.floor((R.a0+240)/360)+1)*360;d.innerHTML=face(R.v)}
-      lu=Math.min(1,(now-R.tl)/LAND);ang=R.a0+(R.tg-R.a0)*eo(lu);lift=Math.pow(1-lu,2)+(lu>.72?Math.sin((lu-.72)/.28*Math.PI)*.1:0)}
-    else{lift=eo(Math.min(1,t/120));ang=t*.8}
+    if(R.v&&t>=MINT){
+      if(!R.tl){R.tl=now;R.a0=R.ang;R.dd=Math.ceil((R.a0+SPIN*LAND/2)/90)*90-R.a0;d.innerHTML=face(R.v)}
+      lu=Math.min(1,(now-R.tl)/LAND);const w0=SPIN*LAND;
+      ang=R.a0+w0*(lu-2*lu*lu+lu*lu*lu)+R.dd*(3*lu*lu-2*lu*lu*lu);
+      lift=Math.pow(1-lu,2)+(lu>.75?Math.sin((lu-.75)/.25*Math.PI)*.07:0)}
+    else{lift=eo(Math.min(1,t/170));ang=t*SPIN}
     R.ang=ang;const w=1-lu;
-    d.style.zIndex=30;d.style.transform=`translateY(${(-lift*20).toFixed(1)}px) scale(${(1+lift*.55).toFixed(3)}) perspective(150px) rotateX(${(Math.sin(t/75)*26*w).toFixed(1)}deg) rotateY(${(Math.cos(t/95)*20*w).toFixed(1)}deg) rotateZ(${ang.toFixed(1)}deg)`;
+    d.style.zIndex=30;d.style.transform=`translateY(${(-lift*14).toFixed(1)}px) scale(${(1+lift*.4).toFixed(3)}) perspective(190px) rotateX(${(Math.sin(t/120)*13*w).toFixed(1)}deg) rotateY(${(Math.cos(t/140)*11*w).toFixed(1)}deg) rotateZ(${ang.toFixed(1)}deg)`;
     if(R.tl&&lu>=1)return end(R.v);
     requestAnimationFrame(f)};
   requestAnimationFrame(f);return R}
-async function diceAnim(seat,v){lastDice[seat]=v;const R=RV[seat]||rollStart(seat);R.v=v||lastDice[seat]||1;hap('light');await Promise.race([R.p,sleep(1800)])}
+async function diceAnim(seat,v){lastDice[seat]=v;const R=RV[seat]||rollStart(seat);R.v=v||lastDice[seat]||1;await Promise.race([R.p,sleep(1800)])}
 function tapDice(i){
   if(!st||st.isSpec||st.me!==i||st.ph!=='play')return;
   if(st.turn===i&&st.stage==='roll'&&!RV[i]){rollStart(i);sk.emit('roll');return}
