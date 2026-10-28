@@ -6,10 +6,12 @@ bgAudio.preload = 'auto';
 const TRACKS = 21;
 let actx = null, gainNode = null, roomTrack = 1, musicOn = false, trackSynced = false, lookNow = null;
 
-const FK_CARPETS = [['f1', 'زمرد شب'], ['f2', 'یاقوتی'], ['f3', 'آبی سلطنتی'], ['f4', 'مشکی کربن'], ['f5', 'بنفش جوکر'], ['f6', 'طلایی شاهی'], ['f7', 'یخی'], ['f8', 'شنی کرم'], ['f9', 'سبز نئونی'], ['f10', 'قرمز آتشین']];
-const FK_CARDS = [['g1', 'عاج کلاسیک'], ['g2', 'نیمه‌شب'], ['g3', 'جوکر طلایی'], ['g4', 'جوکر بنفش'], ['g5', 'یاقوت'], ['g6', 'زمرد'], ['g7', 'نقره‌ای'], ['g8', 'نئونی'], ['g9', 'طلای ناب'], ['g10', 'یخی']];
-const MF_CARPETS = [['c1', 'سبز لوزی'], ['c2', 'قرمز گل'], ['c3', 'سرمه‌ای'], ['c4', 'طلایی ترنج'], ['c5', 'مشکی طلایی']].concat(FK_CARPETS);
-const MF_CARDS = [['k1', 'سفید کلاسیک'], ['k2', 'مشکی دارک'], ['k3', 'جوکر قرمز'], ['k4', 'سبز گل‌گلی'], ['k5', 'مشکی طلایی']].concat(FK_CARDS);
+const CACT_CARPETS = [['n1', 'زمرد کاکتوس'], ['n2', 'دوزخ'], ['n3', 'شب طلایی'], ['n4', 'مخمل یاقوتی'], ['n5', 'اقیانوس'], ['n6', 'کهکشان'], ['n7', 'صحرا'], ['n8', 'یخچال'], ['n9', 'نئون کاکتوس'], ['n10', 'سپیده‌دم']];
+const CACT_CARDS = [['n1', 'زمرد کاکتوس'], ['n2', 'دوزخ'], ['n3', 'عاج طلایی'], ['n4', 'یاقوت سرخ'], ['n5', 'اقیانوس'], ['n6', 'کهکشان'], ['n7', 'صحرا'], ['n8', 'یخچال'], ['n9', 'نئون کاکتوس'], ['n10', 'سپیده‌دم']];
+const FK_CARPETS = CACT_CARPETS.concat([['f1', 'زمرد شب'], ['f2', 'یاقوتی'], ['f3', 'آبی سلطنتی'], ['f4', 'مشکی کربن'], ['f5', 'بنفش جوکر'], ['f6', 'طلایی شاهی'], ['f7', 'یخی'], ['f8', 'شنی کرم'], ['f9', 'سبز نئونی'], ['f10', 'قرمز آتشین']]);
+const FK_CARDS = CACT_CARDS.concat([['g1', 'عاج کلاسیک'], ['g2', 'نیمه‌شب'], ['g3', 'جوکر طلایی'], ['g4', 'جوکر بنفش'], ['g5', 'یاقوت'], ['g6', 'زمرد'], ['g7', 'نقره‌ای'], ['g8', 'نئونی'], ['g9', 'طلای ناب'], ['g10', 'یخی']]);
+const MF_CARPETS = CACT_CARPETS.concat([['c1', 'سبز لوزی'], ['c2', 'قرمز گل'], ['c3', 'سرمه‌ای'], ['c4', 'طلایی ترنج'], ['c5', 'مشکی طلایی']], FK_CARPETS.slice(10));
+const MF_CARDS = CACT_CARDS.concat([['k1', 'سفید کلاسیک'], ['k2', 'مشکی دارک'], ['k3', 'جوکر قرمز'], ['k4', 'سبز گل‌گلی'], ['k5', 'مشکی طلایی']], FK_CARDS.slice(10));
 const PAGE_GAME = location.pathname.indexOf('fiskoot') >= 0 ? 'fk' : (location.pathname.indexOf('ludo') >= 0 ? 'ld' : 'mf');
 /* منفی و حکم: فقط یک آهنگ ثابت که همیشه تکرار می‌شود. لودو مثل قبل می‌ماند */
 const SINGLE = PAGE_GAME !== 'ld', THEME_SRC = 'theme.mp3';
@@ -65,7 +67,7 @@ function lookPickerHTML() {
   const crd = G.k.map(([id, n]) =>
     `<button class="sw swc pv cards-${id}${l.cards === id ? ' sel' : ''}"${dis} onclick="pickCards('${id}')"><div class="c r heart"><em>A</em><b>♥</b></div><span>${n}</span></button>`).join('');
   return `${tabs}
-    <div class="pv pvbig carpet-${l.carpet} cards-${l.cards}"><div class="pvmark">CACTUC</div><div class="pvrow">${SAMPLE}</div></div>
+    <div class="pv pvbig carpet-${l.carpet} cards-${l.cards}"><div class="pvmark">CACTUC</div><div class="pvrow">${SAMPLE}${/^n/.test(l.cards) ? '<div class="c back"></div>' : ''}</div></div>
     <div class="lkTitle">🧶 فرش میز</div><div class="swrow">${car}</div>
     <div class="lkTitle">🃏 طرح پر</div><div class="swrow">${crd}</div>
     ${can ? '' : '<div class="lkNote">🔒 فرش و پر را میزبان اتاق انتخاب می‌کند و برای همه یکسان است</div>'}`;
