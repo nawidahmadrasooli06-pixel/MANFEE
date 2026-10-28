@@ -11,6 +11,9 @@ const FK_CARDS = [['g1', 'عاج کلاسیک'], ['g2', 'نیمه‌شب'], ['g3
 const MF_CARPETS = [['c1', 'سبز لوزی'], ['c2', 'قرمز گل'], ['c3', 'سرمه‌ای'], ['c4', 'طلایی ترنج'], ['c5', 'مشکی طلایی']].concat(FK_CARPETS);
 const MF_CARDS = [['k1', 'سفید کلاسیک'], ['k2', 'مشکی دارک'], ['k3', 'جوکر قرمز'], ['k4', 'سبز گل‌گلی'], ['k5', 'مشکی طلایی']].concat(FK_CARDS);
 const PAGE_GAME = location.pathname.indexOf('fiskoot') >= 0 ? 'fk' : (location.pathname.indexOf('ludo') >= 0 ? 'ld' : 'mf');
+/* منفی و حکم: فقط یک آهنگ ثابت که همیشه تکرار می‌شود. لودو مثل قبل می‌ماند */
+const SINGLE = PAGE_GAME !== 'ld', THEME_SRC = 'theme.mp3';
+bgAudio.loop = SINGLE;
 const GAMES = { ld: { c: [], k: [], kc: 'ld_carpet', kk: 'ld_cards', dc: 'c1', dk: 'k1' }, mf: { c: MF_CARPETS, k: MF_CARDS, kc: 'carpet', kk: 'cards', dc: 'c1', dk: 'k1' }, fk: { c: FK_CARPETS, k: FK_CARDS, kc: 'fk_carpet', kk: 'fk_cards', dc: 'f1', dk: 'g1' } };
 let tabGame = PAGE_GAME;
 const modalGame = () => inRoom() ? PAGE_GAME : tabGame;
@@ -93,6 +96,7 @@ function setupAudioGraph() {
     gainNode.gain.value = savedVol() / 100;
     src.connect(gainNode);
     gainNode.connect(actx.destination);
+    try { const an = actx.createAnalyser(); an.fftSize = 64; src.connect(an); window.bgAnalyser = an; } catch (e) { }
     return true;
   } catch (e) {
     actx = null; gainNode = null;
@@ -104,14 +108,24 @@ function playLocal(n) {
   lsSet('mon', '1'); lsSet('mtrack', String(n));
   if (!setupAudioGraph()) bgAudio.volume = savedVol() / 100;
   if (actx && actx.state === 'suspended') actx.resume();
-  const ext = (n == 1 || n == 21) ? 'm4a' : 'mp3';
-  bgAudio.src = `music${n}.${ext}`;
+  if (SINGLE) {
+    lsSet('bgm_off', '0');
+    if (bgAudio.getAttribute('src') === THEME_SRC && !bgAudio.paused) return;
+    if (bgAudio.getAttribute('src') !== THEME_SRC) bgAudio.src = THEME_SRC;
+  } else {
+    const ext = (n == 1 || n == 21) ? 'm4a' : 'mp3';
+    bgAudio.src = `music${n}.${ext}`;
+  }
   const p = bgAudio.play();
   if (p && p.catch) p.catch(e => { needTap = true; console.log('Music play blocked, waiting for a tap:', e); });
 }
 
 /* اولین لمس صفحه، صدا را آماده می‌کند تا آهنگ میزبان برای همه خودکار پخش شود */
-function unlockAudio() {
+function unlockAudio(e) {
+  if (SINGLE && lsGet('bgm_off', '0') !== '1') {
+    const onBar = e && e.target && e.target.closest && e.target.closest('#musicBar');
+    if (!onBar && (bgAudio.paused || bgAudio.getAttribute('src') !== THEME_SRC)) { musicOn = true; roomPlaying = true; needTap = false; unlocked = true; playLocal(1); updateMusicUI(); return; }
+  }
   if (needTap && musicOn && bgAudio.paused) { needTap = false; playLocal(roomTrack); return; }
   if (unlocked) return;
   unlocked = true;
@@ -137,6 +151,11 @@ function updateMusicUI() {
 /* توقف و ادامه فقط برای خود شخص است.
    فقط اگر هنوز هیچ‌کس موزیک را شروع نکرده باشد، شروعش برای همه است */
 function musicToggle() {
+  if (SINGLE) {
+    if (musicOn && !bgAudio.paused) { userStopped = true; musicOn = false; lsSet('bgm_off', '1'); lsSet('mon', '0'); bgAudio.pause(); }
+    else { userStopped = false; musicOn = true; roomPlaying = true; playLocal(1); }
+    updateMusicUI(); return;
+  }
   if (musicOn) { userStopped = true; musicOn = false; lsSet('mon', '0'); bgAudio.pause(); }
   else if (!roomPlaying) { goTrack(roomTrack); return; }
   else { userStopped = false; musicOn = true; playLocal(roomTrack); }
@@ -145,15 +164,19 @@ function musicToggle() {
 
 /* شروع، قبلی، بعدی و انتخاب آهنگ برای همه‌ی بازیکنان اتاق است */
 function goTrack(n) {
+  if (SINGLE) { userStopped = false; musicOn = true; roomPlaying = true; playLocal(1); updateMusicUI(); return; }
   roomTrack = n; roomPlaying = true; userStopped = false; musicOn = true;
   playLocal(n); updateMusicUI();
   if (inRoom()) sk.emit('track', n);
 }
-function musicNext() { goTrack(roomTrack % TRACKS + 1); }
-function musicPrev() { goTrack(roomTrack === 1 ? TRACKS : roomTrack - 1); }
+function musicNext() {
+  if (SINGLE) return; goTrack(roomTrack % TRACKS + 1); }
+function musicPrev() {
+  if (SINGLE) return; goTrack(roomTrack === 1 ? TRACKS : roomTrack - 1); }
 
 /* پیام آهنگ از طرف یکی از بازیکنان اتاق */
 function onRemoteTrack(n) {
+  if (SINGLE) return;
   n = parseInt(n, 10);
   if (!(n >= 1 && n <= TRACKS)) return;
   const same = n === roomTrack;
@@ -167,6 +190,7 @@ function onRemoteTrack(n) {
 
 /* کسی که بعد از شروع موزیک وارد اتاق می‌شود، آهنگ جاری را می‌شنود */
 function syncTrackFromState(n, playing) {
+  if (SINGLE) return;
   if (trackSynced) return;
   trackSynced = true;
   n = parseInt(n, 10);
@@ -177,11 +201,13 @@ function syncTrackFromState(n, playing) {
 }
 
 function musicSelect(v) {
+  if (SINGLE) { if (v === '-1') { userStopped = true; musicOn = false; lsSet('bgm_off', '1'); lsSet('mon', '0'); bgAudio.pause(); } else { userStopped = false; musicOn = true; roomPlaying = true; playLocal(1); } updateMusicUI(); return; }
   if (v === '-1') { userStopped = true; musicOn = false; lsSet('mon', '0'); bgAudio.pause(); updateMusicUI(); }
   else goTrack(parseInt(v, 10));
 }
 
 bgAudio.addEventListener('ended', () => {
+  if (SINGLE) return;
   if (bgAudio.getAttribute('src') === SILENT) return;
   roomTrack = roomTrack % TRACKS + 1;
   if (musicOn) playLocal(roomTrack);
@@ -208,7 +234,8 @@ function closeSettingsModal() {
 function openSettingsModal() {
   closeSettingsModal();
   let musicOptions = `<option value="-1"${!musicOn ? ' selected' : ''}>خاموش</option>`;
-  for (let i = 1; i <= TRACKS; i++) musicOptions += `<option value="${i}"${musicOn && roomTrack === i ? ' selected' : ''}>موزیک شماره ${i}</option>`;
+  if (SINGLE) { const on = musicOn && !bgAudio.paused; musicOptions = `<option value="-1"${!on ? ' selected' : ''}>خاموش</option><option value="1"${on ? ' selected' : ''}>🎵 آهنگ بازی</option>`; }
+  else for (let i = 1; i <= TRACKS; i++) musicOptions += `<option value="${i}"${musicOn && roomTrack === i ? ' selected' : ''}>موزیک شماره ${i}</option>`;
   const selStyle = 'background:#0f2a28; color:#fff; border:1px solid #f0b64a; border-radius:8px; padding:5px;';
   const row = 'display:flex; justify-content:space-between; align-items:center; gap:8px;';
   const html = `
@@ -236,7 +263,30 @@ function openSettingsModal() {
   bar.id = 'musicBar';
   bar.innerHTML = '<button onclick="musicPrev()">⏮</button><button id="mbPlay" onclick="musicToggle()">▶️</button><button onclick="musicNext()">⏭</button><span id="mbNum">1</span>';
   document.body.appendChild(bar);
+  if (SINGLE) { bar.querySelectorAll('button:not(#mbPlay),span').forEach(x => { x.style.display = 'none'; }); const pb = bar.querySelector('#mbPlay'); pb.style.width = '36px'; pb.style.height = '36px'; pb.style.fontSize = '15px'; pb.title = 'آهنگ بازی'; }
 })();
+
+/* ---------- صدای کلیک دکمه‌ها: خشک، کوتاه و آرام (مثل کلیک موس) ---------- */
+function uiClick() {
+  try {
+    if (!setupAudioGraph()) return;
+    const c = actx; if (c.state === 'suspended') c.resume();
+    const t = c.currentTime, sr = c.sampleRate, n = Math.floor(sr * 0.011), buf = c.createBuffer(1, n, sr), d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 4);
+    const s = c.createBufferSource(); s.buffer = buf;
+    const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 2800; bp.Q.value = 0.9;
+    const g = c.createGain(); g.gain.value = 0.12;
+    s.connect(bp); bp.connect(g); g.connect(c.destination); s.start(t);
+    const o = c.createOscillator(), og = c.createGain(); o.type = 'sine';
+    o.frequency.setValueAtTime(190, t); o.frequency.exponentialRampToValueAtTime(90, t + 0.02);
+    og.gain.setValueAtTime(0.03, t); og.gain.exponentialRampToValueAtTime(0.0001, t + 0.025);
+    o.connect(og); og.connect(c.destination); o.start(t); o.stop(t + 0.03);
+  } catch (e) { }
+}
+document.addEventListener('pointerdown', e => {
+  const el = e.target.closest && e.target.closest('button,.btn,.kbtn,.ktile,.kic,.rb,a.lnk');
+  if (el && !el.disabled) uiClick();
+}, true);
 
 function idToast(t) {
   let e = document.getElementById('idToast');
@@ -281,6 +331,7 @@ document.addEventListener('click', e => { if (e.target.closest && e.target.close
 })();
 
 applyLook(prefLook());
-if (lsGet('mon', '0') === '1') { roomTrack = parseInt(lsGet('mtrack', '1'), 10) || 1; roomPlaying = true; musicOn = true; playLocal(roomTrack); }
+if (SINGLE) { if (lsGet('bgm_off', '0') !== '1') { roomPlaying = true; musicOn = true; playLocal(1); } }
+else if (lsGet('mon', '0') === '1') { roomTrack = parseInt(lsGet('mtrack', '1'), 10) || 1; roomPlaying = true; musicOn = true; playLocal(roomTrack); }
 updateMusicUI();
 if (typeof sk !== 'undefined') sk.on('track', onRemoteTrack);
