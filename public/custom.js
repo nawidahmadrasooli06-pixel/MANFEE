@@ -6,8 +6,8 @@ bgAudio.preload = 'auto';
 const TRACKS = 21;
 let actx = null, gainNode = null, roomTrack = 1, musicOn = false, trackSynced = false, lookNow = null;
 
-const CACT_CARPETS = [['n1', 'ترنج سلطنتی'], ['n2', 'بخارا (گل ترکمنی)'], ['n3', 'لاجورد'], ['n4', 'زمرد باغ'], ['n5', 'کاشان کهربایی'], ['n6', 'شب فیلیگران'], ['n7', 'عقیق بنفش'], ['n8', 'فیروزه'], ['n9', 'هراتی'], ['n10', 'آتشین']];
-const CACT_CARDS = [['n1', 'عاج هراتی'], ['n2', 'لاجورد'], ['n3', 'زمرد باغ'], ['n4', 'شب طلایی'], ['n5', 'یاقوت'], ['n6', 'فیروزه'], ['n7', 'عقیق بنفش'], ['n8', 'کهربا'], ['n9', 'مرمر'], ['n10', 'آتشین']];
+const CACT_CARPETS = [['n9', 'هراتی'], ['x1', 'زمرد شطرنجی'], ['x2', 'یاقوت سلطنتی'], ['x3', 'لاجورد شب'], ['x4', 'طلای گنگ'], ['x5', 'نئون بنفش'], ['x6', 'فیروزه هندسی'], ['x7', 'اوبسیدین'], ['x8', 'آتش و فولاد']];
+const CACT_CARDS = [['n1', 'عاج هراتی'], ['n5', 'یاقوت'], ['n7', 'عقیق بنفش'], ['n3', 'زمرد باغ'], ['g11', 'شبح کروم'], ['g12', 'طلای شب'], ['g13', 'نئون گنگ'], ['g14', 'اژدهای زمرد'], ['g15', 'یخ آبی'], ['g16', 'آتش سرخ']];
 /* طرح‌های قدیمی که نگه داشته شدند */
 const FK_CARPETS = CACT_CARPETS.concat([['f1', 'زمرد شب'], ['f5', 'بنفش جوکر'], ['f7', 'یخی'], ['f8', 'شنی کرم']]);
 const FK_CARDS = CACT_CARDS.concat([['g4', 'جوکر بنفش'], ['g6', 'زمرد'], ['g10', 'یخی']]);
@@ -67,7 +67,7 @@ function lookPickerHTML() {
   const crd = G.k.map(([id, n]) =>
     `<button class="sw swc pv cards-${id}${l.cards === id ? ' sel' : ''}"${dis} onclick="pickCards('${id}')"><div class="c r heart"><em>A</em><b>♥</b></div><span>${n}</span></button>`).join('');
   return `${tabs}
-    <div class="pv pvbig carpet-${l.carpet} cards-${l.cards}"><div class="pvmark">CACTUC</div><div class="pvrow">${SAMPLE}${/^n/.test(l.cards) ? '<div class="c back"></div>' : ''}</div></div>
+    <div class="pv pvbig carpet-${l.carpet} cards-${l.cards}"><div class="pvmark"><span class="pv-cactus" aria-hidden="true">♣</span><span>CACTUC</span><small>@cactuc580</small></div><div class="pvrow">${SAMPLE}${/^n/.test(l.cards) ? '<div class="c back"></div>' : ''}</div></div>
     <div class="lkTitle">🧶 فرش میز</div><div class="swrow">${car}</div>
     <div class="lkTitle">🃏 طرح پر</div><div class="swrow">${crd}</div>
     ${can ? '' : '<div class="lkNote">🔒 فرش و پر را میزبان اتاق انتخاب می‌کند و برای همه یکسان است</div>'}`;
