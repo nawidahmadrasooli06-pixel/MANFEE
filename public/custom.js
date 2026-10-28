@@ -6,17 +6,17 @@ bgAudio.preload = 'auto';
 const TRACKS = 21;
 let actx = null, gainNode = null, roomTrack = 1, musicOn = false, trackSynced = false, lookNow = null;
 
-const CACT_CARPETS = [['n1', 'زمرد کاکتوس'], ['n2', 'دوزخ'], ['n3', 'شب طلایی'], ['n4', 'مخمل یاقوتی'], ['n5', 'اقیانوس'], ['n6', 'کهکشان'], ['n7', 'صحرا'], ['n8', 'یخچال'], ['n9', 'نئون کاکتوس'], ['n10', 'سپیده‌دم']];
-const CACT_CARDS = [['n1', 'زمرد کاکتوس'], ['n2', 'دوزخ'], ['n3', 'عاج طلایی'], ['n4', 'یاقوت سرخ'], ['n5', 'اقیانوس'], ['n6', 'کهکشان'], ['n7', 'صحرا'], ['n8', 'یخچال'], ['n9', 'نئون کاکتوس'], ['n10', 'سپیده‌دم']];
-const FK_CARPETS = CACT_CARPETS.concat([['f1', 'زمرد شب'], ['f2', 'یاقوتی'], ['f3', 'آبی سلطنتی'], ['f4', 'مشکی کربن'], ['f5', 'بنفش جوکر'], ['f6', 'طلایی شاهی'], ['f7', 'یخی'], ['f8', 'شنی کرم'], ['f9', 'سبز نئونی'], ['f10', 'قرمز آتشین']]);
-const FK_CARDS = CACT_CARDS.concat([['g1', 'عاج کلاسیک'], ['g2', 'نیمه‌شب'], ['g3', 'جوکر طلایی'], ['g4', 'جوکر بنفش'], ['g5', 'یاقوت'], ['g6', 'زمرد'], ['g7', 'نقره‌ای'], ['g8', 'نئونی'], ['g9', 'طلای ناب'], ['g10', 'یخی']]);
-const MF_CARPETS = CACT_CARPETS.concat([['c1', 'سبز لوزی'], ['c2', 'قرمز گل'], ['c3', 'سرمه‌ای'], ['c4', 'طلایی ترنج'], ['c5', 'مشکی طلایی']], FK_CARPETS.slice(10));
-const MF_CARDS = CACT_CARDS.concat([['k1', 'سفید کلاسیک'], ['k2', 'مشکی دارک'], ['k3', 'جوکر قرمز'], ['k4', 'سبز گل‌گلی'], ['k5', 'مشکی طلایی']], FK_CARDS.slice(10));
+const CACT_CARPETS = [['n1', 'ترنج سلطنتی'], ['n2', 'بخارا (گل ترکمنی)'], ['n3', 'لاجورد'], ['n4', 'زمرد باغ'], ['n5', 'کاشان کهربایی'], ['n6', 'شب فیلیگران'], ['n7', 'عقیق بنفش'], ['n8', 'فیروزه'], ['n9', 'هراتی'], ['n10', 'آتشین']];
+const CACT_CARDS = [['n1', 'عاج هراتی'], ['n2', 'لاجورد'], ['n3', 'زمرد باغ'], ['n4', 'شب طلایی'], ['n5', 'یاقوت'], ['n6', 'فیروزه'], ['n7', 'عقیق بنفش'], ['n8', 'کهربا'], ['n9', 'مرمر'], ['n10', 'آتشین']];
+/* طرح‌های قدیمی که نگه داشته شدند */
+const FK_CARPETS = CACT_CARPETS.concat([['f1', 'زمرد شب'], ['f5', 'بنفش جوکر'], ['f7', 'یخی'], ['f8', 'شنی کرم']]);
+const FK_CARDS = CACT_CARDS.concat([['g4', 'جوکر بنفش'], ['g6', 'زمرد'], ['g10', 'یخی']]);
+const MF_CARPETS = FK_CARPETS, MF_CARDS = FK_CARDS;
 const PAGE_GAME = location.pathname.indexOf('fiskoot') >= 0 ? 'fk' : (location.pathname.indexOf('ludo') >= 0 ? 'ld' : 'mf');
 /* منفی و حکم: فقط یک آهنگ ثابت که همیشه تکرار می‌شود. لودو مثل قبل می‌ماند */
 const SINGLE = PAGE_GAME !== 'ld', THEME_SRC = 'theme.mp3';
 bgAudio.loop = SINGLE;
-const GAMES = { ld: { c: [], k: [], kc: 'ld_carpet', kk: 'ld_cards', dc: 'c1', dk: 'k1' }, mf: { c: MF_CARPETS, k: MF_CARDS, kc: 'carpet', kk: 'cards', dc: 'c1', dk: 'k1' }, fk: { c: FK_CARPETS, k: FK_CARDS, kc: 'fk_carpet', kk: 'fk_cards', dc: 'f1', dk: 'g1' } };
+const GAMES = { ld: { c: [], k: [], kc: 'ld_carpet', kk: 'ld_cards', dc: 'c1', dk: 'k1' }, mf: { c: MF_CARPETS, k: MF_CARDS, kc: 'carpet', kk: 'cards', dc: 'n1', dk: 'n1' }, fk: { c: FK_CARPETS, k: FK_CARDS, kc: 'fk_carpet', kk: 'fk_cards', dc: 'n1', dk: 'n1' } };
 let tabGame = PAGE_GAME;
 const modalGame = () => inRoom() ? PAGE_GAME : tabGame;
 
