@@ -95,7 +95,7 @@ body{display:block}
 #hand{bottom:calc(48px + env(safe-area-inset-bottom,0px))}#s0{bottom:calc(138px + env(safe-area-inset-bottom,0px))!important}
 #ex{left:auto;right:8px}.c.r{color:#d11}
 #pz{position:fixed;inset:0;z-index:24;background:#000b;display:none;align-items:center;justify-content:center;padding:16px}
-</style><link rel="stylesheet" href="fk-theme.css"><link rel="stylesheet" href="inferno.css"></head><body>
+</style><link rel="stylesheet" href="fk-theme.css"><link rel="stylesheet" href="inferno.css"><link rel="stylesheet" href="cactus-pack.css"></head><body>
 <div id="top"><div class="chip">امتیاز (تا 13)<br><span class="g">تیم ما <b id="sa">0</b></span><br><span class="r">تیم حریف <b id="sb">0</b></span></div><div class="chip" id="tr">رنگ (حکم): —</div><div class="chip">دورها (تا 7)<br><span class="g">تیم ما <b id="ta">0</b></span><br><span class="r">تیم حریف <b id="tb">0</b></span></div></div>
 <div id="tbl"><div id="tc"></div><div class="idTag">@cactuc580</div><div id="lt"></div><div id="ann"></div><button id="ex" onclick="exitG()">خروج ✕</button>
 <div class="seat" id="s2" style="top:6px;left:50%;transform:translateX(-50%)"></div><div class="seat" id="s3" style="left:4px;top:50%;transform:translateY(-50%)"></div><div class="seat" id="s1" style="right:4px;top:50%;transform:translateY(-50%)"></div><div class="seat" id="s0" style="bottom:4px;left:50%;transform:translateX(-50%)"></div>
@@ -159,6 +159,7 @@ const PO=[0,2,1,3];
 function sk0(c){return PO[S(c)]}
 function rGame(){
  const me=st.me,rel=k=>(k-me+4)%4,mt=me%2,ph=st.ph;
+ try{const tk=st.trick||[];if(window._fkLen!==undefined)for(let i=Math.max(window._fkLen,1);i<tk.length;i++)if(st.tr!=null&&S(tk[i].c)==st.tr&&S(tk[0].c)!=st.tr&&window.crackFx)crackFx();window._fkLen=tk.length}catch(e){}
  $('sa').textContent=st.sc[mt];$('sb').textContent=st.sc[1-mt];$('ta').textContent=st.tw[mt];$('tb').textContent=st.tw[1-mt];
  const T=st.tr;$('tr').innerHTML=T==null?'رنگ (حکم): ؟':`رنگ (حکم): <span class="${T>1?'red':''}">${SU[T]} ${SN[T]}</span>`;
  $('tc').innerHTML=T==null?'':`<span style="color:${T>1?'#ff6b6b':'#fff'}">${SU[T]}</span><small>رنگ (حکم)</small>`;
@@ -220,4 +221,4 @@ if(u){$('cin').value=u.toUpperCase();$('inv').style.display='block'}
 if(ld('fk_room')){$('rsm').style.display='block';$('rcode').textContent=ld('fk_room')}
 </script>
 <script src="custom.js"></script>
-<script src="social.js"></script><script src="inferno.js"></script></body></html>
+<script src="social.js"></script><script src="crack.js"></script><script src="inferno.js"></script></body></html>
