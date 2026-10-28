@@ -9,8 +9,8 @@ let actx = null, gainNode = null, roomTrack = 1, musicOn = false, trackSynced = 
 const CACT_CARPETS = [['n9', 'هراتی'], ['x1', 'زمرد شطرنجی'], ['x2', 'یاقوت سلطنتی'], ['x3', 'لاجورد شب'], ['x4', 'طلای گنگ'], ['x5', 'نئون بنفش'], ['x6', 'فیروزه هندسی'], ['x7', 'اوبسیدین'], ['x8', 'آتش و فولاد']];
 const CACT_CARDS = [['n1', 'عاج هراتی'], ['n5', 'یاقوت'], ['n7', 'عقیق بنفش'], ['n3', 'زمرد باغ'], ['g11', 'شبح کروم'], ['g12', 'طلای شب'], ['g13', 'نئون گنگ'], ['g14', 'اژدهای زمرد'], ['g15', 'یخ آبی'], ['g16', 'آتش سرخ']];
 /* طرح‌های قدیمی که نگه داشته شدند */
-const FK_CARPETS = CACT_CARPETS.concat([['f1', 'زمرد شب'], ['f5', 'بنفش جوکر'], ['f7', 'یخی'], ['f8', 'شنی کرم']]);
-const FK_CARDS = CACT_CARDS.concat([['g4', 'جوکر بنفش'], ['g6', 'زمرد'], ['g10', 'یخی']]);
+const FK_CARPETS = CACT_CARPETS;
+const FK_CARDS = CACT_CARDS;
 const MF_CARPETS = FK_CARPETS, MF_CARDS = FK_CARDS;
 const PAGE_GAME = location.pathname.indexOf('fiskoot') >= 0 ? 'fk' : (location.pathname.indexOf('ludo') >= 0 ? 'ld' : 'mf');
 /* منفی و حکم: فقط یک آهنگ ثابت که همیشه تکرار می‌شود. لودو مثل قبل می‌ماند */
