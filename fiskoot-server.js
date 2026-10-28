@@ -7,8 +7,8 @@ const sh = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random
 const mk = low => { const d = []; for (let s = 0; s < 4; s++) for (let r = 2; r <= 14; r++) d.push(s * 20 + (r == 14 && low ? 1 : r)); return sh(d); };
 const beats = (a, b, t) => S(a) == S(b) ? Rk(a) > Rk(b) : (S(a) == t && S(b) != t);
 const winner = (tr, t) => { let b = tr[0]; for (const x of tr) if (beats(x.c, b.c, t)) b = x; return b.p; };
-const FC = ['f1','f2','f3','f4','f5','f6','f7','f8','f9','f10'], GC = ['g1','g2','g3','g4','g5','g6','g7','g8','g9','g10'];
-const cleanLook = l => ({ carpet: FC.includes(l && l.carpet) ? l.carpet : 'f1', cards: GC.includes(l && l.cards) ? l.cards : 'g1' });
+const FC = ['n1','n2','n3','n4','n5','n6','n7','n8','n9','n10','f1','f5','f7','f8'], GC = ['n1','n2','n3','n4','n5','n6','n7','n8','n9','n10','g4','g6','g10'];
+const cleanLook = l => ({ carpet: FC.includes(l && l.carpet) ? l.carpet : 'n1', cards: GC.includes(l && l.cards) ? l.cards : 'n1' });
 module.exports = function (io) {
   const nsp = io.of('/fiskoot'), rooms = {};
   const legal = (r, p) => { const h = r.hands[p], led = r.trick.length ? S(r.trick[0].c) : null; const lg = led !== null ? h.filter(c => S(c) == led) : []; return lg.length ? lg : h; };
