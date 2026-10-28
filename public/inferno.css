@@ -1,1 +1,95 @@
+/* ===== تم «دوزخ»: فقط منوها و لابی‌های منفی و حکم (تخته‌ها و خود بازی‌ها دست‌نخورده‌اند) ===== */
+:root{--beat:0}
+#infFx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;display:none}
 
+/* ---- پوستهٔ صفحه‌ها (فقط وقتی افکت پس‌زمینه آماده است) ---- */
+body.inf-ok.pg-mf .scr:not(#game){position:relative;z-index:2;background:transparent}
+body.inf-ok.pg-fk #menu,body.inf-ok.pg-fk #lobby{background:transparent!important}
+body.inf-ok.pg-mf .scr:not(#game),body.inf-ok.pg-fk #menu,body.inf-ok.pg-fk #lobby{
+  justify-content:flex-start!important;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;
+  gap:clamp(5px,1.3vh,12px);color:#ffeede;
+  padding:calc(env(safe-area-inset-top,0px) + clamp(6px,1.6vh,18px)) 16px calc(env(safe-area-inset-bottom,0px) + 54px)}
+body.inf-ok.pg-mf .scr:not(#game)>:first-child,body.inf-ok.pg-fk #menu>:first-child,body.inf-ok.pg-fk #lobby>:first-child{margin-top:auto}
+body.inf-ok.pg-mf .scr:not(#game)>:last-child,body.inf-ok.pg-fk #menu>:last-child,body.inf-ok.pg-fk #lobby>:last-child{margin-bottom:auto}
+body.inf-ok.pg-mf .scr:not(#game)>*,body.inf-ok.pg-fk #menu>*,body.inf-ok.pg-fk #lobby>*{flex-shrink:0}
+
+/* ---- متن و لوگو ---- */
+body.inf-ok .scr:not(#game) h2{color:#ffd9a8;text-shadow:0 0 14px #ff5a1f66;margin:2px 0}
+body.inf-ok #menu .logo{font-size:clamp(28px,6.2vh,50px)!important;font-weight:900;line-height:1.45;padding:0 8px;
+  background:linear-gradient(#fff3d1,#ffb347 45%,#ff4d1a);-webkit-background-clip:text;background-clip:text;
+  color:transparent!important;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 calc(8px + var(--beat)*16px) #ff5a1fcc)}
+body.inf-ok #menu .sub{opacity:.7;margin:0;color:#e9b79a}
+body.inf-ok .vipH{color:#ffb347;letter-spacing:.28em;font-weight:900;font-size:clamp(10px,1.7vh,13px);direction:ltr;text-shadow:0 0 10px #ff5a1f88}
+body.inf-ok .vipId{color:#ffffff3d;font-size:10px;letter-spacing:.06em;direction:ltr}
+.infEmblem{display:block;height:clamp(50px,10.5vh,100px);width:auto;flex:none;filter:drop-shadow(0 0 calc(8px + var(--beat)*14px) #ff5a1fbb);animation:infBreath 3.4s ease-in-out infinite}
+@keyframes infBreath{50%{transform:translateY(-2px) scale(1.035)}}
+
+/* ---- دکمه‌ها (همان دکمه‌های قبلی، شیک‌تر) ---- */
+body.inf-ok .scr:not(#game) .btn{position:relative;overflow:hidden;width:min(100%,330px);min-width:0!important;max-width:330px;
+  padding:clamp(8px,1.6vh,13px) 16px;font-size:clamp(13.5px,2.05vh,17px);font-weight:800;line-height:1.35;color:#ffe9d2;
+  border-radius:16px;border:1.5px solid #8a2a12;background:linear-gradient(180deg,#261312,#0d0606);
+  box-shadow:inset 0 1px 0 #ffffff14,inset 0 0 14px #ff3b1a26,0 4px 0 #2a0a05,0 8px 16px #000a;
+  transition:transform .08s,box-shadow .12s;-webkit-user-select:none;user-select:none}
+body.inf-ok .scr:not(#game) .btn:active{transform:translateY(3px) scale(.985);
+  box-shadow:inset 0 1px 0 #ffffff10,inset 0 0 20px #ff3b1a55,0 1px 0 #2a0a05,0 3px 8px #000a}
+body.inf-ok .scr:not(#game) .btn::after{content:'';position:absolute;top:0;bottom:0;left:-60%;width:38%;pointer-events:none;
+  background:linear-gradient(100deg,transparent,#ffb34755,transparent);transform:skewX(-20deg);animation:infSweep 5.2s ease-in-out infinite}
+body.inf-ok .scr:not(#game) .btn:nth-of-type(2n)::after{animation-delay:.8s}
+body.inf-ok .scr:not(#game) .btn:nth-of-type(3n)::after{animation-delay:1.7s}
+@keyframes infSweep{0%,62%{left:-60%}100%{left:135%}}
+body.inf-ok .scr:not(#game) .btn.go{background:linear-gradient(180deg,#ffb347,#e2461b 70%,#a81d08);color:#2a0900;border-color:#ffd9a0;
+  text-shadow:0 1px 0 #ffffff55;box-shadow:inset 0 1px 0 #fff9,0 4px 0 #6a1704,0 8px 16px #000a,0 0 calc(8px + var(--beat)*26px) #ff5a1fa0}
+body.inf-ok .scr:not(#game) .btn:disabled{opacity:.4}
+/* رنگ شعلهٔ هر بازی */
+body.inf-ok .btn.gm{border-color:var(--ac)}
+body.inf-ok .btn.gm.mf{--ac:#b36bff;--acg:#7a2fe055}
+body.inf-ok .btn.gm.fk{--ac:#ff566a;--acg:#c0182c55}
+body.inf-ok .btn.gm.ld{--ac:#ffc547;--acg:#e0840f55}
+body.inf-ok .scr:not(#game) .btn.gm{background:linear-gradient(180deg,#261312,#0d0606);color:#fff;
+  box-shadow:inset 0 0 22px var(--acg),inset 0 1px 0 #ffffff18,0 4px 0 #2a0a05,0 8px 16px #000a,0 0 14px var(--acg)}
+body.inf-ok .scr:not(#game) .btn.gm.go{color:#fff;text-shadow:0 1px 6px #000a}
+body.inf-ok .lnk{color:#ff9d6a}
+
+/* ---- ورودی‌ها، لیست صندلی‌ها و کادرها ---- */
+body.inf-ok .scr:not(#game) input:not([type=checkbox]):not([type=radio]):not([type=range]),body.inf-ok.pg-fk #nm,body.inf-ok.pg-fk #cin{background:#140808!important;color:#ffe9d2!important;
+  border:2px solid #6a2410!important;border-radius:14px;min-width:0;width:min(100%,330px);max-width:330px;padding:clamp(8px,1.5vh,13px)}
+body.inf-ok .scr:not(#game) input:not([type=checkbox]):focus{outline:0;border-color:#ff7a2a!important;box-shadow:0 0 0 3px #ff7a2a44,0 0 16px #ff5a1f55}
+body.inf-ok .sb,body.inf-ok.pg-fk .st{background:#160909!important;border:2px dashed #6a2410!important;color:#e8b9a0!important;border-radius:14px}
+body.inf-ok .sb.f,body.inf-ok.pg-fk .st.me{background:#2c0f08!important;border:2px solid #ff7a2a!important;color:#fff!important;box-shadow:0 0 14px #ff5a1f55}
+body.inf-ok .or,body.inf-ok.pg-fk .th{color:#ffb98c}
+body.inf-ok .inviteBox,body.inf-ok .waitInvite,body.inf-ok .guidebox{background:#1a0907e0;border-color:#ff7a2a}
+body.inf-ok .credit{opacity:.8}body.inf-ok .credit a{color:#ffb347}
+body.inf-ok #resumeBox,body.inf-ok.pg-fk #rsm{background:#1a0907e0!important;border:1px solid #ff7a2a!important;border-radius:16px;width:min(100%,330px)!important;max-width:330px!important;padding:10px!important}
+body.inf-ok #resumeBox .btn-row{display:flex;flex-direction:row;gap:8px;width:100%}
+body.inf-ok #resumeBox .btn-row .btn{flex:1 1 0!important;width:auto!important;min-width:0!important;max-width:none!important;padding:9px 4px!important;font-size:12.5px!important}
+body.inf-ok.pg-fk #rsm .btn{width:100%!important}
+
+/* ---- نوار موزیک و پنجرهٔ تنظیمات ---- */
+body.pg-mf #musicBar button,body.pg-fk #musicBar button{border-color:#ff7a2a99;background:#140808dd;color:#ffd9a8}
+body.pg-mf #customSettingsModal>div,body.pg-fk #customSettingsModal>div{background:#140808!important;border-color:#ff7a2a!important}
+body.pg-mf #customSettingsModal h3,body.pg-fk #customSettingsModal h3{color:#ffb347!important}
+body.pg-mf #customSettingsModal select,body.pg-fk #customSettingsModal select{background:#1f0d0a!important;border-color:#ff7a2a!important}
+body.pg-mf #customSettingsModal button[onclick*="closeSettingsModal"],body.pg-fk #customSettingsModal button[onclick*="closeSettingsModal"]{background:linear-gradient(#ffb347,#e2461b)!important;color:#2a0900!important}
+
+/* ---- جرقهٔ لمس ---- */
+.infSpark{position:fixed;width:5px;height:5px;margin:-2.5px;border-radius:50%;background:#ffb347;box-shadow:0 0 8px #ff5a1f;pointer-events:none;z-index:99998;animation:infSp .46s ease-out forwards}
+@keyframes infSp{to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
+
+/* ---- ورود دو ثانیه‌ای ---- */
+#infSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 60%,#3a0f08,#050202 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;animation:infOut .45s 1.6s ease forwards}
+#infSplash .fan{position:relative;width:0;height:0}
+#infSplash .fan i{position:absolute;left:-26px;top:-52px;width:52px;height:76px;border-radius:9px;background:linear-gradient(#fff6e6,#e8d2b4);border:2px solid #ff9a3a;box-shadow:0 0 18px #ff5a1f88;opacity:0;transform-origin:50% 120%;animation:infFan .85s .15s cubic-bezier(.2,.9,.3,1.25) forwards}
+#infSplash .fan i:nth-child(2){animation-delay:.2s}#infSplash .fan i:nth-child(3){animation-delay:.25s}#infSplash .fan i:nth-child(4){animation-delay:.3s}#infSplash .fan i:nth-child(5){animation-delay:.35s}
+@keyframes infFan{from{opacity:0;transform:rotate(0) scale(.5)}to{opacity:.95;transform:rotate(var(--r)) translateY(-18px) scale(1)}}
+#infSplash .em{height:min(34vh,190px);width:auto;position:relative;opacity:0;animation:infRise .85s .1s cubic-bezier(.2,.9,.3,1.2) forwards;filter:drop-shadow(0 0 22px #ff5a1fdd)}
+#infSplash .tt{position:relative;color:#ffb347;font-weight:900;letter-spacing:.34em;direction:ltr;font-size:15px;opacity:0;animation:infFade .6s .7s forwards;text-shadow:0 0 12px #ff5a1f}
+@keyframes infRise{from{opacity:0;transform:scale(.45) translateY(30px);filter:blur(8px) drop-shadow(0 0 4px #ff5a1f)}to{opacity:1;transform:none}}
+@keyframes infFade{to{opacity:1}}
+@keyframes infOut{to{opacity:0;visibility:hidden}}
+
+/* ---- گوشی‌های کوچک یا زوم‌شده: همه‌چیز جمع‌تر می‌شود ولی دکمه‌ها می‌مانند ---- */
+@media (max-height:720px){body.inf-ok #menu .sub{display:none}body.inf-ok .credit{margin-top:6px;font-size:11px}body.inf-ok .vipId{display:none}}
+@media (max-height:620px){.infEmblem{height:44px}body.inf-ok .credit{display:none}body.inf-ok #resumeBox{margin-top:4px;padding:8px!important}}
+@media (max-height:520px){body.inf-ok #menu .logo{font-size:26px!important}.infEmblem,body.inf-ok .vipH{display:none}body.inf-ok .scr:not(#game) .btn{padding:7px 12px;font-size:13px;border-radius:13px}}
+@media (max-width:340px){body.inf-ok .scr:not(#game) .btn{font-size:13px}}
+@media (prefers-reduced-motion:reduce){body.inf-ok .btn::after,.infEmblem{animation:none!important}}
