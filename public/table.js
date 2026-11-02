@@ -2,7 +2,7 @@ const T = (() => {
   const SU = ['♠', '♥', '♦', '♣'], RK = '2 3 4 5 6 7 8 9 10 J Q K A'.split(' ');
   const $ = q => document.querySelector(q);
   const cd = (c, x = '') => { const s = c / 13 | 0; return `<div class="c ${s == 1 || s == 2 ? 'r' : ''} ${s == 1 ? 'heart' : ''} ${x}"><em>${RK[c % 13]}</em><b>${SU[s]}</b></div>`; };
-  let S, pl = 0, nid = 0, v = 2, tm, rid = -1, lastTk = 0, lastCount = -1, myTurn = false, drag = null, sel = null, pending = null, flyOwn = null;
+  let S, pl = 0, nid = 0, v = 2, tm, rid = -1, lastTk = 0, lastCount = -1, myTurn = false, drag = null, sel = null, pending = null, flyOwn = null, askSwap = false, askRid = -1;
   function flyCard(el, c) {
     const ic = el.querySelector('.c'), ctr = document.querySelector('#tbl .ctr'); if (!ic || !ctr) return;
     const r = ic.getBoundingClientRect(), t = ctr.getBoundingClientRect(), k = ic.offsetWidth, cx = r.left + r.width / 2, cy = r.top + r.height / 2;
@@ -46,6 +46,7 @@ const T = (() => {
   function draw(st) {
     S = st; mirReviewOverlay(st); const g = st.g, me = st.me, mt = me % 2, rel = s => (s - me + 4) % 4, name = s => st.seats[s].name, my = g.phase == 'play' && g.turn == me;
     if (g.rid != rid) rid = g.rid;
+    if (g.phase != 'mir') askSwap = false;
     myTurn = my;
     const pill = (t, l) => `<div class="pl ${t == mt ? 'm' : 'e'}">${l} · سری ${g.ser[t]} از ۵ · ${g.taken[t] + g.taken[t + 2]}/${g.tc ? g.tc[t] : '؟'}</div>`;
     $('#hud').innerHTML = pill(mt, 'ما') + pill(1 - mt, 'حریف') + (st.host ? '<button class="ib" onclick="backToMenu()">↩️ برگشت</button>' : '');
@@ -69,7 +70,8 @@ const T = (() => {
     let p = '';
     if (g.phase == 'bid' && g.bidTurn == me) { v = Math.min(2, g.bidMax); p = `ادعای تو:<button onclick="T.ch(-1)">−</button><span class="big" id="bv">${v}</span><button onclick="T.ch(1)">+</button><br><button class="go" onclick="act('bid',T.val())">ثبت ادعا</button>`; }
     else if (g.phase == 'bid') p = `نوبت ادعای ${name(g.bidTurn)}…`;
-    else if (g.phase == 'mir' && g.dealer == me) p = `تو میر هستی؛ ادعای باقی‌مانده برای تو: <span class="big">${g.claims[me]}</span><br><button class="go" onclick="act('mir','ok')">قبول</button><button onclick="act('mir','swap')">بچرخون</button>`;
+    else if (g.phase == 'mir' && g.dealer == me && askSwap && askRid == g.rid && g.rot) p = `اگر بچرخانی، ادعای حریف (<span class="big">${g.rot.theirs}</span>) برای تیم تو می‌شود <span class="big">${g.rot.theirsNew}</span> و ادعای تیم تو (<span class="big">${g.rot.ours}</span>) برای حریف می‌شود <span class="big">${g.rot.oursNew}</span>.<br><button class="go" onclick="T.doSwap()">می‌چرخانم</button><button onclick="T.doOk()">قبول</button>`;
+    else if (g.phase == 'mir' && g.dealer == me) p = `تو میر هستی؛ ادعای باقی‌مانده برای تو: <span class="big">${g.claims[me]}</span><br><button class="go" onclick="act('mir','ok')">قبول</button><button onclick="T.askSwap()">بچرخون</button>`;
     else if (g.phase == 'mir') p = `${name(g.dealer)} (میر) تصمیم می‌گیرد: قبول یا چرخاندن…`;
     else if (g.phase == 'play' || g.phase == 'trick') p = my ? 'نوبت توست' : `نوبت ${name(g.turn)}`;
     $('#pn').innerHTML = p;
@@ -104,7 +106,10 @@ const T = (() => {
   });
   window.addEventListener('pointercancel', () => { if (drag) { drag = null; draw(S); } });
   return {
-    render, val: () => v, ch: d => { v = Math.max(0, Math.min(S.g.bidMax, v + d)); $('#bv').textContent = v; },
+    render, val: () => v,
+    askSwap: () => { if (!S || !S.g.rot) return act('mir', 'swap'); askSwap = true; askRid = S.g.rid; draw(S); },
+    doSwap: () => { askSwap = false; act('mir', 'swap'); },
+    doOk: () => { askSwap = false; act('mir', 'ok'); }, ch: d => { v = Math.max(0, Math.min(S.g.bidMax, v + d)); $('#bv').textContent = v; },
     hold: i => { const els = document.querySelectorAll('#aw .aw'); els.forEach(e => { if (e.textContent.includes((S.seats[i] || {}).name || '')) e.remove(); }); }
   };
 })();
