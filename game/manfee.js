@@ -71,6 +71,13 @@ class Game {
     if (this.phase != 'mir' || s != this.dealer) return;
     a == 'swap' ? this.swap() : this.go();
   }
+  // When the dealer (mir) rotates, one trick moves from the dealer's team to the other team (total stays 13).
+  // Taken from the dealer's own claim; if that is 0, from his partner's claim. Returns null if both are 0.
+  rotPlan() {
+    const d = this.dealer, c = this.claim;
+    const src = c[d] > 0 ? d : c[(d + 2) % 4] > 0 ? (d + 2) % 4 : -1;
+    return src < 0 ? null : { src, srcAfter: (src + 1) % 4, dst: d };
+  }
   swap() {
     if (this.phase !== 'mir') return;
     // Give every player a shared 20-second review period before the cards rotate.
@@ -82,10 +89,12 @@ class Game {
   mirReviewStep() {
     if (this.phase !== 'mirReview') return;
     if (this.mirReview <= 0) {
+      const plan = this.rotPlan();
       const h = [], c = [];
       for (let i = 0; i < 4; i++) { h[(i + 1) % 4] = this.hands[i]; c[(i + 1) % 4] = this.claim[i]; }
+      if (plan) { c[plan.srcAfter]--; c[plan.dst]++; }
       this.hands = h; this.claim = c; this.nid++;
-      this.note = this.names[this.dealer] + ' ادعا را رد کرد — کارت‌ها و ادعاها چرخید!';
+      this.note = this.names[this.dealer] + ' ادعا را رد کرد — کارت‌ها و ادعاها چرخید!' + (plan ? ' یک دست از ادعای تیم او به تیم حریف رفت.' : '');
       this.go();
       return;
     }
@@ -164,6 +173,7 @@ class Game {
       bidTurn: P == 'bid' ? this.order[this.bi] : -1, bidMax: 13 - sum,
       tc: pl ? [this.tc(0), this.tc(1)] : null,
       rem: P == 'over' || P == 'series' ? this.hands : null,
+      rot: P == 'mir' ? (() => { const d = this.dealer, c = this.claim, ours = c[d] + c[(d + 2) % 4], theirs = c[(d + 1) % 4] + c[(d + 3) % 4], mv = this.rotPlan() ? 1 : 0; return { ours, theirs, oursNew: ours - mv, theirsNew: theirs + mv, move: mv }; })() : null,
       dl: 0, dls: -1
     };
   }
