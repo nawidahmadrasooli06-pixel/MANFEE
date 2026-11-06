@@ -112,8 +112,8 @@
     if (!seen && !deep && !reduce) {
       try { sessionStorage.setItem('inf_splash', '1'); } catch (e) { }
       const sp = document.createElement('div'); sp.id = 'infSplash';
-      sp.innerHTML = '<div class="fan">' + [-44, -22, 0, 22, 44].map(r => `<i style="--r:${r}deg"></i>`).join('') + '</div>' + emblem('em') + '<div class="tt">VIP · CACTUC</div>';
-      const kill = () => sp.remove(); sp.addEventListener('pointerdown', kill); setTimeout(kill, 2200);
+      sp.innerHTML = '<div class="fan">' + [-44, -22, 0, 22, 44].map(r => `<i style="--r:${r}deg"></i>`).join('') + '</div>' + emblem('em') + '<div class="tt">VIP · CACTUC</div><div class="tt2">♠ منفی · ♥ حکم · 🎲 لودو</div><div class="bar"><i></i></div>';
+      const kill = () => sp.remove(); sp.addEventListener('pointerdown', kill); setTimeout(kill, 2900);
       body.appendChild(sp);
     }
   } catch (e) { console.log('inferno fx off', e); }
