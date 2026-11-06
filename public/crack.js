@@ -48,6 +48,7 @@
   window.crackFx = function () {
     try {
       const now = Date.now(); if (now - last < 600) return; last = now;
+      try { window.VIP && VIP.cut && VIP.cut(); } catch (e) { }
       const old = document.getElementById('crackFx'); if (old) old.remove();
       const W = innerWidth, H = innerHeight;
       let cx = W / 2, cy = H * .47;
