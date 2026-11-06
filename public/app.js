@@ -16,20 +16,18 @@ $('#invNm').value = $('#nm').value;
 const qr = new URLSearchParams(location.search).get('r'), wq = new URLSearchParams(location.search).get('w');
 if (qr) show('invite');
 function mk() {
-  if (typeof appearanceGate === 'function' && !appearanceGate('mf')) return;
   sk.emit('create', { name: nm(), token: tok, look: typeof prefLook === 'function' ? prefLook('mf') : undefined });
 }
-function jn() { if (typeof appearanceGate === 'function' && !appearanceGate('mf')) return; sk.emit('join', { code: $('#cd').value, name: nm(), token: tok }); }
-function acceptInvite() { if (typeof appearanceGate === 'function' && !appearanceGate('mf')) return; $('#nm').value = $('#invNm').value; sk.emit('join', { code: qr || $('#invCode').textContent, name: nm(), token: tok }); }
+function jn() { sk.emit('join', { code: $('#cd').value, name: nm(), token: tok }); }
+function acceptInvite() { $('#nm').value = $('#invNm').value; sk.emit('join', { code: qr || $('#invCode').textContent, name: nm(), token: tok }); }
 function backToMenu() { menuMode = true; show('menu'); }
 function resume() {
-  if (typeof appearanceGate === 'function' && !appearanceGate('mf')) return;
   if (st && st.g) { menuMode = false; show('game'); T.render(st); return; }
   sk.emit('join', { code: localStorage.room, name: localStorage.nm || 'بازیکن', token: tok }); }
 function fresh() { menuMode = false; localStorage.removeItem('room'); pend = null; history.replaceState(0, '', '/'); $('#cd').value = ''; show('join'); }
-function take(i) { if (typeof appearanceGate === 'function' && !appearanceGate('mf')) return; sk.emit('take', { ...pend, seat: i }); }
-function startGame() { sk.emit('start', { forceBots: false }); }
-function startWithBots() { sk.emit('start', { forceBots: true }); }
+function take(i) { sk.emit('take', { ...pend, seat: i }); }
+function startGame() { const go = () => sk.emit('start', { forceBots: false }); if (window.requestAppearanceStart) requestAppearanceStart('mf', go); else go(); }
+function startWithBots() { const go = () => sk.emit('start', { forceBots: true }); if (window.requestAppearanceStart) requestAppearanceStart('mf', go); else go(); }
 function restartBot() {
   if (BOT && tg && tg.openTelegramLink) tg.openTelegramLink('https://t.me/' + BOT);
   else if (BOT) location.href = 'https://t.me/' + BOT;
