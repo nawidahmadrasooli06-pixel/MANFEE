@@ -7,14 +7,16 @@ const TRACKS = 21;
 let actx = null, gainNode = null, roomTrack = 1, musicOn = false, trackSynced = false, lookNow = null;
 
 /* چهار فرش نهایی: دو طرح منتخب + دو طرح اختصاصی تازه */
-const CACT_CARPETS = [['n1', 'کاکتوس کلاسیک'], ['x3', 'لاجورد سلطنتی'], ['x9', 'زمرد آبی'], ['x10', 'یاقوت آتشین']];
+const CACT_CARPETS = [['n1', 'کاکتوس کلاسیک'], ['x3', 'لاجورد سلطنتی'], ['x9', 'زمرد آبی'], ['x10', 'یاقوت آتشین'], ['x11', 'شب فیروزه‌ای'], ['x12', 'مخمل سلطنتی'], ['x13', 'طلوع کهربایی']];
 /* پشت کارت‌ها با چهار فرش هماهنگ شده‌اند */
-const CACT_CARDS = [['n1', 'کاکتوس طلایی'], ['n2', 'لاجورد و طلا'], ['g17', 'زمرد و نقره'], ['g18', 'یاقوت و طلایی']];
+const CACT_CARDS = [['n1', 'کاکتوس طلایی'], ['n2', 'لاجورد و طلا'], ['g17', 'زمرد و نقره'], ['g18', 'یاقوت و طلایی'], ['g19', 'شب الماس'], ['g20', 'مخمل آبی'], ['g21', 'کهربای سیاه']];
 /* طرح‌های قدیمی که نگه داشته شدند */
 const FK_CARPETS = CACT_CARPETS;
 const FK_CARDS = CACT_CARDS;
 const MF_CARPETS = FK_CARPETS, MF_CARDS = FK_CARDS;
 const PAGE_GAME = location.pathname.indexOf('fiskoot') >= 0 ? 'fk' : (location.pathname.indexOf('ludo') >= 0 ? 'ld' : 'mf');
+/* هر بار بازشدن تازهٔ مینی‌اپ، میزبان باید ظاهر را دوباره تأیید کند؛ مهمان‌ها این اجبار را ندارند. */
+try { if (PAGE_GAME !== 'ld') { ['mf','fk'].forEach(g => { localStorage.removeItem('cact_carpet_picked_' + g); localStorage.removeItem('cact_cards_picked_' + g); localStorage.removeItem('cact_look_chosen_' + g); }); sessionStorage.removeItem('cact_gate_done_' + PAGE_GAME); } } catch (e) {}
 /* منفی و حکم: فقط یک آهنگ ثابت که همیشه تکرار می‌شود. لودو مثل قبل می‌ماند */
 const SINGLE = PAGE_GAME !== 'ld', THEME_SRC = 'theme.mp3';
 bgAudio.loop = SINGLE;
@@ -36,25 +38,35 @@ function lookKey(g, part) { return 'cact_' + part + '_picked_' + g; }
 function lookChosen(g) {
   g = g || PAGE_GAME; if (g === 'ld') return true;
   try {
-    if (localStorage.getItem('cact_look_chosen_' + g) === '1') return true;
-    // مهاجرت انتخاب‌های کامل نسخه قبلی برای همان بازی
-    if (g === PAGE_GAME && localStorage.getItem('cact_carpet_chosen') === '1' && localStorage.getItem('cact_cards_chosen') === '1') {
-      localStorage.setItem(lookKey(g, 'carpet'), '1'); localStorage.setItem(lookKey(g, 'cards'), '1');
-      localStorage.setItem('cact_look_chosen_' + g, '1'); return true;
-    }
-    return localStorage.getItem(lookKey(g, 'carpet')) === '1' && localStorage.getItem(lookKey(g, 'cards')) === '1';
+    return localStorage.getItem('cact_look_chosen_' + g) === '1' ||
+      (localStorage.getItem(lookKey(g, 'carpet')) === '1' && localStorage.getItem(lookKey(g, 'cards')) === '1');
   } catch (e) { return false; }
 }
 function markLookPicked(g, part) {
   try { localStorage.setItem(lookKey(g, part), '1'); if (localStorage.getItem(lookKey(g, 'carpet')) === '1' && localStorage.getItem(lookKey(g, 'cards')) === '1') localStorage.setItem('cact_look_chosen_' + g, '1'); } catch (e) {}
 }
-function showLookRequired() {
-  const t = document.getElementById('cactLookToast');
-  const w = document.getElementById('cactWelcome'); if (w) w.classList.remove('show');
-  if (t) { t.innerHTML = '<b>CACTUC</b><span>اول از تنظیمات، در بخش «انتخاب ظاهر بازی»، فرش و پشت کارت را جداگانه انتخاب کن.</span>'; t.classList.add('show'); clearTimeout(window.__cactLookToastTimer); window.__cactLookToastTimer = setTimeout(() => t.classList.remove('show'), 3600); }
-  else alert('اول از تنظیمات، فرش و پشت کارت را انتخاب کن.');
+let pendingAppearanceStart = null;
+let requiredAppearanceSettings = false;
+function closeAppearanceGate() {
+  const el = document.getElementById('cactAppearanceGate'); if (el) el.remove();
 }
-function appearanceGate(g) { if (lookChosen(g || PAGE_GAME)) return true; showLookRequired(); return false; }
+function showAppearanceGate(g) {
+  closeAppearanceGate();
+  const el = document.createElement('div'); el.id = 'cactAppearanceGate';
+  el.innerHTML = `<div class="cagBox"><div class="cagBrand">CACTUC</div><h3>یک تنظیم کوتاه پیش از شروع</h3><p>میزبان باید ظاهر میز را برای همهٔ بازیکنان انتخاب کند. لطفاً یک فرش و یک پشت‌کارت جداگانه انتخاب کن؛ هر دو با هم برای تمام بازیکنان نمایش داده می‌شوند.</p><div class="cagActions"><button onclick="openRequiredAppearanceSettings()">انتخاب ظاهر بازی</button><button class="cagLater" onclick="closeAppearanceGate()">فعلاً بستن</button></div></div>`;
+  document.body.appendChild(el);
+}
+function requestAppearanceStart(g, action) {
+  g = g || PAGE_GAME;
+  const host = typeof st !== 'undefined' && st && st.host && !st.isSpec;
+  if (!host || g === 'ld') { action(); return true; }
+  try { if (sessionStorage.getItem('cact_gate_done_' + g) === '1') { action(); return true; } } catch (e) {}
+  pendingAppearanceStart = action; showAppearanceGate(g); return false;
+}
+window.requestAppearanceStart = requestAppearanceStart;
+window.closeAppearanceGate = closeAppearanceGate;
+window.openRequiredAppearanceSettings = function () { closeAppearanceGate(); openSettingsModal(true); };
+
 
 function applyLook(l) {
   l = cleanLook(l);
@@ -262,12 +274,21 @@ function changeVolume(val) {
 
 /* ---------- پنجره‌ی تنظیمات ---------- */
 function closeSettingsModal() {
-  const modal = document.getElementById('customSettingsModal');
-  if (modal) modal.remove();
+  if (requiredAppearanceSettings && !lookChosen(PAGE_GAME)) {
+    const note = document.getElementById('requiredLookNote'); if (note) note.textContent = 'هنوز هر دو مورد انتخاب نشده است؛ یک فرش و یک پشت‌کارت را جداگانه انتخاب کن.';
+    return;
+  }
+  const required = requiredAppearanceSettings; requiredAppearanceSettings = false;
+  const modal = document.getElementById('customSettingsModal'); if (modal) modal.remove();
+  if (required) {
+    try { sessionStorage.setItem('cact_gate_done_' + PAGE_GAME, '1'); } catch (e) {}
+    const go = pendingAppearanceStart; pendingAppearanceStart = null; if (typeof go === 'function') go();
+  }
 }
 
-function openSettingsModal() {
-  closeSettingsModal();
+function openSettingsModal(required = false) {
+  const oldModal = document.getElementById('customSettingsModal'); if (oldModal) oldModal.remove();
+  requiredAppearanceSettings = !!required;
   let musicOptions = `<option value="-1"${!musicOn ? ' selected' : ''}>خاموش</option>`;
   if (SINGLE) { const on = musicOn && !bgAudio.paused; musicOptions = `<option value="-1"${!on ? ' selected' : ''}>خاموش</option><option value="1"${on ? ' selected' : ''}>🎵 آهنگ بازی</option>`; }
   else for (let i = 1; i <= TRACKS; i++) musicOptions += `<option value="${i}"${musicOn && roomTrack === i ? ' selected' : ''}>موزیک شماره ${i}</option>`;
@@ -285,8 +306,8 @@ function openSettingsModal() {
           <span>🔊 ولوم: <b id="volLabel">${savedVol()}</b></span>
           <input type="range" id="volRange" min="0" max="100" step="1" value="${savedVol()}" oninput="changeVolume(this.value)" onchange="changeVolume(this.value)" style="flex:1; min-width:0; direction:ltr;">
         </div>
-        ${PAGE_GAME === 'ld' ? '' : `<div class="lkBottomTitle">انتخاب ظاهر بازی</div><div id="lookPicker">${lookPickerHTML()}</div>`}
-        <button style="padding:10px; margin-top:4px; background:#f0b64a; color:#000; font-weight:bold; border:none; border-radius:10px; cursor:pointer;" onclick="closeSettingsModal()">بستن</button>
+        ${PAGE_GAME === 'ld' ? '' : `${required ? '<div id="requiredLookNote" class="requiredLookNote">فرش و پشت‌کارت را جداگانه انتخاب کن؛ سپس دکمهٔ «بستن» را بزن.</div>' : ''}<div class="lkBottomTitle">انتخاب ظاهر بازی</div><div id="lookPicker">${lookPickerHTML()}</div>`}
+        <button style="padding:10px; margin-top:4px; background:#f0b64a; color:#000; font-weight:bold; border:none; border-radius:10px; cursor:pointer;" onclick="closeSettingsModal()">${required ? 'بستن و شروع بازی' : 'بستن'}</button>
       </div>
     </div>`;
   document.body.insertAdjacentHTML('beforeend', html);
@@ -378,12 +399,6 @@ document.addEventListener('click', e => { if (e.target.closest && e.target.close
     window.__cactLookToastTimer = setTimeout(() => toast.classList.remove('show'), 4200);
   };
   if (typeof sk !== 'undefined' && sk.on) sk.on('lookHint', window.showLookHint);
-  const welcome = document.createElement('div');
-  welcome.id = 'cactWelcome';
-  welcome.innerHTML = '<b>CACTUC</b><span>سلام دوست عزیز، به بازی خوش آمدی!<br>امیدواریم کنار دوستانت خوش بگذرانی.</span>';
-  document.body.appendChild(welcome);
-  requestAnimationFrame(() => welcome.classList.add('show'));
-  setTimeout(() => welcome.classList.remove('show'), 3000);
 })();
 
 applyLook(prefLook());
