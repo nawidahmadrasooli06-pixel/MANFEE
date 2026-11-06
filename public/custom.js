@@ -14,7 +14,6 @@ const CACT_CARDS = [['n1', 'کاکتوس طلایی'], ['n2', 'لاجورد و �
 const FK_CARPETS = CACT_CARPETS;
 const FK_CARDS = CACT_CARDS;
 const MF_CARPETS = FK_CARPETS, MF_CARDS = FK_CARDS;
-const MATCHED_CARDS = { n1: 'n1', x3: 'n2', x9: 'g17', x10: 'g18' };
 const PAGE_GAME = location.pathname.indexOf('fiskoot') >= 0 ? 'fk' : (location.pathname.indexOf('ludo') >= 0 ? 'ld' : 'mf');
 /* منفی و حکم: فقط یک آهنگ ثابت که همیشه تکرار می‌شود. لودو مثل قبل می‌ماند */
 const SINGLE = PAGE_GAME !== 'ld', THEME_SRC = 'theme.mp3';
@@ -33,6 +32,29 @@ function cleanLook(l, g) {
   return { carpet: G.c.some(x => x[0] === l.carpet) ? l.carpet : G.dc, cards: G.k.some(x => x[0] === l.cards) ? l.cards : G.dk };
 }
 function prefLook(g) { g = g || PAGE_GAME; const G = GAMES[g]; return cleanLook({ carpet: lsGet(G.kc, G.dc), cards: lsGet(G.kk, G.dk) }, g); }
+function lookKey(g, part) { return 'cact_' + part + '_picked_' + g; }
+function lookChosen(g) {
+  g = g || PAGE_GAME; if (g === 'ld') return true;
+  try {
+    if (localStorage.getItem('cact_look_chosen_' + g) === '1') return true;
+    // مهاجرت انتخاب‌های کامل نسخه قبلی برای همان بازی
+    if (g === PAGE_GAME && localStorage.getItem('cact_carpet_chosen') === '1' && localStorage.getItem('cact_cards_chosen') === '1') {
+      localStorage.setItem(lookKey(g, 'carpet'), '1'); localStorage.setItem(lookKey(g, 'cards'), '1');
+      localStorage.setItem('cact_look_chosen_' + g, '1'); return true;
+    }
+    return localStorage.getItem(lookKey(g, 'carpet')) === '1' && localStorage.getItem(lookKey(g, 'cards')) === '1';
+  } catch (e) { return false; }
+}
+function markLookPicked(g, part) {
+  try { localStorage.setItem(lookKey(g, part), '1'); if (localStorage.getItem(lookKey(g, 'carpet')) === '1' && localStorage.getItem(lookKey(g, 'cards')) === '1') localStorage.setItem('cact_look_chosen_' + g, '1'); } catch (e) {}
+}
+function showLookRequired() {
+  const t = document.getElementById('cactLookToast');
+  const w = document.getElementById('cactWelcome'); if (w) w.classList.remove('show');
+  if (t) { t.innerHTML = '<b>CACTUC</b><span>اول از تنظیمات، در بخش «انتخاب ظاهر بازی»، فرش و پشت کارت را جداگانه انتخاب کن.</span>'; t.classList.add('show'); clearTimeout(window.__cactLookToastTimer); window.__cactLookToastTimer = setTimeout(() => t.classList.remove('show'), 3600); }
+  else alert('اول از تنظیمات، فرش و پشت کارت را انتخاب کن.');
+}
+function appearanceGate(g) { if (lookChosen(g || PAGE_GAME)) return true; showLookRequired(); return false; }
 
 function applyLook(l) {
   l = cleanLook(l);
@@ -54,12 +76,12 @@ function setLook(part) {
   if (g === PAGE_GAME) { applyLook(l); if (inRoom() && st.host) sk.emit('look', l); } else refreshLookPicker();
 }
 function pickCarpet(id) {
-  setLook({ carpet: id, cards: MATCHED_CARDS[id] || 'n1' });
-  try { localStorage.setItem('cact_carpet_chosen', '1'); localStorage.setItem('cact_cards_chosen', '1'); } catch (e) {}
+  setLook({ carpet: id }); markLookPicked(modalGame(), 'carpet');
+  refreshLookPicker();
 }
 function pickCards(id) {
-  setLook({ cards: id });
-  try { localStorage.setItem('cact_cards_chosen', '1'); } catch (e) {}
+  setLook({ cards: id }); markLookPicked(modalGame(), 'cards');
+  refreshLookPicker();
 }
 function pickGame(g) { tabGame = g; refreshLookPicker(); }
 
@@ -71,15 +93,16 @@ function lookPickerHTML() {
   const l = g === PAGE_GAME ? (lookNow || prefLook(g)) : prefLook(g);
   const can = !inRoom() || st.host;
   const dis = can ? '' : ' disabled';
-  const tabs = inRoom() ? '' : `<div class="gtabs"><button class="${g === 'mf' ? 'sel' : ''}" onclick="pickGame('mf')">♠ بازی منفی</button><button class="${g === 'fk' ? 'sel' : ''}" onclick="pickGame('fk')">♥ بازی حکم</button></div><div class="lkNote">تنظیمات زیر برای ${g === 'mf' ? 'بازی منفی' : 'بازی حکم (فیسکوت)'} است</div>`;
+  const tabs = (PAGE_GAME !== 'mf' || inRoom()) ? '' : `<div class="gtabs"><button class="${g === 'mf' ? 'sel' : ''}" onclick="pickGame('mf')">♠ بازی منفی</button><button class="${g === 'fk' ? 'sel' : ''}" onclick="pickGame('fk')">♥ بازی حکم</button></div><div class="lkNote">تنظیمات زیر برای ${g === 'mf' ? 'بازی منفی' : 'بازی حکم (فیسکوت)'} است</div>`;
   const car = G.c.map(([id, n]) =>
     `<button class="sw pv carpet-${id}${l.carpet === id ? ' sel' : ''}"${dis} onclick="pickCarpet('${id}')"><span>${n}</span></button>`).join('');
   const crd = G.k.map(([id, n]) =>
-    `<button class="sw swc pv cards-${id}${l.cards === id ? ' sel' : ''}"${dis} onclick="pickCards('${id}')"><div class="c r heart"><em>A</em><b>♥</b></div><span>${n}</span></button>`).join('');
+    `<button class="sw swc pv cards-${id}${l.cards === id ? ' sel' : ''}"${dis} onclick="pickCards('${id}')"><div class="c back"></div><span>${n}</span></button>`).join('');
   return `${tabs}
-    <div class="pv pvbig carpet-${l.carpet} cards-${l.cards}"><div class="pvmark"><span class="pv-cactus" aria-hidden="true">♣</span><span>CACTUC</span><small>@cactuc580</small></div><div class="pvrow">${SAMPLE}${/^n/.test(l.cards) ? '<div class="c back"></div>' : ''}</div></div>
-    <div class="lkTitle">🧶 فرش میز</div><div class="swrow">${car}</div>
-    <div class="lkTitle">🃏 طرح پر</div><div class="swrow">${crd}</div>
+    <div class="pv pvbig carpet-${l.carpet} cards-${l.cards}"><div class="pvmark"><span class="pv-cactus" aria-hidden="true">♣</span><span>CACTUC</span><small>@cactuc580</small></div><div class="pvrow">${SAMPLE}<div class="c back"></div></div></div>
+    <div class="lkTitle">فرش میز</div><div class="swrow">${car}</div>
+    <div class="lkTitle">پشت کارت (مستقل از فرش)</div><div class="swrow">${crd}</div>
+    <div class="lkNote">برای فعال‌شدن ورود، هر دو مورد را جداگانه انتخاب کن.</div>
     ${can ? '' : '<div class="lkNote">🔒 فرش و پر را میزبان اتاق انتخاب می‌کند و برای همه یکسان است</div>'}`;
 }
 function refreshLookPicker() {
@@ -254,7 +277,6 @@ function openSettingsModal() {
     <div id="customSettingsModal" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; display:flex; align-items:center; justify-content:center; padding:14px;">
       <div style="background:#0b1f1e; border:2px solid #f0b64a; border-radius:18px; padding:16px; width:100%; max-width:320px; max-height:92vh; overflow-y:auto; -webkit-overflow-scrolling:touch; color:#fff; text-align:center; display:flex; flex-direction:column; gap:10px;">
         <h3 style="margin:0; color:#f0b64a;">${PAGE_GAME === 'ld' ? '⚙️ تنظیمات و موزیک' : '⚙️ فرش، پر و موزیک'}</h3>
-        <div id="lookPicker">${lookPickerHTML()}</div>
         <div style="${row}">
           <span>🎵 موزیک:</span>
           <select id="musicSelect" onchange="musicSelect(this.value)" style="${selStyle}">${musicOptions}</select>
@@ -263,6 +285,7 @@ function openSettingsModal() {
           <span>🔊 ولوم: <b id="volLabel">${savedVol()}</b></span>
           <input type="range" id="volRange" min="0" max="100" step="1" value="${savedVol()}" oninput="changeVolume(this.value)" onchange="changeVolume(this.value)" style="flex:1; min-width:0; direction:ltr;">
         </div>
+        ${PAGE_GAME === 'ld' ? '' : `<div class="lkBottomTitle">انتخاب ظاهر بازی</div><div id="lookPicker">${lookPickerHTML()}</div>`}
         <button style="padding:10px; margin-top:4px; background:#f0b64a; color:#000; font-weight:bold; border:none; border-radius:10px; cursor:pointer;" onclick="closeSettingsModal()">بستن</button>
       </div>
     </div>`;
@@ -343,41 +366,24 @@ document.addEventListener('click', e => { if (e.target.closest && e.target.close
 })();
 
 
-/* پیام تغییر ظاهر: بالای تخته، بدون گرفتن کلیک و بدون پوشاندن کارت‌ها */
+/* پیام‌های کوتاه و غیرمزاحم Mini App */
 (function () {
-  const toast = document.createElement('div');
+  const toast = document.getElementById('cactLookToast') || document.createElement('div');
   toast.id = 'cactLookToast';
-  toast.innerHTML = '<b>CACTUC</b><span>برای تغییر ظاهر، «بازگشت» را بزن و سپس «تنظیمات» را انتخاب کن.</span>';
-  document.body.appendChild(toast);
-  let lastKey = null, hideTimer = null;
-  if (typeof sk !== 'undefined') sk.on('state', s => {
-    if (!s || !s.look) return;
-    const key = s.code + ':' + s.look.carpet + ':' + s.look.cards;
-    if (lastKey !== null && key !== lastKey && s.code === (lastKey.split(':')[0])) {
-      toast.classList.add('show');
-      clearTimeout(hideTimer);
-      hideTimer = setTimeout(() => toast.classList.remove('show'), 4200);
-    }
-    lastKey = key;
-  });
+  if (!toast.parentNode) document.body.appendChild(toast);
+  window.showLookHint = function (data) {
+    const host = data && data.hostName ? 'میزبان «' + data.hostName + '»' : 'میزبان';
+    toast.innerHTML = '<b>CACTUC</b><span>' + host + ' می‌تواند ظاهر میز را تغییر دهد؛ گزینه «بازگشت» را بزن و سپس «تنظیمات» را انتخاب کن.</span>';
+    toast.classList.add('show'); clearTimeout(window.__cactLookToastTimer);
+    window.__cactLookToastTimer = setTimeout(() => toast.classList.remove('show'), 4200);
+  };
+  if (typeof sk !== 'undefined' && sk.on) sk.on('lookHint', window.showLookHint);
   const welcome = document.createElement('div');
   welcome.id = 'cactWelcome';
-  welcome.innerHTML = '<b>CACTUC</b><span>سلام دوست عزیز، خوش آمدی به ربات بازی!<br>امیدواریم کنار دوستانت خوش بگذرانی.</span>';
+  welcome.innerHTML = '<b>CACTUC</b><span>سلام دوست عزیز، به بازی خوش آمدی!<br>امیدواریم کنار دوستانت خوش بگذرانی.</span>';
   document.body.appendChild(welcome);
-  if (!sessionStorage.getItem('cact_welcomed')) {
-    sessionStorage.setItem('cact_welcomed', '1');
-    requestAnimationFrame(() => welcome.classList.add('show'));
-    setTimeout(() => welcome.classList.remove('show'), 3000);
-  }
-})();
-
-/* اولین ورود عادی: تنظیمات ظاهر قبل از ساخت میز باز شود؛ دعوت‌شده‌ها ظاهر میز میزبان را می‌گیرند. */
-(function () {
-  const q = new URLSearchParams(location.search);
-  const invited = q.has('r') || q.has('room') || q.has('tb') || q.has('c') || q.has('w') || q.has('watch');
-  if (!invited && !localStorage.getItem('cact_look_chosen')) {
-    setTimeout(() => { if (typeof openSettingsModal === 'function' && !inRoom()) openSettingsModal(); }, 650);
-  }
+  requestAnimationFrame(() => welcome.classList.add('show'));
+  setTimeout(() => welcome.classList.remove('show'), 3000);
 })();
 
 applyLook(prefLook());
