@@ -15,7 +15,13 @@ $('#nm').value = localStorage.nm || (tg && tg.initDataUnsafe && tg.initDataUnsaf
 $('#invNm').value = $('#nm').value;
 const qr = new URLSearchParams(location.search).get('r'), wq = new URLSearchParams(location.search).get('w');
 if (qr) show('invite');
-function mk() { sk.emit('create', { name: nm(), token: tok, look: typeof prefLook === 'function' ? prefLook() : undefined }); }
+function mk() {
+  if (!localStorage.getItem('cact_carpet_chosen') || !localStorage.getItem('cact_cards_chosen')) {
+    if (typeof openSettingsModal === 'function') openSettingsModal();
+    return;
+  }
+  sk.emit('create', { name: nm(), token: tok, look: typeof prefLook === 'function' ? prefLook() : undefined });
+}
 function jn() { sk.emit('join', { code: $('#cd').value, name: nm(), token: tok }); }
 function acceptInvite() { $('#nm').value = $('#invNm').value; sk.emit('join', { code: qr || $('#invCode').textContent, name: nm(), token: tok }); }
 function backToMenu() { menuMode = true; show('menu'); }
