@@ -203,7 +203,7 @@ body.pg-ld #specBadge{font-size:9px!important;padding:1px 7px!important;left:aut
 .dice.roll{animation:none!important;transition:none!important;border-color:#ffd76a;box-shadow:0 8px 14px #0007}.dice{touch-action:manipulation;will-change:transform}
 .tk{touch-action:manipulation}
 #lmsg{font-size:13px}
-</style><link rel="stylesheet" href="fk-theme.css"></head><body>
+</style><link rel="stylesheet" href="fk-theme.css"><link rel="stylesheet" href="vip.css"></head><body>
 <div id="bw" style="display:none"></div>
 <svg width="0" height="0" style="position:absolute;pointer-events:none" id="gdefs"></svg>
 <div id="net">🔌 اتصال قطع شد؛ در حال اتصال دوباره…</div><div id="bigd" class="bigd"><div class="cube" id="cube"></div></div><div id="dcb"></div>
@@ -218,6 +218,7 @@ body.pg-ld #specBadge{font-size:9px!important;padding:1px 7px!important;left:aut
 <button class="lnk" onclick="SOC.about()">ℹ️ درباره ربات</button><a class="lnk" href="/">⬅ بازگشت به انتخاب بازی</a></div></div>
 <div class="scr kg" id="lobby" style="display:none"><div class="fit"><div class="kh">اتاق <span id="rc"></span></div>
 <div class="krow2"><button class="kbtn sm" onclick="invite()">📨 دعوت دوستان</button><button class="kbtn sm alt" onclick="inviteWatch()">👁 تماشاچی</button></div>
+<button class="kbtn sm alt" id="annBtn" onclick="VIP.announce()" style="display:none">📣 اعلام میز در گروه</button>
 <div class="kpanel"><div class="kt">رنگ و بازیکنان</div><div id="room"></div></div>
 <div class="kpanel"><div class="kt">تعداد بازیکن</div><div id="cntRow" class="rbs"></div></div>
 <div class="kpanel" id="teamP" style="display:none"><div class="kt">⚔️</div><div id="teamRow" class="rbs"></div></div>
@@ -466,4 +467,4 @@ if(wq){const go=()=>sk.emit('watch',{code:wq});sk.connected?go():sk.once('connec
 
 </script>
 <script src="custom.js"></script>
-<script src="social.js"></script></body></html>
+<script src="social.js"></script><script src="vip.js"></script></body></html>
