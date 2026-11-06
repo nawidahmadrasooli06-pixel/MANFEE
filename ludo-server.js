@@ -18,6 +18,11 @@ module.exports = function (io) {
   const teamHome = r => (r.team && r.pos) ? [0, 1].map(k => [0, 1, 2, 3].filter(x => (x & 1) === k).reduce((a, x) => a + r.pos[x].filter(p => p === 56).length, 0)) : null;
   const ids = r => [...r.seats.filter(s => s && s.sid && s.on).map(s => s.sid), ...r.spec];
   const act = r => ACT[r.n];
+  io.tables && io.tables.register('ld', c => {
+    const r = rooms[c]; if (!r) return { s: 'gone' };
+    const hs = r.seats.find(x => x && x.token === r.host), lobby = r.phase === 'lobby', free = act(r).filter(i => !r.seats[i]).length;
+    return { s: lobby && free > 0 ? 'open' : 'full', free: lobby ? free : 0, host: hs ? hs.name : '' };
+  });
   const nextSeat = (r, s) => { const a = act(r); let i = a.indexOf(s); for (let k = 0; k < a.length; k++) { i = (i + 1) % a.length; if (!r.fin.includes(a[i])) return a[i]; } return s; };
   const movable = (r, s, v) => {
     const m = [], own = r.pos[s];
@@ -174,6 +179,10 @@ module.exports = function (io) {
     const R = () => rooms[so.data && so.data.code], tk = () => so.data && so.data.tok;
     const takeSeat = (r, k, name, token) => { const s = r.seats[k]; if (!s || !s.auto || !s.bot) return so.emit('err', 'این صندلی دیگر ربات نیست.'); r.seats[k] = mkSeat(name, token, so.id, so.uid); so.data = { code: r.code, tok: token }; step(r); };
     so.on('auth', () => { });
+    so.on('announce', async () => {
+      const r = R(); if (!r || tk() !== r.host || !io.tables) return so.emit('announced', { ok: false, msg: 'فقط میزبان می‌تواند میز را اعلام کند.' });
+      so.emit('announced', await io.tables.announce('ld', r.code, r.host));
+    });
     so.on('create', ({ name, token } = {}) => {
       let c; do c = [0, 1, 2, 3].map(() => L[Math.random() * 24 | 0]).join(''); while (rooms[c]);
       const r = rooms[c] = { code: c, host: token, seats: [null, null, null, null], phase: 'lobby', n: 4, pos: null, turn: -1, stage: 'roll', dice: 0, rollSeq: 0, mseq: 0, mv: null, mov: [], six: 0, winner: -1, rank: [], fin: [], wait: null, t: null, at: Date.now(), track: 1, playing: false, spec: new Set(), busy: 0 };
