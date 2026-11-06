@@ -79,6 +79,7 @@ body.pg-mf #customSettingsModal button[onclick*="closeSettingsModal"],body.pg-fk
 #infSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 60%,#3a0f08,#050202 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;animation:infOut .45s 1.6s ease forwards}
 #infSplash .fan{position:relative;width:0;height:0}
 #infSplash .fan i{position:absolute;left:-26px;top:-52px;width:52px;height:76px;border-radius:9px;background:linear-gradient(#fff6e6,#e8d2b4);border:2px solid #ff9a3a;box-shadow:0 0 18px #ff5a1f88;opacity:0;transform-origin:50% 120%;animation:infFan .85s .15s cubic-bezier(.2,.9,.3,1.25) forwards}
+#infSplash .fanCardLogo{position:absolute;width:25px;height:27px;left:50%;top:20px;transform:translateX(-50%);filter:drop-shadow(0 1px 2px #9b4a25)}#infSplash .fanBrand{position:absolute;left:0;right:0;bottom:10px;text-align:center;font:900 6px/1 Arial,sans-serif;letter-spacing:1px;color:#7b321d;direction:ltr}
 #infSplash .fan i:nth-child(2){animation-delay:.2s}#infSplash .fan i:nth-child(3){animation-delay:.25s}#infSplash .fan i:nth-child(4){animation-delay:.3s}#infSplash .fan i:nth-child(5){animation-delay:.35s}
 @keyframes infFan{from{opacity:0;transform:rotate(0) scale(.5)}to{opacity:.95;transform:rotate(var(--r)) translateY(-18px) scale(1)}}
 #infSplash .em{height:min(34vh,190px);width:auto;position:relative;opacity:0;animation:infRise .85s .1s cubic-bezier(.2,.9,.3,1.2) forwards;filter:drop-shadow(0 0 22px #ff5a1fdd)}
