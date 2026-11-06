@@ -106,15 +106,9 @@
       }
     }, true);
 
-    /* ---- ورود دو ثانیه‌ای (یک بار در هر بار باز کردن ربات؛ در لینک دعوت و تماشا نمایش داده نمی‌شود) ---- */
-    let seen = false; try { seen = sessionStorage.getItem('inf_splash') === '1'; } catch (e) { }
-    const deep = /[?&](r|room|watch|w|invite)=/.test(location.search);
-    if (!seen && !deep && !reduce) {
-      try { sessionStorage.setItem('inf_splash', '1'); } catch (e) { }
-      const sp = document.createElement('div'); sp.id = 'infSplash';
-      sp.innerHTML = '<div class="fan">' + [-44, -22, 0, 22, 44].map(r => `<i style="--r:${r}deg">${emblem('fanCardLogo')}<small class="fanBrand">CACTUC</small></i>`).join('') + '</div>' + emblem('em') + '<div class="tt">VIP · CACTUC</div><div class="tt2">♠ منفی · ♥ حکم · 🎲 لودو</div><div class="bar"><i></i></div>';
-      const kill = () => sp.remove(); sp.addEventListener('pointerdown', kill); setTimeout(kill, 2900);
-      body.appendChild(sp);
-    }
+    /* ---- صفحهٔ خوشامد پنج‌ثانیه‌ای؛ همراه با نوار پیشرفت ---- */
+    const sp = document.createElement('div'); sp.id = 'infSplash';
+    sp.innerHTML = '<div class="fan">' + [-44, -22, 0, 22, 44].map(r => `<i style="--r:${r}deg">${emblem('fanCardLogo')}<small class="fanBrand">CACTUC</small></i>`).join('') + '</div>' + emblem('em') + '<div class="tt">VIP · CACTUC</div><div class="tt2">سلام دوست عزیز، به بازی خوش آمدی!<br>امیدواریم کنار دوستانت خوش بگذرانی.</div><div class="bar"><i></i></div>';
+    body.appendChild(sp); setTimeout(() => sp.remove(), 5000);
   } catch (e) { console.log('inferno fx off', e); }
 })();
