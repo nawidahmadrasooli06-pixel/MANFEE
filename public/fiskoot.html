@@ -111,7 +111,7 @@ body{display:block}
 <div class="scr" id="lobby" style="display:none"><h2>اتاق <span id="rc" style="color:#f0b64a;direction:ltr;display:inline-block"></span></h2>
 <div class="lact"><button class="btn mini" onclick="invite()"><span>📨</span>دعوت دوستان</button><button class="btn mini" id="annBtn" onclick="VIP.announce()" style="display:none"><span>📣</span>اعلام در گروه</button><button class="btn mini" onclick="openSettingsModal()"><span>🎨</span>فرش و پر</button><button class="btn mini" onclick="SOC.openProfile()"><span>👤</span>پروفایل</button><button class="btn mini" onclick="inviteWatch()"><span>👁</span>تماشاچی</button></div><div id="room"></div>
 <label style="font-size:13px"><input type="checkbox" id="al" onchange="sk.emit('cfg',{low:this.checked})"> توس (آس) کمترین کارت باشد</label>
-<small id="lm" style="color:#9fcfc0"></small><button id="go" class="btn go" onclick="sk.emit('start')">شروع بازی</button><button id="gob" class="btn" onclick="sk.emit('start',{bots:1})">شروع با ربات‌ها 🤖</button><a class="lnk" href="/">خروج</a></div>
+<small id="lm" style="color:#9fcfc0"></small><button id="go" class="btn go" onclick="startFk()">شروع بازی</button><button id="gob" class="btn" onclick="startFkBots()">شروع با ربات‌ها 🤖</button><a class="lnk" href="/">خروج</a></div>
 <div class="ovl" id="rl" style="display:none"><div class="box"><h2>قوانین بازی حکم (فیسکوت)</h2><ul>
 <li>4 نفر، دو تیم؛ هم‌تیمی روبه‌روست. تیمی که به 13 امتیاز برسد برنده است.</li>
 <li>حاکم (کسی که رنگ را می‌گوید): اولین کسی که توس (آس) بیاورد. پخش‌کننده سمت چپ حاکم است.</li>
@@ -141,9 +141,11 @@ function ann(t,ms,tp){const a=$('ann');a.style.top=tp||'40%';a.innerHTML=t;a.sty
 function scr(n){$('menu').style.display=n=='menu'?'flex':'none';$('lobby').style.display=n=='lobby'?'flex':'none'}
 function rules(){$('rl').style.display='flex'}
 function nameV(){const n=($('nm').value||'').trim();if(!n){toast('اسمت را بنویس');return null}sv('fk_nm',n);return n}
-function mkRoom(){if(typeof appearanceGate==='function'&&!appearanceGate('fk'))return;const n=nameV();if(n)sk.emit('create',{name:n,token:tok,look:prefLook('fk')})}
-function joinCode(){if(typeof appearanceGate==='function'&&!appearanceGate('fk'))return;const n=nameV(),c=$('cin').value.trim().toUpperCase();if(n&&c)sk.emit('join',{code:c,name:n,token:tok})}
-function resume(){if(typeof appearanceGate==='function'&&!appearanceGate('fk'))return;sk.emit('rejoin',{code:ld('fk_room'),token:tok})}
+function mkRoom(){const n=nameV();if(n)sk.emit('create',{name:n,token:tok,look:prefLook('fk')})}
+function joinCode(){const n=nameV(),c=$('cin').value.trim().toUpperCase();if(n&&c)sk.emit('join',{code:c,name:n,token:tok})}
+function resume(){sk.emit('rejoin',{code:ld('fk_room'),token:tok})}
+function startFk(){const go=()=>sk.emit('start');if(window.requestAppearanceStart)requestAppearanceStart('fk',go);else go()}
+function startFkBots(){const go=()=>sk.emit('start',{bots:1});if(window.requestAppearanceStart)requestAppearanceStart('fk',go);else go()}
 function sit(k){sk.emit('sit',k)}
 function invite(){const go=l=>{const u='https://t.me/share/url?url='+encodeURIComponent(l)+'&text='+encodeURIComponent('بیا بازی حکم (فیسکوت)! کد اتاق: '+st.code);try{Telegram.WebApp.openTelegramLink(u)}catch(e){window.open(u,'_blank')}};fetch('/config').then(r=>r.json()).then(c=>go(c.bot?'https://t.me/'+c.bot+'?start=fk_'+st.code:location.origin+'/fiskoot.html?room='+st.code)).catch(()=>go(location.origin+'/fiskoot.html?room='+st.code))}
 function inviteWatch(){const go=l=>{const u='https://t.me/share/url?url='+encodeURIComponent(l)+'&text='+encodeURIComponent('بیا بازی حکم (فیسکوت) را زنده تماشا کن! 👁 کد اتاق: '+st.code);try{Telegram.WebApp.openTelegramLink(u)}catch(e){window.open(u,'_blank')}};fetch('/config').then(r=>r.json()).then(c=>go(c.bot?'https://t.me/'+c.bot+'?start=fkw_'+st.code:location.origin+'/fiskoot.html?watch='+st.code)).catch(()=>go(location.origin+'/fiskoot.html?watch='+st.code))}
@@ -203,7 +205,7 @@ function rGame(){
 }
 function dropCard(e,c,rc){const el=$('p0'),t=el.getBoundingClientRect();el.innerHTML=cel(c,'mid slide');el.dataset.c=c;el.firstChild.style.setProperty('--f',`translate(${rc.left+rc.width/2-t.left}px,${rc.top+rc.height/2-t.top}px)`);e.style.visibility='hidden'}
 let pend=null;
-function takeSeat(k){if(typeof appearanceGate==='function'&&!appearanceGate('fk'))return;$('wt').style.display='none';sk.emit('take',{code:pend.code,name:nameV()||'بازیکن',token:tok,seat:k})}
+function takeSeat(k){$('wt').style.display='none';sk.emit('take',{code:pend.code,name:nameV()||'بازیکن',token:tok,seat:k})}
 function copyLink(){try{navigator.clipboard.writeText(location.href).then(()=>toast('لینک کپی شد؛ در Safari یا Chrome بچسبان'))}catch(e){toast(location.href)}}
 function paint(el){const c=el._c,L=st&&st.lg;el.classList.remove('dim','dim2','lift');if(!L)return;if(sel===c)el.classList.add('lift');else if(!L.includes(c))el.classList.add('dim');else if(sel!=null)el.classList.add('dim2')}
 function bindCard(e,c){
