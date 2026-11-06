@@ -89,11 +89,13 @@
 
 <div id="lobby" class="scr">
   <h2>اتاق <span id="code" style="direction:ltr;display:inline-block;color:var(--gold)"></span></h2>
-  <button class="btn" onclick="share()">دعوت دوستان</button>
-  <button class="btn" id="annBtn" onclick="VIP.announce()" style="display:none">📣 اعلام میز در گروه</button>
-  <button class="btn" onclick="openSettingsModal()">🎨 فرش، پر و موزیک</button>
-  <button class="btn" onclick="SOC.openProfile()">👤 پروفایل من</button>
-  <button class="btn" onclick="shareWatch()">👁 دعوت تماشاچی</button>
+  <div class="lact">
+    <button class="btn mini" onclick="share()"><span>📨</span>دعوت دوستان</button>
+    <button class="btn mini" id="annBtn" onclick="VIP.announce()" style="display:none"><span>📣</span>اعلام در گروه</button>
+    <button class="btn mini" onclick="openSettingsModal()"><span>🎨</span>فرش و پر</button>
+    <button class="btn mini" onclick="SOC.openProfile()"><span>👤</span>پروفایل</button>
+    <button class="btn mini" onclick="shareWatch()"><span>👁</span>تماشاچی</button>
+  </div>
   <div id="lb"></div>
   <div id="waitMsg" class="waitMsg"></div>
   <div id="startCount" class="startCount"></div>
