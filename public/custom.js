@@ -6,12 +6,15 @@ bgAudio.preload = 'auto';
 const TRACKS = 21;
 let actx = null, gainNode = null, roomTrack = 1, musicOn = false, trackSynced = false, lookNow = null;
 
-const CACT_CARPETS = [['n9', 'هراتی'], ['x1', 'زمرد شطرنجی'], ['x2', 'یاقوت سلطنتی'], ['x3', 'لاجورد شب'], ['x4', 'طلای گنگ'], ['x5', 'نئون بنفش'], ['x6', 'فیروزه هندسی'], ['x7', 'اوبسیدین'], ['x8', 'آتش و فولاد']];
-const CACT_CARDS = [['n1', 'عاج هراتی'], ['n5', 'یاقوت'], ['n7', 'عقیق بنفش'], ['n3', 'زمرد باغ'], ['g11', 'شبح کروم'], ['g12', 'طلای شب'], ['g13', 'نئون گنگ'], ['g14', 'اژدهای زمرد'], ['g15', 'یخ آبی'], ['g16', 'آتش سرخ']];
+/* چهار فرش نهایی: دو طرح منتخب + دو طرح اختصاصی تازه */
+const CACT_CARPETS = [['n1', 'کاکتوس کلاسیک'], ['x3', 'لاجورد سلطنتی'], ['x9', 'زمرد آبی'], ['x10', 'یاقوت آتشین']];
+/* پشت کارت‌ها با چهار فرش هماهنگ شده‌اند */
+const CACT_CARDS = [['n1', 'کاکتوس طلایی'], ['n2', 'لاجورد و طلا'], ['g17', 'زمرد و نقره'], ['g18', 'یاقوت و طلایی']];
 /* طرح‌های قدیمی که نگه داشته شدند */
 const FK_CARPETS = CACT_CARPETS;
 const FK_CARDS = CACT_CARDS;
 const MF_CARPETS = FK_CARPETS, MF_CARDS = FK_CARDS;
+const MATCHED_CARDS = { n1: 'n1', x3: 'n2', x9: 'g17', x10: 'g18' };
 const PAGE_GAME = location.pathname.indexOf('fiskoot') >= 0 ? 'fk' : (location.pathname.indexOf('ludo') >= 0 ? 'ld' : 'mf');
 /* منفی و حکم: فقط یک آهنگ ثابت که همیشه تکرار می‌شود. لودو مثل قبل می‌ماند */
 const SINGLE = PAGE_GAME !== 'ld', THEME_SRC = 'theme.mp3';
@@ -47,10 +50,17 @@ function setLook(part) {
   const cur = g === PAGE_GAME ? (lookNow || prefLook(g)) : prefLook(g);
   const l = cleanLook(Object.assign({}, cur, part), g), G = GAMES[g];
   lsSet(G.kc, l.carpet); lsSet(G.kk, l.cards);
+   
   if (g === PAGE_GAME) { applyLook(l); if (inRoom() && st.host) sk.emit('look', l); } else refreshLookPicker();
 }
-function pickCarpet(id) { setLook({ carpet: id }); }
-function pickCards(id) { setLook({ cards: id }); }
+function pickCarpet(id) {
+  setLook({ carpet: id, cards: MATCHED_CARDS[id] || 'n1' });
+  try { localStorage.setItem('cact_carpet_chosen', '1'); localStorage.setItem('cact_cards_chosen', '1'); } catch (e) {}
+}
+function pickCards(id) {
+  setLook({ cards: id });
+  try { localStorage.setItem('cact_cards_chosen', '1'); } catch (e) {}
+}
 function pickGame(g) { tabGame = g; refreshLookPicker(); }
 
 const SAMPLE = '<div class="c"><em>A</em><b>♠</b></div><div class="c r heart"><em>K</em><b>♥</b></div><div class="c r"><em>Q</em><b>♦</b></div><div class="c"><em>J</em><b>♣</b></div>';
@@ -330,6 +340,44 @@ document.addEventListener('click', e => { if (e.target.closest && e.target.close
 (function () {
   const b = document.createElement('div'); b.id = 'specBadge'; document.body.appendChild(b);
   window.setSpec = n => { b.textContent = '👁 تماشاچی ' + (n | 0); };
+})();
+
+
+/* پیام تغییر ظاهر: بالای تخته، بدون گرفتن کلیک و بدون پوشاندن کارت‌ها */
+(function () {
+  const toast = document.createElement('div');
+  toast.id = 'cactLookToast';
+  toast.innerHTML = '<b>CACTUC</b><span>برای تغییر ظاهر، «بازگشت» را بزن و سپس «تنظیمات» را انتخاب کن.</span>';
+  document.body.appendChild(toast);
+  let lastKey = null, hideTimer = null;
+  if (typeof sk !== 'undefined') sk.on('state', s => {
+    if (!s || !s.look) return;
+    const key = s.code + ':' + s.look.carpet + ':' + s.look.cards;
+    if (lastKey !== null && key !== lastKey && s.code === (lastKey.split(':')[0])) {
+      toast.classList.add('show');
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => toast.classList.remove('show'), 4200);
+    }
+    lastKey = key;
+  });
+  const welcome = document.createElement('div');
+  welcome.id = 'cactWelcome';
+  welcome.innerHTML = '<b>CACTUC</b><span>سلام دوست عزیز، خوش آمدی به ربات بازی!<br>امیدواریم کنار دوستانت خوش بگذرانی.</span>';
+  document.body.appendChild(welcome);
+  if (!sessionStorage.getItem('cact_welcomed')) {
+    sessionStorage.setItem('cact_welcomed', '1');
+    requestAnimationFrame(() => welcome.classList.add('show'));
+    setTimeout(() => welcome.classList.remove('show'), 3000);
+  }
+})();
+
+/* اولین ورود عادی: تنظیمات ظاهر قبل از ساخت میز باز شود؛ دعوت‌شده‌ها ظاهر میز میزبان را می‌گیرند. */
+(function () {
+  const q = new URLSearchParams(location.search);
+  const invited = q.has('r') || q.has('room') || q.has('tb') || q.has('c') || q.has('w') || q.has('watch');
+  if (!invited && !localStorage.getItem('cact_look_chosen')) {
+    setTimeout(() => { if (typeof openSettingsModal === 'function' && !inRoom()) openSettingsModal(); }, 650);
+  }
 })();
 
 applyLook(prefLook());
