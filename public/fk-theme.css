@@ -96,11 +96,7 @@ body.pg-mf.carpet-x10 #game.on,body.pg-fk.carpet-x10 #tbl,.pv.carpet-x10{
     radial-gradient(circle at 50% 45%,#a9273b 0%,#641426 52%,#260914 100%);
   box-shadow:inset 0 0 0 3px #f2c66eaa,inset 0 0 0 8px #3a0b19;
 }
-body.pg-mf.carpet-x9 .idTag,body.pg-fk.carpet-x9 .idTag,
-body.pg-mf.carpet-x10 .idTag,body.pg-fk.carpet-x10 .idTag{
-  color:#fff2c9!important;text-shadow:0 1px 3px #00131c,0 0 7px #000;
-  opacity:.92;font-weight:900;letter-spacing:.1em;
-}
+body.pg-mf .idTag,body.pg-fk .idTag{color:#ffffffa6!important;text-shadow:0 1px 3px #00131c,0 0 4px #000;opacity:1;font-weight:800;letter-spacing:.07em}
 body.cards-g17 .c.back,.pv.cards-g17 .c.back{
   background-color:#073b45;
   background-image:radial-gradient(circle at 50% 50%,#e5d18a 0 2px,transparent 3px),
@@ -118,12 +114,6 @@ body.cards-g18 .c.back,.pv.cards-g18 .c.back{
     repeating-linear-gradient(90deg,transparent 0 9px,#ffd38a22 10px 11px);
   background-size:20px 20px,100% 100%,100% 100%,20px 100%;
   border:2px solid #ffd27a;box-shadow:inset 0 0 0 3px #330b18,inset 0 0 0 5px #b94c58,0 2px 8px #000b;
-}
-body.cards-g17 .c.back::after,body.cards-g18 .c.back::after,
-.pv.cards-g17 .c.back::after,.pv.cards-g18 .c.back::after{
-  content:'CACTUC  •  @cactuc580';position:absolute;left:0;right:0;bottom:4px;
-  text-align:center;font-size:6px;font-weight:900;letter-spacing:.025em;
-  color:#fff0bd;direction:ltr;text-shadow:0 1px 3px #000;pointer-events:none;
 }
 #cactLookToast,#cactWelcome{
   position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 72px);
@@ -158,11 +148,47 @@ body.cards-g18 .c.r:not(.back),.pv.cards-g18 .c.r:not(.back){color:#a31335}
 #cactLookToast span{display:block}
 /* شناسه کاکتوس روی همه پشت‌کارت‌ها، خوانا اما کوچک */
 .c.back{position:relative}
-.c.back::after{content:'CACTUC  •  @cactuc580';position:absolute;left:1px;right:1px;bottom:3px;text-align:center;font:900 5.5px/1 Arial,sans-serif;letter-spacing:0;color:#fff1c2;text-shadow:0 1px 2px #000;direction:ltr;pointer-events:none}
-.pv .c.back::after{font-size:5px}
 
 .swc .c.back{width:28px;height:40px;min-width:28px;border-radius:5px}
 /* نشان برند و آیدی روی تمام فرش‌ها با کنتراست خوانا */
-body.pg-mf #wm{color:#fff0c6;opacity:.19;text-shadow:0 2px 5px #000}
-body.pg-fk #tbl::after{content:'CACTUC';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:1;pointer-events:none;direction:ltr;font:900 clamp(42px,12vw,82px)/1 Arial,sans-serif;letter-spacing:.12em;color:#fff0c6;opacity:.15;text-shadow:0 2px 6px #000}
-body.pg-mf .idTag,body.pg-fk .idTag{color:#fff0c9!important;text-shadow:0 1px 3px #00131c,0 0 7px #000;opacity:.94;font-weight:900}
+body.pg-mf #wm{color:#fff0c6;opacity:.14;text-shadow:0 1px 4px #000}
+body.pg-fk #tbl::after{content:'CACTUC';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:1;pointer-events:none;direction:ltr;font:900 clamp(42px,12vw,82px)/1 Arial,sans-serif;letter-spacing:.12em;color:#fff0c6;opacity:.10;text-shadow:0 1px 4px #000}
+body.pg-mf .idTag,body.pg-fk .idTag{color:#ffffffa6!important;text-shadow:0 1px 3px #00131c,0 0 4px #000;opacity:1;font-weight:800;letter-spacing:.07em}
+
+/* ===== سه فرش تازه و مستقل ===== */
+body.pg-mf.carpet-x11 #game.on,body.pg-fk.carpet-x11 #tbl,.pv.carpet-x11{
+ background:radial-gradient(ellipse at 50% 48%,transparent 25%,#03121cbb 100%),repeating-linear-gradient(45deg,#b8f2e522 0 1px,transparent 1px 24px),repeating-linear-gradient(-45deg,#e8d18b18 0 2px,transparent 2px 30px),radial-gradient(circle at 50% 45%,#167f88 0%,#07505e 52%,#062536 100%);
+ box-shadow:inset 0 0 0 3px #d9bd70aa,inset 0 0 0 8px #07313b;
+}
+body.pg-mf.carpet-x12 #game.on,body.pg-fk.carpet-x12 #tbl,.pv.carpet-x12{
+ background:radial-gradient(ellipse at 50% 48%,transparent 25%,#050b1cbb 100%),repeating-linear-gradient(90deg,#d7c4ff12 0 1px,transparent 1px 26px),repeating-linear-gradient(0deg,#d7c4ff10 0 1px,transparent 1px 26px),radial-gradient(circle at 50% 45%,#344b83 0%,#17284e 55%,#09142d 100%);
+ box-shadow:inset 0 0 0 3px #c8b5efaa,inset 0 0 0 8px #101b39;
+}
+body.pg-mf.carpet-x13 #game.on,body.pg-fk.carpet-x13 #tbl,.pv.carpet-x13{
+ background:radial-gradient(ellipse at 50% 48%,transparent 25%,#211006bb 100%),repeating-linear-gradient(45deg,#ffe0a51a 0 2px,transparent 2px 25px),repeating-linear-gradient(-45deg,#fff0c512 0 1px,transparent 1px 31px),radial-gradient(circle at 50% 45%,#a96b27 0%,#704019 54%,#2e1b12 100%);
+ box-shadow:inset 0 0 0 3px #f0cf83aa,inset 0 0 0 8px #422713;
+}
+/* ===== سه پشت‌کارت تازه؛ فقط نقش، بدون لوگو و شناسه ===== */
+body.cards-g19 .c.back,.pv.cards-g19 .c.back{
+ background-color:#10264a;background-image:radial-gradient(circle at 50% 50%,#f1d88c 0 2px,transparent 3px),repeating-linear-gradient(45deg,transparent 0 7px,#a9c5e522 8px 9px),repeating-linear-gradient(-45deg,transparent 0 7px,#f1d88c22 8px 9px);
+ border:2px solid #e5cb83;box-shadow:inset 0 0 0 3px #07172f,inset 0 0 0 5px #6c85b4,0 2px 8px #000b;
+}
+body.cards-g20 .c.back,.pv.cards-g20 .c.back{
+ background-color:#152d50;background-image:linear-gradient(45deg,transparent 42%,#b8d7ef55 43% 46%,transparent 47%),linear-gradient(-45deg,transparent 42%,#b8d7ef55 43% 46%,transparent 47%),radial-gradient(circle,#d6e7f6 0 1.5px,transparent 2px);
+ background-size:100% 100%,100% 100%,18px 18px;border:2px solid #c7d8e8;box-shadow:inset 0 0 0 3px #0b1c36,inset 0 0 0 5px #6688ad,0 2px 8px #000b;
+}
+body.cards-g21 .c.back,.pv.cards-g21 .c.back{
+ background-color:#382016;background-image:radial-gradient(circle at 50% 50%,#f6d28a 0 2px,transparent 3px),repeating-linear-gradient(0deg,transparent 0 8px,#f0c47722 9px 10px),repeating-linear-gradient(90deg,transparent 0 8px,#f0c47722 9px 10px);
+ border:2px solid #e7bd70;box-shadow:inset 0 0 0 3px #24120d,inset 0 0 0 5px #8d542c,0 2px 8px #000b;
+}
+/* شناسهٔ سازنده فقط روی فرش؛ با خوانایی متوسط و بدون نمایش روی پشت‌کارت */
+.pvmark{opacity:.13!important;text-shadow:0 1px 4px #0008}
+#cactAppearanceGate{position:fixed;inset:0;z-index:100001;background:#000b;display:flex;align-items:center;justify-content:center;padding:18px;font-family:Vazirmatn,Tahoma,sans-serif}
+#cactAppearanceGate .cagBox{width:min(100%,370px);padding:20px 17px;border:1.5px solid #d9b65e;border-radius:20px;background:linear-gradient(155deg,#142b35,#091821);box-shadow:0 16px 50px #000c;text-align:center;color:#fff;direction:rtl}
+#cactAppearanceGate .cagBrand{font:900 13px Arial,sans-serif;letter-spacing:.22em;color:#e8c36a;margin-bottom:9px;direction:ltr}
+#cactAppearanceGate h3{margin:0 0 10px;color:#ffe0a0;font-size:18px}
+#cactAppearanceGate p{font-size:13px;line-height:1.9;color:#e7edf1;margin:0 0 16px}
+#cactAppearanceGate .cagActions{display:flex;gap:9px;flex-direction:column}
+#cactAppearanceGate button{border:0;border-radius:11px;padding:11px 14px;background:linear-gradient(120deg,#e8c36a,#b88a35);color:#1a1a1a;font:800 14px Vazirmatn,Tahoma,sans-serif}
+#cactAppearanceGate button.cagLater{background:#ffffff16;color:#e5e9ec;border:1px solid #ffffff30}
+.requiredLookNote{padding:9px 10px;border:1px solid #e8c36a88;border-radius:10px;background:#e8c36a14;color:#ffe8b2;font:700 12px/1.8 Vazirmatn,Tahoma,sans-serif}
