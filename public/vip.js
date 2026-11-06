@@ -22,12 +22,36 @@
   }
   V.toast = toast;
 
-  /* ================= ویبره ================= (فقط منفی و حکم؛ در لودو هرگز) */
-  function buzz(kind) {
-    if (PG === 'ld' || document.hidden) return;
-    try { const h = tg && tg.HapticFeedback; if (h && h.impactOccurred) { h.impactOccurred(kind === 'cut' ? 'light' : 'medium'); return; } } catch (e) { }
-    try { if (navigator.vibrate) navigator.vibrate(kind === 'cut' ? 35 : 70); } catch (e) { }
+  /* ================= ویبره ================= (فقط منفی و حکم؛ در لودو هرگز)
+     رنگ‌زدن: ویبرهٔ ملایم حدود ۱٫۵ ثانیه — نوبت: ویبرهٔ قوی ۳ ثانیه.
+     اندروید: ویبرهٔ واقعی با navigator.vibrate. آیفون این را ندارد؛ پس با ضربه‌های پشت‌سرهم لرزش تلگرام (HapticFeedback) ساخته می‌شود. */
+  let rum = null;
+  function stopRumble(kind) {
+    if (!rum || (kind && rum.kind !== kind)) return;
+    clearInterval(rum.t); clearTimeout(rum.e); rum = null;
+    try { if (navigator.vibrate) navigator.vibrate(0); } catch (e) { }
   }
+  function rumble(kind) {
+    if (PG === 'ld' || document.hidden) return;
+    stopRumble();
+    const soft = kind === 'cut', ms = soft ? 1500 : 3000, h = tg && tg.HapticFeedback;
+    const ios = /iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+    if (!ios && navigator.vibrate) {
+      try {
+        let pat = [3000];
+        if (soft) { pat = []; for (let i = 0; i < 20; i++) pat.push(26, 50); }
+        if (navigator.vibrate(pat)) { rum = { kind, t: 0, e: setTimeout(() => { rum = null; }, ms) }; return; }
+      } catch (e) { }
+    }
+    if (h && h.impactOccurred) {
+      const gap = soft ? 75 : 45, styles = soft ? ['soft'] : ['heavy', 'rigid'];
+      let n = 0, t0 = Date.now();
+      const tick = () => { try { h.impactOccurred(styles[n++ % styles.length]); } catch (e) { } };
+      tick(); rum = { kind, t: setInterval(tick, gap), e: setTimeout(() => stopRumble(), ms) };
+    }
+  }
+  const buzz = rumble;
+  document.addEventListener('visibilitychange', () => { if (document.hidden) stopRumble(); });
   const isSpec = () => { const s = stNow(); return !!(s && s.isSpec); };
   // پر «رنگ زدن» (حکم روی خال دیگر) انداخته شد؛ همان لحظهٔ افکت ترک‌خوردن. روی گوشی همهٔ بازیکنان حاضر اجرا می‌شود.
   V.cut = function () {
@@ -37,7 +61,7 @@
   // یادآوری نوبت: اگر ۵ ثانیه بعد از رسیدن نوبت هنوز کارت نینداخته‌ای، فقط گوشی خودت یک‌بار می‌لرزد
   let tTimer = null, tKey = '';
   function turn(on, key) {
-    if (!on) { clearTimeout(tTimer); tTimer = null; tKey = ''; return; }
+    if (!on) { clearTimeout(tTimer); tTimer = null; tKey = ''; stopRumble('turn'); return; }
     if (key === tKey) return;
     tKey = key; clearTimeout(tTimer);
     V.sfx('turn');
@@ -279,6 +303,14 @@
     const s = stNow(), has = !!(ls.get('room') || (s && s.code && !s.isSpec));
     b.style.display = has ? '' : 'none';
   }
+
+  /* ================= لمس کد اتاق = کپی ================= */
+  document.addEventListener('click', e => {
+    const h = e.target.closest && e.target.closest('#lobby h2,#lobby .kh'); if (!h) return;
+    const c = (($('code') || $('rc') || {}).textContent || '').trim(); if (!c) return;
+    const done = () => toast('کد اتاق کپی شد: ' + c, 1800);
+    try { navigator.clipboard.writeText(c).then(done, () => toast('کد اتاق: ' + c, 2200)); } catch (x) { toast('کد اتاق: ' + c, 2200); }
+  });
 
   /* ================= شروع ================= */
   const boot = () => {
