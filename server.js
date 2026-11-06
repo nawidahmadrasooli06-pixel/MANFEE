@@ -9,7 +9,7 @@ const srv = http.createServer(app), io = new Server(srv), rooms = {};
 const tables = require('./tables')(io, tgbot); tgbot.tables = tables; // «میز باز»: وضعیت میزها + اعلام در گروه
 app.get('/api/table', (q, r) => { r.set('Cache-Control', 'no-store'); const g = String(q.query.g || ''); r.json(tables.info(['mf', 'fk', 'ld'].includes(g) ? g : '', q.query.c)); });
 const L = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-const CARPETS = ['n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7', 'n8', 'n9', 'n10', 'f1', 'f5', 'f7', 'f8', 'x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8'], CARDSETS = ['n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7', 'n8', 'n9', 'n10', 'g4', 'g6', 'g10', 'g11', 'g12', 'g13', 'g14', 'g15', 'g16'];
+const CARPETS = ['n1', 'x3', 'x9', 'x10'], CARDSETS = ['n1', 'n2', 'g17', 'g18'];
 const cleanLook = l => ({ carpet: CARPETS.includes(l && l.carpet) ? l.carpet : 'n1', cards: CARDSETS.includes(l && l.cards) ? l.cards : 'n1' });
 const cl = n => String(n || 'بازیکن').slice(0, 14);
 const ended = r => !!(r && r.g && r.g.phase === 'series');
