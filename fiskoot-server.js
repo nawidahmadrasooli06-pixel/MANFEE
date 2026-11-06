@@ -19,7 +19,7 @@ module.exports = function (io) {
   const legal = (r, p) => { const h = r.hands[p], led = r.trick.length ? S(r.trick[0].c) : null; const lg = led !== null ? h.filter(c => S(c) == led) : []; return lg.length ? lg : h; };
   const actor = r => r.phase == 'pick' ? r.pick.turn : r.phase == 'trump' ? r.hk : r.phase == 'play' ? r.turn : -1;
   const view = (r, i, sp) => ({
-    code: r.code, ph: r.phase, me: i, host: !sp && r.seats[i].token === r.host, spec: r.spec.size, isSpec: !!sp, low: r.aceLow,
+    code: r.code, ph: r.phase, me: i, host: !sp && r.seats[i].token === r.host, hostName: (r.seats.find(x => x && x.token === r.host) || {}).name || '', spec: r.spec.size, isSpec: !!sp, low: r.aceLow,
     seats: r.seats.map((s, k) => s && { n: s.name, b: s.bot, on: s.on, k: r.hands[k].length }),
     hand: (sp || r.phase == 'shuf') ? [] : r.hands[i], tr: r.trump, hk: r.hk, dl: r.dl, turn: r.phase == 'play' ? r.turn : -1,
     trick: r.trick, w: r.phase == 'tr' ? winner(r.trick, r.trump) : -1, last: r.last, tw: r.tw, sc: r.sc,
@@ -35,6 +35,13 @@ module.exports = function (io) {
     ids(r).forEach(id => { if (!r.avk.has(id)) { r.avk.add(id); const o = nsp.sockets.get(id); if (o) o.emit('avs', map); } });
   };
   const send = r => {
+    if ((r.phase === 'res' || r.phase === 'over') && r.res && r._lastHintRes !== r.res) {
+      r._lastHintRes = r.res; r._completedDeals = (r._completedDeals || 0) + 1;
+      if (r._completedDeals % 3 === 0) {
+        const hn = (r.seats.find(x => x && x.token === r.host) || {}).name || '';
+        ids(r).forEach(id => { const so = nsp.sockets.get(id); if (so) so.emit('lookHint', { hostName: hn }); });
+      }
+    }
     r.seats.forEach((s, i) => { if (s && s.sid && s.on) { const so = nsp.sockets.get(s.sid); if (so) so.emit('st', view(r, i)); } });
     r.spec.forEach(id => { const so = nsp.sockets.get(id); if (so) so.emit('st', view(r, 0, true)); });
     sendAvs(r);
