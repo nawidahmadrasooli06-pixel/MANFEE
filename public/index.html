@@ -12,20 +12,26 @@
 <link rel="stylesheet" href="fk-theme.css">
 <link rel="stylesheet" href="inferno.css">
 <link rel="stylesheet" href="cactus-pack.css">
+<link rel="stylesheet" href="vip.css">
 </head>
 <body>
 <div id="menu" class="scr on">
   <div class="vipH">VIP · CACTUC 🃏♠️</div>
   <div class="vipId" onclick="SOC.idMenu()">@cactuc580</div>
   <div class="logo">♠ منفی</div>
-  <div class="sub">بازی ورق چهار نفره</div>
+  <div class="sub">سه بازی، یک پلتفرم VIP</div>
 
-  <button class="btn go gm mf" onclick="show('join')">♠ شروع بازی منفی</button>
-  <button class="btn gm fk" onclick="location.href='/fiskoot.html'">♥ بازی حکم (فیسکوت)</button>
-  <button class="btn gm ld" onclick="location.href='/ludo.html'">🎲 لودو</button>
-  <button class="btn" onclick="openSettingsModal()">⚙️ تنظیمات، تم و موزیک</button>
-  <button class="btn" onclick="SOC.openProfile()">👤 پروفایل من</button>
-  <button class="btn" onclick="SOC.about()">ℹ️ درباره ربات</button>
+  <div class="gcards">
+    <button class="btn gm mf gcard" onclick="show('join')"><i class="gi">♠</i><span class="gt"><b>بازی منفی</b><small>ادعا کن، دست بگیر · ۴ نفره</small></span><u class="gp">۲ در ۲</u></button>
+    <button class="btn gm fk gcard" onclick="location.href='/fiskoot.html'"><i class="gi">♥</i><span class="gt"><b>بازی حکم (فیسکوت)</b><small>توس بیاور، حکم بگو · ۴ نفره</small></span><u class="gp">۲ در ۲</u></button>
+    <button class="btn gm ld gcard" onclick="location.href='/ludo.html'"><i class="gi">🎲</i><span class="gt"><b>لودو</b><small>تاس بینداز، مهره بزن · ۲ تا ۴ نفر</small></span><u class="gp">۲–۴</u></button>
+  </div>
+  <button class="btn vipPrac" onclick="VIP.openPractice()">🎓 تمرین با ربات <small>برای تازه‌واردها · بدون نیاز به دوست</small></button>
+  <div class="mrow">
+    <button class="btn mini" onclick="openSettingsModal()"><span>⚙️</span>تنظیمات</button>
+    <button class="btn mini" onclick="SOC.openProfile()"><span>👤</span>پروفایل</button>
+    <button class="btn mini" onclick="SOC.about()"><span>ℹ️</span>درباره</button>
+  </div>
 
   <div id="resumeBox">
     <button class="btn" onclick="shareWatch()" style="margin-bottom:8px">👁 دعوت تماشاچی</button>
@@ -84,6 +90,7 @@
 <div id="lobby" class="scr">
   <h2>اتاق <span id="code" style="direction:ltr;display:inline-block;color:var(--gold)"></span></h2>
   <button class="btn" onclick="share()">دعوت دوستان</button>
+  <button class="btn" id="annBtn" onclick="VIP.announce()" style="display:none">📣 اعلام میز در گروه</button>
   <button class="btn" onclick="openSettingsModal()">🎨 فرش، پر و موزیک</button>
   <button class="btn" onclick="SOC.openProfile()">👤 پروفایل من</button>
   <button class="btn" onclick="shareWatch()">👁 دعوت تماشاچی</button>
@@ -128,5 +135,6 @@
 <script src="social.js"></script>
 <script src="crack.js"></script>
 <script src="inferno.js"></script>
+<script src="vip.js"></script>
 </body>
 </html>
