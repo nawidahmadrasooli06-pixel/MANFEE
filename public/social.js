@@ -295,6 +295,7 @@
     });
     document.body.appendChild(d);
     fireworks($$('endCv'), performance.now() + 11000);
+    try { window.VIP && VIP.cine(d, { kind: 'team', win: s.isSpec ? null : ((s.me & 1) === i.win), names: win.map(k => nameOf(s.seats[k])) }); } catch (e) { }
   }
   function showEndLd(s, i) {
     S.hideEnd(); S.endKey = i.key;
@@ -319,6 +320,7 @@
     });
     document.body.appendChild(d);
     fireworks($$('endCv'), performance.now() + 11000);
+    try { const mr = s.isSpec ? -1 : rk.indexOf(s.me); window.VIP && VIP.cine(d, { kind: 'ld', rank: mr, last: mr === n - 1, names: [nameOf(kx)] }); } catch (e) { }
   }
   S.checkEnd = function (s) {
     const i = endInfo(s);
