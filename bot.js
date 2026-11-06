@@ -51,22 +51,22 @@ function start(rooms) {
       const wf = /^(fkw|ldw|w)_([A-Za-z]{4})$/i.exec(arg || '');
       if (wf) {
         const c = wf[2].toUpperCase(), wk = wf[1].toLowerCase(), hok = wk == 'fkw', lud = wk == 'ldw';
-        await api('sendMessage', { chat_id: m.chat.id, text: `👁 دوستت تو را به تماشای زندهٔ ${hok ? 'بازی حکم (فیسکوت)' : lud ? 'لودو' : 'بازی منفی'} دعوت کرده!\nکد اتاق: ${c}\nدست‌ها دیده نمی‌شوند؛ فقط میز را می‌بینی. برای تماشا دکمه را بزن.`, reply_markup: { inline_keyboard: [[{ text: '👁 تماشای بازی', web_app: { url: URL_ + (hok ? '/fiskoot.html?watch=' : lud ? '/ludo.html?watch=' : '/?w=') + c } }]] } });
+        await api('sendMessage', { chat_id: m.chat.id, text: `سلام دوست عزیز، خوش آمدی به ربات بازی! امیدواریم کنار دوستانت خوش بگذرانی. ❤️\n\n👁 دوستت تو را به تماشای زندهٔ ${hok ? 'بازی حکم (فیسکوت)' : lud ? 'لودو' : 'بازی منفی'} دعوت کرده!\nکد اتاق: ${c}\nدست‌ها دیده نمی‌شوند؛ فقط میز را می‌بینی. برای تماشا دکمه را بزن.`, reply_markup: { inline_keyboard: [[{ text: '👁 تماشای بازی', web_app: { url: URL_ + (hok ? '/fiskoot.html?watch=' : lud ? '/ludo.html?watch=' : '/?w=') + c } }]] } });
         return;
       }
       const tb = /^tb([mfl])_([A-Za-z]{4})$/i.exec(arg || '');
       if (tb) {
         const g = { m: 'mf', f: 'fk', l: 'ld' }[tb[1].toLowerCase()], c = tb[2].toUpperCase(), nmG = { mf: 'منفی', fk: 'حکم (فیسکوت)', ld: 'لودو' }[g];
         const ti = start.tables ? start.tables.info(g, c) : { s: 'open', free: 0 };
-        const txt = ti.s === 'open' ? `🃏 یک میز ${nmG} باز است!\n🪑 ${ti.free} جای خالی دارد؛ کد میز: ${c}\nدکمه را بزن تا ربات باز شود و بتوانی وارد همین میز شوی.`
-          : `🔒 این میز پر شده است!\nدکمه را بزن؛ در ربات می‌توانی یک میز جدید بسازی و دوستانت را دعوت کنی.`;
+        const txt = ti.s === 'open' ? `سلام دوست عزیز، خوش آمدی به ربات بازی! امیدواریم کنار دوستانت خوش بگذرانی. ❤️\n\n🃏 یک میز ${nmG} باز است!\n🪑 ${ti.free} جای خالی دارد؛ کد میز: ${c}\nدکمه را بزن تا ربات باز شود و بتوانی وارد همین میز شوی.`
+          : `سلام دوست عزیز، خوش آمدی به ربات بازی! امیدواریم کنار دوستانت خوش بگذرانی. ❤️\n\n🔒 این میز پر شده است!\nدکمه را بزن؛ در ربات می‌توانی یک میز جدید بسازی و دوستانت را دعوت کنی.`;
         await api('sendMessage', { chat_id: m.chat.id, text: txt, reply_markup: { inline_keyboard: [[{ text: '🎮 بیا بازی', web_app: { url: URL_ + '/?tb=' + g + '&c=' + c } }]] } });
         return;
       }
       const fk = /^fk_([A-Za-z]{4})$/i.exec(arg || '');
       if (fk) {
         const c = fk[1].toUpperCase();
-        await api('sendMessage', { chat_id: m.chat.id, text: `♠ دوستت تو را به بازی حکم (فیسکوت) دعوت کرده!\nکد اتاق: ${c}\nبرای ورود به اتاق، دکمه را بزن.`, reply_markup: { inline_keyboard: [[{ text: '🎮 ورود به بازی حکم (فیسکوت)', web_app: { url: URL_ + '/fiskoot.html?room=' + c } }]] } });
+        await api('sendMessage', { chat_id: m.chat.id, text: `سلام دوست عزیز، خوش آمدی به ربات بازی! امیدواریم کنار دوستانت خوش بگذرانی. ❤️\n\n♠ دوستت تو را به بازی حکم (فیسکوت) دعوت کرده!\nکد اتاق: ${c}\nبرای ورود به اتاق، دکمه را بزن.`, reply_markup: { inline_keyboard: [[{ text: '🎮 ورود به بازی حکم (فیسکوت)', web_app: { url: URL_ + '/fiskoot.html?room=' + c } }]] } });
         return;
       }
       const ld = /^ld_([A-Za-z]{4})$/i.exec(arg || '');
@@ -77,7 +77,7 @@ function start(rooms) {
       }
       const code = /^[A-Za-z]{4}$/.test(arg || '') ? arg.toUpperCase() : '';
       const nm = (m.from && m.from.first_name) || 'دوست من';
-      const text = code ? `🃏 دوستت تو را به اتاق ${code} دعوت کرده!\nبرای دیدن نام دعوت‌کننده و ورود، دکمه را بزن.` : `سلام ${nm} 👋\n🃏 خوش آمدی به ربات بازی منفی، حکم (فیسکوت) و لودو!\nبا دوستان یا با ربات. برای دیدن همهٔ بازی‌ها، «شروع بازی‌ها» را بزن.`;
+      const text = code ? `سلام دوست عزیز، خوش آمدی به ربات بازی! امیدواریم کنار دوستانت خوش بگذرانی. ❤️\n\n🃏 دوستت تو را به اتاق ${code} دعوت کرده!\nبرای دیدن نام دعوت‌کننده و ورود، دکمه را بزن.` : `سلام دوست عزیز ${nm}، خوش آمدی به ربات بازی! ❤️\nامیدواریم کنار دوستانت خوش بگذرانی.\n\n🃏 منفی، حکم (فیسکوت) و لودو؛ با دوستان یا با ربات. برای دیدن بازی‌ها، «شروع بازی‌ها» را بزن.`;
       await api('sendMessage', { chat_id: m.chat.id, text, reply_markup: kb(code) });
     } else if (cmd == '/groupid') {
       if (!ADMIN || String(m.from.id) == ADMIN) await api('sendMessage', { chat_id: m.chat.id, text: 'شناسهٔ این چت (برای GROUP_ID در Render):\n' + m.chat.id });
