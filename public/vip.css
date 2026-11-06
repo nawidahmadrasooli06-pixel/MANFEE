@@ -103,3 +103,30 @@ body.pg-ld .vipH{color:#ffd37a;text-shadow:0 0 10px #ffb34799}
 @media (max-height:700px){.gcard .gt small{display:none}.btn.vipPrac small{display:none}.gcards{gap:6px}}
 @media (max-height:560px){.mrow .btn.mini span{display:none}.gcard .gp{display:none}}
 @media (prefers-reduced-motion:reduce){.scr:not(#game),body.vip-on .gcards .btn.gcard{animation:none!important}}
+
+/* ===== لابی (اتاق) هر سه بازی: هم‌سبک منوی اصلی ===== */
+/* کد اتاق: کارت طلایی */
+body.vip-on #lobby h2,body.vip-on #lobby .kh{display:flex;align-items:center;justify-content:center;gap:10px;margin:0 auto;padding:8px 22px;width:min(100%,330px);box-sizing:border-box;
+  font-size:clamp(16px,2.4vh,19px);font-weight:900;color:#ffe9c9;border-radius:18px;border:1.5px solid transparent;
+  background:linear-gradient(180deg,#2a1311,#0d0606) padding-box,linear-gradient(135deg,var(--vg1),var(--vg2) 42%,var(--vfire)) border-box;
+  box-shadow:0 6px 16px #000b,0 0 18px #ffb34730;cursor:pointer}
+body.vip-on #lobby h2 span,body.vip-on #lobby .kh span{font-size:1.45em;letter-spacing:.18em;direction:ltr;background:linear-gradient(#fff7de,#ffcf74);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent}
+/* دکمه‌های اتاق: شبکهٔ آیکون‌دار */
+.lact{display:flex;flex-wrap:wrap;gap:8px;width:min(100%,330px);justify-content:center}
+body.vip-on .scr:not(#game) .lact .btn.mini{flex:1 1 28%!important;width:auto;max-width:none!important;min-width:0!important;padding:8px 4px!important;font-size:12px!important;min-height:52px!important;border-radius:15px!important;display:flex;flex-direction:column;align-items:center;gap:1px}
+.lact .btn.mini span{font-size:19px;line-height:1.1}
+/* صندلی‌ها */
+body.vip-on #lobby .sb,body.vip-on #lobby .st{background:linear-gradient(180deg,#1d0f0d,#0c0606)!important;border:1.5px dashed #8a5a1c!important;color:#d9b996!important;border-radius:16px!important;padding:12px!important;box-shadow:inset 0 0 14px #ff5a1f12}
+body.vip-on #lobby .sb.f,body.vip-on #lobby .st.me{background:linear-gradient(180deg,#34190d,#150a06)!important;border:1.5px solid transparent!important;color:#fff4e2!important;font-weight:800;
+  background:linear-gradient(180deg,#34190d,#150a06) padding-box,linear-gradient(135deg,var(--vg1),var(--vg2) 45%,var(--vfire)) border-box!important;box-shadow:0 0 16px #ffb34740,inset 0 0 16px #ff5a1f22!important}
+body.vip-on #lobby h3,body.vip-on #lobby .th{display:flex;align-items:center;gap:8px;justify-content:center;margin:8px 0 2px;font-size:13.5px;font-weight:800;color:#ffcf74!important}
+body.vip-on #lobby h3::before,body.vip-on #lobby h3::after,body.vip-on #lobby .th::before,body.vip-on #lobby .th::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,#b8791c88,transparent)}
+body.vip-on #lobby small,body.vip-on #lobby #lm{color:#e0b99a!important;line-height:1.8;max-width:320px}
+body.vip-on #lobby #lb,body.vip-on #lobby #room{width:min(100%,330px)}
+body.vip-on #lobby #lb .sb,body.vip-on #lobby #room .st{width:100%}
+/* لودو: همان چیدمان طلایی روی تم آبی خودش */
+body.pg-ld.vip-on #lobby .kpanel{border:1.5px solid #e2b04a99;box-shadow:0 0 14px #ffc86a30}
+body.pg-ld.vip-on #lobby .kt{color:#ffd37a}
+body.pg-ld.vip-on #lobby .lact{width:100%}
+body.pg-ld.vip-on #lobby .lact .kbtn{flex:1 1 28%;min-width:0}
+body.vip-on #lobby #room .st{width:100%!important;max-width:none!important;height:auto!important;min-height:0!important;display:block!important;position:static!important;text-align:center;box-sizing:border-box;margin:5px 0!important}
