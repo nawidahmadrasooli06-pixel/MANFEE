@@ -77,3 +77,77 @@ body.carpet-f7 .idTag,body.carpet-f8 .idTag{color:#0000008c}
 .credit2 .cr3 button{flex:1;max-width:150px;padding:8px 6px;border-radius:10px;border:1px solid #f0b64a88;background:#0b1f1ecc;color:#fff;font:inherit;font-size:12px;margin:0}
 
 #specBadge{display:none}body.ingame #specBadge{display:block}
+
+
+/* ===== دو فرش اختصاصی CACTUC و پشت‌کارت‌های هماهنگ ===== */
+body.pg-mf.carpet-x9 #game.on,body.pg-fk.carpet-x9 #tbl,.pv.carpet-x9{
+  background:
+    radial-gradient(ellipse at 50% 48%,transparent 28%,#02091499 100%),
+    repeating-linear-gradient(45deg,#b9e7dc12 0 2px,transparent 2px 28px),
+    repeating-linear-gradient(-45deg,#e7c87518 0 1px,transparent 1px 34px),
+    radial-gradient(circle at 50% 45%,#147b78 0%,#07505a 48%,#08283a 100%);
+  box-shadow:inset 0 0 0 3px #d9bd70aa,inset 0 0 0 8px #062b3b;
+}
+body.pg-mf.carpet-x10 #game.on,body.pg-fk.carpet-x10 #tbl,.pv.carpet-x10{
+  background:
+    radial-gradient(ellipse at 50% 48%,transparent 25%,#16030799 100%),
+    repeating-linear-gradient(45deg,#ffe0a51a 0 2px,transparent 2px 26px),
+    repeating-linear-gradient(-45deg,#ffb66b14 0 1px,transparent 1px 32px),
+    radial-gradient(circle at 50% 45%,#a9273b 0%,#641426 52%,#260914 100%);
+  box-shadow:inset 0 0 0 3px #f2c66eaa,inset 0 0 0 8px #3a0b19;
+}
+body.pg-mf.carpet-x9 .idTag,body.pg-fk.carpet-x9 .idTag,
+body.pg-mf.carpet-x10 .idTag,body.pg-fk.carpet-x10 .idTag{
+  color:#fff2c9!important;text-shadow:0 1px 3px #00131c,0 0 7px #000;
+  opacity:.92;font-weight:900;letter-spacing:.1em;
+}
+body.cards-g17 .c.back,.pv.cards-g17 .c.back{
+  background-color:#073b45;
+  background-image:radial-gradient(circle at 50% 50%,#e5d18a 0 2px,transparent 3px),
+    linear-gradient(45deg,transparent 43%,#70d6c2 44% 46%,transparent 47%),
+    linear-gradient(-45deg,transparent 43%,#70d6c2 44% 46%,transparent 47%),
+    repeating-linear-gradient(0deg,transparent 0 9px,#d6bd6a22 10px 11px);
+  background-size:20px 20px,100% 100%,100% 100%,100% 20px;
+  border:2px solid #e6ca78;box-shadow:inset 0 0 0 3px #062630,inset 0 0 0 5px #4bb9a5,0 2px 8px #000b;
+}
+body.cards-g18 .c.back,.pv.cards-g18 .c.back{
+  background-color:#591426;
+  background-image:radial-gradient(circle at 50% 50%,#ffe2a0 0 2px,transparent 3px),
+    linear-gradient(45deg,transparent 43%,#f4b65e 44% 46%,transparent 47%),
+    linear-gradient(-45deg,transparent 43%,#f4b65e 44% 46%,transparent 47%),
+    repeating-linear-gradient(90deg,transparent 0 9px,#ffd38a22 10px 11px);
+  background-size:20px 20px,100% 100%,100% 100%,20px 100%;
+  border:2px solid #ffd27a;box-shadow:inset 0 0 0 3px #330b18,inset 0 0 0 5px #b94c58,0 2px 8px #000b;
+}
+body.cards-g17 .c.back::after,body.cards-g18 .c.back::after,
+.pv.cards-g17 .c.back::after,.pv.cards-g18 .c.back::after{
+  content:'CACTUC  •  @cactuc580';position:absolute;left:0;right:0;bottom:4px;
+  text-align:center;font-size:6px;font-weight:900;letter-spacing:.025em;
+  color:#fff0bd;direction:ltr;text-shadow:0 1px 3px #000;pointer-events:none;
+}
+#cactLookToast,#cactWelcome{
+  position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 72px);
+  transform:translate(-50%,-8px);z-index:1200;display:flex;align-items:center;
+  gap:9px;max-width:min(92vw,420px);padding:8px 13px;border-radius:13px;
+  background:rgba(8,14,27,.94);border:1px solid #d9b65e;
+  box-shadow:0 5px 18px #0008;color:#fff2d0;text-align:center;
+  font:700 12px/1.55 Vazirmatn,Tahoma,sans-serif;direction:rtl;
+  opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s,transform .22s;
+}
+#cactLookToast b,#cactWelcome b{color:#ffd36e;letter-spacing:.12em;direction:ltr;white-space:nowrap}
+#cactLookToast.show,#cactWelcome.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
+#cactWelcome{top:calc(env(safe-area-inset-top,0px) + 72px);display:block;max-width:min(88vw,360px)}
+#cactWelcome b{display:block;margin-bottom:2px}
+
+body.cards-g17 .c:not(.back),.pv.cards-g17 .c:not(.back){
+  background:linear-gradient(145deg,#e7fff6,#9bd7c8 52%,#286b70);
+  color:#073b45;border:1px solid #e6d18a;
+  box-shadow:inset 0 0 0 2px #fff7,inset 0 0 0 4px #4aa99b66,0 3px 8px #000a;
+}
+body.cards-g17 .c.r:not(.back),.pv.cards-g17 .c.r:not(.back){color:#a51d45}
+body.cards-g18 .c:not(.back),.pv.cards-g18 .c:not(.back){
+  background:linear-gradient(145deg,#fff0d1,#e9b96e 52%,#8d3547);
+  color:#5b1025;border:1px solid #ffe0a0;
+  box-shadow:inset 0 0 0 2px #fff7,inset 0 0 0 4px #a84a5c66,0 3px 8px #000a;
+}
+body.cards-g18 .c.r:not(.back),.pv.cards-g18 .c.r:not(.back){color:#a31335}
