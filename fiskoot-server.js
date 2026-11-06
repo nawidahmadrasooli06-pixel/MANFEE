@@ -11,6 +11,11 @@ const FC = ['n1','n2','n3','n4','n5','n6','n7','n8','n9','n10','f1','f5','f7','f
 const cleanLook = l => ({ carpet: FC.includes(l && l.carpet) ? l.carpet : 'n1', cards: GC.includes(l && l.cards) ? l.cards : 'n1' });
 module.exports = function (io) {
   const nsp = io.of('/fiskoot'), rooms = {};
+  io.tables && io.tables.register('fk', c => {
+    const r = rooms[c]; if (!r) return { s: 'gone' };
+    const hs = r.seats.find(x => x && x.token === r.host), free = r.seats.filter(x => !x).length, lobby = r.phase == 'lobby';
+    return { s: lobby && free > 0 ? 'open' : 'full', free: lobby ? free : 0, host: hs ? hs.name : '' };
+  });
   const legal = (r, p) => { const h = r.hands[p], led = r.trick.length ? S(r.trick[0].c) : null; const lg = led !== null ? h.filter(c => S(c) == led) : []; return lg.length ? lg : h; };
   const actor = r => r.phase == 'pick' ? r.pick.turn : r.phase == 'trump' ? r.hk : r.phase == 'play' ? r.turn : -1;
   const view = (r, i, sp) => ({
@@ -117,6 +122,10 @@ module.exports = function (io) {
       let c; do c = [0, 1, 2, 3].map(() => L[Math.random() * 24 | 0]).join(''); while (rooms[c]);
       const r = rooms[c] = { code: c, host: token, seats: [mkSeat(name, token, so.id), null, null, null], phase: 'lobby', aceLow: false, sc: [0, 0], hk: -1, dl: -1, trump: null, hands: [[], [], [], []], trick: [], last: null, tw: [0, 0], turn: -1, pick: null, res: null, wait: null, cnt: 0, t: null, at: Date.now(), look: cleanLook(look), track: 1, playing: false, paused: false, spec: new Set() };
       so.data = { code: c, tok: token }; send(r);
+    });
+    so.on('announce', async () => {
+      const r = R(); if (!r || tk() !== r.host || !io.tables) return so.emit('announced', { ok: false, msg: 'فقط میزبان می‌تواند میز را اعلام کند.' });
+      so.emit('announced', await io.tables.announce('fk', r.code, r.host));
     });
     so.on('join', ({ code, name, token } = {}) => {
       const r = rooms[String(code || '').toUpperCase().trim()]; if (!r) return so.emit('err', 'اتاق پیدا نشد؛ کد را بررسی کن.');
