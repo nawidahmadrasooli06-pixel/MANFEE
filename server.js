@@ -6,11 +6,18 @@ app.use(express.static('public'));
 app.get('/health', (q, r) => r.send('ok'));
 app.get('/config', (q, r) => r.json({ bot: tgbot.info.username || '' }));
 const srv = http.createServer(app), io = new Server(srv), rooms = {};
+const tables = require('./tables')(io, tgbot); tgbot.tables = tables; // «میز باز»: وضعیت میزها + اعلام در گروه
+app.get('/api/table', (q, r) => { r.set('Cache-Control', 'no-store'); const g = String(q.query.g || ''); r.json(tables.info(['mf', 'fk', 'ld'].includes(g) ? g : '', q.query.c)); });
 const L = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
 const CARPETS = ['n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7', 'n8', 'n9', 'n10', 'f1', 'f5', 'f7', 'f8', 'x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8'], CARDSETS = ['n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7', 'n8', 'n9', 'n10', 'g4', 'g6', 'g10', 'g11', 'g12', 'g13', 'g14', 'g15', 'g16'];
 const cleanLook = l => ({ carpet: CARPETS.includes(l && l.carpet) ? l.carpet : 'n1', cards: CARDSETS.includes(l && l.cards) ? l.cards : 'n1' });
 const cl = n => String(n || 'بازیکن').slice(0, 14);
 const ended = r => !!(r && r.g && r.g.phase === 'series');
+tables.register('mf', c => {
+  const r = rooms[c]; if (!r || ended(r)) return { s: 'gone' };
+  const hs = r.seats.find(x => x && x.token === r.host), free = r.seats.filter(x => !x).length;
+  return { s: !r.g && free > 0 ? 'open' : 'full', free: r.g ? 0 : free, host: hs ? hs.name : '' };
+});
 const expiredMessage = 'این بازی قبلاً به پایان رسیده یا لینک آن منقضی شده است. لطفاً ربات منفی را دوباره استارت کن و بازی تازه بساز.';
 io.on('connection', s => {
   const R = () => rooms[s.data.code];
@@ -54,6 +61,11 @@ io.on('connection', s => {
   s.on('look', l => { const r = R(), i = r ? r.seatOf(s.id) : -1; if (r && i >= 0 && r.seats[i].token == r.host) { r.look = cleanLook(l); r.send(); } });
   s.on('track', n => { const r = R(); n = n | 0; if (r && r.seatOf(s.id) >= 0 && n >= 1 && n <= 21) r.setTrack(n); });
   s.on('invite', () => R() && R().invite(s.id));
+  s.on('announce', async () => {
+    const r = R(), i = r ? r.seatOf(s.id) : -1;
+    if (!r || i < 0 || r.seats[i].token != r.host) return s.emit('announced', { ok: false, msg: 'فقط میزبان می‌تواند میز را اعلام کند.' });
+    s.emit('announced', await tables.announce('mf', r.code, r.host));
+  });
   s.on('sit', i => R() && R().sit(s.id, i | 0));
   s.on('sub', i => R() && R().sub(s.id, i | 0));
   s.on('start', opts => R() && R().start(s.id, !!(opts && opts.forceBots)));
