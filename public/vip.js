@@ -120,7 +120,8 @@
     curCode = code || '';
     if (PRAC && PRAC.pend && lobby && host) {   // اتاق تمرین ساخته شد: با ۳ ربات شروع کن
       PRAC.pend = false; PRAC.room = code; PRAC.seen = {}; savePrac();
-      if (PG === 'mf') sk.emit('start', { forceBots: true }); else sk.emit('start', { bots: 1 });
+      const begin = () => { if (PG === 'mf') sk.emit('start', { forceBots: true }); else sk.emit('start', { bots: 1 }); };
+      if (window.requestAppearanceStart && PG !== 'ld') window.requestAppearanceStart(PG, begin); else begin();
     }
     badge(!!(PRAC && PRAC.room && PRAC.room === code));
   }
