@@ -46,12 +46,21 @@ function start(rooms) {
       return;
     }
     const m = u.message; if (!m || !m.text) return;
-    const [cmd, arg] = m.text.trim().split(/\s+/);
+    const [cmd0, arg] = m.text.trim().split(/\s+/), cmd = (cmd0 || '').split('@')[0];
     if (cmd == '/start') {
       const wf = /^(fkw|ldw|w)_([A-Za-z]{4})$/i.exec(arg || '');
       if (wf) {
         const c = wf[2].toUpperCase(), wk = wf[1].toLowerCase(), hok = wk == 'fkw', lud = wk == 'ldw';
         await api('sendMessage', { chat_id: m.chat.id, text: `👁 دوستت تو را به تماشای زندهٔ ${hok ? 'بازی حکم (فیسکوت)' : lud ? 'لودو' : 'بازی منفی'} دعوت کرده!\nکد اتاق: ${c}\nدست‌ها دیده نمی‌شوند؛ فقط میز را می‌بینی. برای تماشا دکمه را بزن.`, reply_markup: { inline_keyboard: [[{ text: '👁 تماشای بازی', web_app: { url: URL_ + (hok ? '/fiskoot.html?watch=' : lud ? '/ludo.html?watch=' : '/?w=') + c } }]] } });
+        return;
+      }
+      const tb = /^tb([mfl])_([A-Za-z]{4})$/i.exec(arg || '');
+      if (tb) {
+        const g = { m: 'mf', f: 'fk', l: 'ld' }[tb[1].toLowerCase()], c = tb[2].toUpperCase(), nmG = { mf: 'منفی', fk: 'حکم (فیسکوت)', ld: 'لودو' }[g];
+        const ti = start.tables ? start.tables.info(g, c) : { s: 'open', free: 0 };
+        const txt = ti.s === 'open' ? `🃏 یک میز ${nmG} باز است!\n🪑 ${ti.free} جای خالی دارد؛ کد میز: ${c}\nدکمه را بزن تا ربات باز شود و بتوانی وارد همین میز شوی.`
+          : `🔒 این میز پر شده است!\nدکمه را بزن؛ در ربات می‌توانی یک میز جدید بسازی و دوستانت را دعوت کنی.`;
+        await api('sendMessage', { chat_id: m.chat.id, text: txt, reply_markup: { inline_keyboard: [[{ text: '🎮 بیا بازی', web_app: { url: URL_ + '/?tb=' + g + '&c=' + c } }]] } });
         return;
       }
       const fk = /^fk_([A-Za-z]{4})$/i.exec(arg || '');
@@ -70,6 +79,8 @@ function start(rooms) {
       const nm = (m.from && m.from.first_name) || 'دوست من';
       const text = code ? `🃏 دوستت تو را به اتاق ${code} دعوت کرده!\nبرای دیدن نام دعوت‌کننده و ورود، دکمه را بزن.` : `سلام ${nm} 👋\n🃏 خوش آمدی به ربات بازی منفی، حکم (فیسکوت) و لودو!\nبا دوستان یا با ربات. برای دیدن همهٔ بازی‌ها، «شروع بازی‌ها» را بزن.`;
       await api('sendMessage', { chat_id: m.chat.id, text, reply_markup: kb(code) });
+    } else if (cmd == '/groupid') {
+      if (!ADMIN || String(m.from.id) == ADMIN) await api('sendMessage', { chat_id: m.chat.id, text: 'شناسهٔ این چت (برای GROUP_ID در Render):\n' + m.chat.id });
     } else if (cmd == '/profile') { await sendProfile(m.chat.id, m.from);
     } else if (cmd == '/guide') { await say(m.chat.id, '📘 راهنمای کدام بازی را می‌خواهی؟', guideKb);
     } else if (cmd == '/about') { await say(m.chat.id, ABOUT, aboutKb);
@@ -92,5 +103,20 @@ function start(rooms) {
     }
   })();
 }
+// ---- پست میز باز در گروه (GROUP_ID در Render؛ دکمهٔ «بیا بازی» از نوع لینک است چون وب‌اپ در گروه مجاز نیست) ----
+const GROUP = () => String(process.env.GROUP_ID || '').trim();
+start.link = (g, code) => {
+  if (!info.username) return '';
+  const p = 'tb' + g[0] + '_' + code, mini = String(process.env.MINIAPP_LINK || '').replace(/\/$/, '');
+  return mini ? mini + '?startapp=' + p : 'https://t.me/' + info.username + '?start=' + p;
+};
+const joinKb = (g, code) => ({ inline_keyboard: [[{ text: '🎮 بیا بازی', url: start.link(g, code) }]] });
+start.postTable = async (text, g, code) => {
+  if (!GROUP()) return { ok: false, why: 'nogroup' };
+  if (!start.link(g, code)) return { ok: false, why: 'nobot' };
+  const r = await api('sendMessage', { chat_id: GROUP(), text, reply_markup: joinKb(g, code) });
+  return r.ok ? { ok: true, id: r.result.message_id } : { ok: false, why: 'tg', desc: r.description };
+};
+start.editTable = (id, text, keepButton, g, code) => api('editMessageText', { chat_id: GROUP(), message_id: id, text, reply_markup: keepButton ? joinKb(g, code) : { inline_keyboard: [] } });
 start.info = info;
 module.exports = start;
