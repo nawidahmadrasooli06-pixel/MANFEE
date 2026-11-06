@@ -96,7 +96,6 @@ body.pg-mf.carpet-x10 #game.on,body.pg-fk.carpet-x10 #tbl,.pv.carpet-x10{
     radial-gradient(circle at 50% 45%,#a9273b 0%,#641426 52%,#260914 100%);
   box-shadow:inset 0 0 0 3px #f2c66eaa,inset 0 0 0 8px #3a0b19;
 }
-body.pg-mf .idTag,body.pg-fk .idTag{color:#ffffffa6!important;text-shadow:0 1px 3px #00131c,0 0 4px #000;opacity:1;font-weight:800;letter-spacing:.07em}
 body.cards-g17 .c.back,.pv.cards-g17 .c.back{
   background-color:#073b45;
   background-image:radial-gradient(circle at 50% 50%,#e5d18a 0 2px,transparent 3px),
@@ -151,9 +150,12 @@ body.cards-g18 .c.r:not(.back),.pv.cards-g18 .c.r:not(.back){color:#a31335}
 
 .swc .c.back{width:28px;height:40px;min-width:28px;border-radius:5px}
 /* نشان برند و آیدی روی تمام فرش‌ها با کنتراست خوانا */
-body.pg-mf #wm{color:#fff0c6;opacity:.14;text-shadow:0 1px 4px #000}
-body.pg-fk #tbl::after{content:'CACTUC';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:1;pointer-events:none;direction:ltr;font:900 clamp(42px,12vw,82px)/1 Arial,sans-serif;letter-spacing:.12em;color:#fff0c6;opacity:.10;text-shadow:0 1px 4px #000}
-body.pg-mf .idTag,body.pg-fk .idTag{color:#ffffffa6!important;text-shadow:0 1px 3px #00131c,0 0 4px #000;opacity:1;font-weight:800;letter-spacing:.07em}
+body.pg-mf #wm{font-size:min(9vw,48px);color:#fff;opacity:.075;text-shadow:none;padding-top:24%}
+body.pg-fk #tbl::before{font-size:clamp(46px,10vw,54px);color:#ffffff12}
+body.pg-fk #tbl::after{content:none}
+body.pg-mf .idTag,body.pg-fk .idTag{color:#ffffff59!important;text-shadow:none;opacity:1;font-weight:700;letter-spacing:.06em}
+body.pg-mf .idTag{top:calc(24vw + min(9vw,48px)*1.15 + 7px)}
+body.pg-fk .idTag{top:calc(36% + 30px)}
 
 /* ===== سه فرش تازه و مستقل ===== */
 body.pg-mf.carpet-x11 #game.on,body.pg-fk.carpet-x11 #tbl,.pv.carpet-x11{
