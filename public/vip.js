@@ -23,32 +23,23 @@
   V.toast = toast;
 
   /* ================= ویبره ================= (فقط منفی و حکم؛ در لودو هرگز)
-     رنگ‌زدن: ویبرهٔ ملایم حدود ۱٫۵ ثانیه — نوبت: ویبرهٔ قوی ۳ ثانیه.
-     اندروید: ویبرهٔ واقعی با navigator.vibrate. آیفون این را ندارد؛ پس با ضربه‌های پشت‌سرهم لرزش تلگرام (HapticFeedback) ساخته می‌شود. */
+     اندروید: لرزش پیوسته و نرم. آیفون: یک ضربهٔ نرم تلگرام؛ API تلگرام لرزش پیوستهٔ چندثانیه‌ای نمی‌دهد. */
   let rum = null;
   function stopRumble(kind) {
     if (!rum || (kind && rum.kind !== kind)) return;
-    clearInterval(rum.t); clearTimeout(rum.e); rum = null;
+    clearTimeout(rum.e); rum = null;
     try { if (navigator.vibrate) navigator.vibrate(0); } catch (e) { }
   }
   function rumble(kind) {
     if (PG === 'ld' || document.hidden) return;
     stopRumble();
-    const soft = kind === 'cut', ms = soft ? 1500 : 3000, h = tg && tg.HapticFeedback;
+    const ms = kind === 'cut' ? 2400 : 2100, h = tg && tg.HapticFeedback;
     const ios = /iPhone|iPad|iPod/i.test(navigator.userAgent || '');
     if (!ios && navigator.vibrate) {
-      try {
-        let pat = [3000];
-        if (soft) { pat = []; for (let i = 0; i < 20; i++) pat.push(26, 50); }
-        if (navigator.vibrate(pat)) { rum = { kind, t: 0, e: setTimeout(() => { rum = null; }, ms) }; return; }
-      } catch (e) { }
+      try { if (navigator.vibrate(ms)) { rum = { kind, e: setTimeout(() => { rum = null; }, ms) }; return; } } catch (e) { }
     }
-    if (h && h.impactOccurred) {
-      const gap = soft ? 75 : 45, styles = soft ? ['soft'] : ['heavy', 'rigid'];
-      let n = 0, t0 = Date.now();
-      const tick = () => { try { h.impactOccurred(styles[n++ % styles.length]); } catch (e) { } };
-      tick(); rum = { kind, t: setInterval(tick, gap), e: setTimeout(() => stopRumble(), ms) };
-    }
+    // iOS/Telegram: فقط یک بازخورد نرم؛ تکرار سریع ضربه‌ها عمداً حذف شده است.
+    if (h && h.impactOccurred) { try { h.impactOccurred('soft'); } catch (e) { } }
   }
   const buzz = rumble;
   document.addEventListener('visibilitychange', () => { if (document.hidden) stopRumble(); });
@@ -56,7 +47,7 @@
   // پر «رنگ زدن» (حکم روی خال دیگر) انداخته شد؛ همان لحظهٔ افکت ترک‌خوردن. روی گوشی همهٔ بازیکنان حاضر اجرا می‌شود.
   V.cut = function () {
     if (isSpec()) return;
-    buzz('cut'); V.sfx('cut'); tip('cut', PG === 'mf' ? 'پیک حکم است؛ وقتی پیک روی خال دیگر بیفتد، آن دست را می‌برد.' : 'حکم همهٔ خال‌های دیگر را می‌برد؛ اگر هم‌خال نداری، حکم بزن.');
+    buzz('cut'); tip('cut', PG === 'mf' ? 'پیک حکم است؛ وقتی پیک روی خال دیگر بیفتد، آن دست را می‌برد.' : 'حکم همهٔ خال‌های دیگر را می‌برد؛ اگر هم‌خال نداری، حکم بزن.');
   };
   // یادآوری نوبت: اگر ۵ ثانیه بعد از رسیدن نوبت هنوز کارت نینداخته‌ای، فقط گوشی خودت یک‌بار می‌لرزد
   let tTimer = null, tKey = '';
@@ -64,7 +55,6 @@
     if (!on) { clearTimeout(tTimer); tTimer = null; tKey = ''; stopRumble('turn'); return; }
     if (key === tKey) return;
     tKey = key; clearTimeout(tTimer);
-    V.sfx('turn');
     tTimer = setTimeout(() => { tTimer = null; if (tKey === key) buzz('turn'); }, 5000);
   }
   V._turn = turn;
@@ -90,7 +80,7 @@
     g.gain.value = vol; s.connect(f); f.connect(g); g.connect(c.destination); s.start(t);
   }
   const SFX = {
-    tap: (c, t) => tone(c, t, 0.05, 1250, 820, 'sine', 0.05),
+    tap: (c, t) => tone(c, t, 0.035, 900, 680, 'sine', 0.018),
     card: (c, t) => { hiss(c, t, 0.06, 2200, 0.09); tone(c, t, 0.07, 190, 120, 'triangle', 0.05); },
     cut: (c, t) => { tone(c, t, 0.26, 130, 55, 'triangle', 0.16); hiss(c, t, 0.14, 1400, 0.1); },
     turn: (c, t) => { tone(c, t, 0.1, 660, 0, 'sine', 0.05); tone(c, t + 0.11, 0.14, 880, 0, 'sine', 0.05); },
@@ -103,11 +93,11 @@
     try { SFX[name](c, c.currentTime + 0.005); } catch (e) { }
   };
   V.toggleSfx = function () { const on = !sfxOn(); ls.set('vip_sfx', on ? '1' : '0'); syncSfxBtn(); if (on) V.sfx('tap'); };
-  function syncSfxBtn() { const b = $('vipSfxBtn'); if (b) b.textContent = sfxOn() ? '🔊 صدای افکت‌ها: روشن' : '🔇 صدای افکت‌ها: خاموش'; }
+  function syncSfxBtn() { const b = $('vipSfxBtn'); if (b) b.textContent = sfxOn() ? '🔊 صدای دکمه‌ها: روشن' : '🔇 صدای دکمه‌ها: خاموش'; }
   document.addEventListener('pointerdown', e => {
     ac();
     const b = e.target.closest && e.target.closest('button,.btn,.kbtn,.ktile,.kic,.gcard,a.lnk');
-    if (b && !b.disabled) V.sfx('tap');
+    if (b && !b.disabled && !b.closest('#game,#tbl,#hand,#btns')) V.sfx('tap');
   }, { capture: true, passive: true });
 
   /* ================= نکته‌های آموزشی (فقط در «تمرین با ربات») ================= */
@@ -233,7 +223,8 @@
 
   /* ================= گوش دادن به وضعیت بازی‌ها ================= */
   let lastTrick = -1;
-  function cardSound(n) { if (lastTrick >= 0 && n > lastTrick) V.sfx('card'); lastTrick = n; }
+  // صداهای کارت، جمع‌شدن دست و پایان بازی عمداً خاموش‌اند؛ فقط کلیک نرم منو باقی است.
+  function cardSound(n) { lastTrick = n; }
   if (hasSk() && PG === 'mf') {
     sk.on('state', s => {
       const g = s.g, lobby = !g;
@@ -286,7 +277,6 @@
       d.innerHTML = `<div class="cRays"></div><div class="cFlash"></div><div class="cBody"><div class="cCrown">👑</div><div class="cT">${title}</div><div class="cN">${names}</div><div class="cS">${esc(sub)}</div></div>`;
       d.addEventListener('pointerdown', () => d.remove());
       el.appendChild(d); setTimeout(() => d.remove(), reduce ? 1400 : 3300);
-      V.sfx(win === false ? 'lose' : 'win');
     } catch (e) { }
   };
 
