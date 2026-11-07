@@ -4,10 +4,10 @@
   if (window.crackFx) return;
   const st = document.createElement('style');
   st.textContent = `
-#crackFx{position:fixed;inset:0;z-index:99990;pointer-events:none;animation:ckLife 2.15s ease-out forwards}
+#crackFx{position:fixed;inset:0;z-index:99990;pointer-events:none;will-change:opacity;animation:ckLife 2.15s ease-out forwards}
 #crackFx svg{position:absolute;inset:0;width:100%;height:100%;animation:ckHit .18s cubic-bezier(.2,.9,.3,1) both}
 #crackFx .fl{position:absolute;inset:0;animation:ckFlash .5s ease-out forwards}
-@keyframes ckLife{0%{opacity:1}28%{opacity:.88;filter:none}100%{opacity:0;filter:blur(.7px)}}
+@keyframes ckLife{0%{opacity:1}28%{opacity:.88}100%{opacity:0}}
 @keyframes ckHit{from{transform:scale(1.018)}to{transform:none}}
 @keyframes ckFlash{0%{opacity:.9}100%{opacity:0}}
 @keyframes ckShake{0%{translate:0 0}15%{translate:-3px 2px}32%{translate:3px -2px}50%{translate:-2px -1px}68%{translate:2px 1px}84%{translate:-1px 1px}100%{translate:0 0}}
@@ -46,8 +46,11 @@
   }
 
   window.crackFx = function () {
+    const now = Date.now(); if (now - last < 600) return; last = now;
+    requestAnimationFrame(run);
+  };
+  function run() {
     try {
-      const now = Date.now(); if (now - last < 600) return; last = now;
       try { window.VIP && VIP.cut && VIP.cut(); } catch (e) { }
       const old = document.getElementById('crackFx'); if (old) old.remove();
       const W = innerWidth, H = innerHeight;
@@ -71,5 +74,5 @@
         ['game', 'tbl', 'hand'].forEach(id => { const t = document.getElementById(id); if (t) { t.classList.remove('ckShake'); void t.offsetWidth; t.classList.add('ckShake'); setTimeout(() => t.classList.remove('ckShake'), 360); } });
       }
     } catch (e) { }
-  };
+  }
 })();
