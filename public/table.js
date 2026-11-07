@@ -2,7 +2,7 @@ const T = (() => {
   const SU = ['♠', '♥', '♦', '♣'], RK = '2 3 4 5 6 7 8 9 10 J Q K A'.split(' ');
   const $ = q => document.querySelector(q);
   const cd = (c, x = '') => { const s = c / 13 | 0; return `<div class="c ${s == 1 || s == 2 ? 'r' : ''} ${s == 1 ? 'heart' : ''} ${x}"><em>${RK[c % 13]}</em><b>${SU[s]}</b></div>`; };
-  let S, pl = 0, nid = 0, v = 2, tm, rid = -1, lastTk = 0, lastCount = -1, myTurn = false, drag = null, sel = null, pending = null, flyOwn = null, askSwap = false, askRid = -1;
+  let S, pl = 0, nid = 0, v = 2, tm, rid = -1, lastTk = 0, lastCount = -1, myTurn = false, drag = null, sel = null, pending = null, flyOwn = null, askSwap = false, askRid = -1, born = {}, tblHtml = '', handHtml = '';
   function flyCard(el, c) {
     const ic = el.querySelector('.c'), ctr = document.querySelector('#tbl .ctr'); if (!ic || !ctr) return;
     const r = ic.getBoundingClientRect(), t = ctr.getBoundingClientRect(), k = ic.offsetWidth, cx = r.left + r.width / 2, cy = r.top + r.height / 2;
@@ -56,14 +56,27 @@ const T = (() => {
       const tag = x.off ? '<i class="o">قطع</i>' : x.sub ? '<i class="o">ربات</i>' : '';
       h += `<div class="st p${rel(s)} ${on ? 'on' : ''} ${s % 2 == mt ? 'm' : 'e'}"><div class="stx"><div class="nl"><u>${x.name}</u>${g.dealer == s ? '<i>میر</i>' : ''}${tag}</div><b>${g.taken[s]}/${c == null ? '؟' : c}</b></div></div>`;
     }
-    h += '<div class="ctr">' + g.trick.map((x, i) => `<div class="q q${rel(x.s)} ${i >= pl && !(flyOwn && x.s == me && x.c == flyOwn.c && Date.now() - flyOwn.t < 2000) ? 'in' : ''} ${flyOwn && x.s == me && x.c == flyOwn.c && Date.now() - flyOwn.t < 450 ? 'hid' : ''} ${g.win == x.s ? 'w' : ''}">${cd(x.c)}</div>`).join('') + '</div>';
+    const nowT = Date.now(); if (!g.trick.length) born = {};
+    const tcards = g.trick.slice();
+    if (pending != null && !tcards.some(x => x.s == me)) tcards.push({ s: me, c: pending, ph: 1 });
+    h += '<div class="ctr">' + tcards.map((x, i) => {
+      const own = !!(flyOwn && x.s == me && x.c == flyOwn.c), key = g.rid + ':' + x.s + ':' + x.c;
+      if (!x.ph && i >= pl && born[key] == null && !(own && nowT - flyOwn.t < 2000)) born[key] = nowT;
+      const age = !x.ph && born[key] != null ? nowT - born[key] : 1e9, anim = age < 720;
+      return `<div class="q q${rel(x.s)} ${anim ? 'in' : ''} ${own && nowT - flyOwn.t < 450 ? 'hid' : ''} ${g.win == x.s ? 'w' : ''}"${anim && age > 0 ? ` style="animation-delay:-${age}ms"` : ''}>${cd(x.c)}</div>`;
+    }).join('') + '</div>';
     try { if (window._mfSeen) for (let i = Math.max(pl, 1); i < g.trick.length; i++) if ((g.trick[i].c / 13 | 0) === 0 && (g.trick[0].c / 13 | 0) !== 0 && window.crackFx) crackFx(); window._mfSeen = true; } catch (e) { }
     pl = g.trick.length;
     if (g.last) h += `<div class="lt"><small>دست قبل</small><div class="ctr2">${g.last.cards.map(x => `<div class="q q${rel(x.s)} ${g.last.w == x.s ? 'w' : ''}">${cd(x.c)}</div>`).join('')}</div></div>`;
-    $('#tbl').innerHTML = h + '<div id="wm">CACTUC</div><div class="idTag">@cactuc580</div>';
+    const tblNew = h + '<div id="wm">CACTUC</div><div class="idTag">@cactuc580</div>';
+    const tblKey = tblNew.replace(/ style="animation-delay:-\d+ms"/g, '');
+    if (tblKey !== tblHtml) { tblHtml = tblKey; $('#tbl').innerHTML = tblNew; }
     if (window.SOC) SOC.afterDraw(st);
     if (sel != null && !g.hand.includes(sel)) sel = null;
-    if (!drag) $('#hand').innerHTML = g.hand.filter(c => c != pending).map((c, i) => `<span data-c="${c}" style="--i:${i}" class="${g.phase == 'deal' ? 'dl' : ''} ${sel == c ? 'sel' : ''}">${cd(c, my && !g.legal.includes(c) ? 'dim' : '')}</span>`).join('');
+    if (!drag) {
+      const handNew = g.hand.filter(c => c != pending).map((c, i) => `<span data-c="${c}" style="--i:${i}" class="${g.phase == 'deal' ? 'dl' : ''} ${sel == c ? 'sel' : ''}">${cd(c, my && !g.legal.includes(c) ? 'dim' : '')}</span>`).join('');
+      if (handNew !== handHtml) { handHtml = handNew; $('#hand').innerHTML = handNew; }
+    }
     if (g.nid != nid) { nid = g.nid; if (g.note) { toast(g.note); $('#hand').classList.add('sw'); setTimeout(() => $('#hand').classList.remove('sw'), 800); } }
     const away = st.away || [];
     $('#aw').innerHTML = away.map(a => `<div class="aw">${a.name} قطع شد<br><button onclick="act('sub',${a.i})">ربات جایش بازی کند</button><button onclick="T.hold(${a.i})">منتظر می‌مانیم</button></div>`).join('');
@@ -87,7 +100,7 @@ const T = (() => {
   const HD = $('#hand');
   HD.addEventListener('pointerdown', e => {
     const el = e.target.closest('span[data-c]'); if (!el || !S) return;
-    e.preventDefault(); drag = { c: +el.dataset.c, el, x: e.clientX, y: e.clientY, mv: false }; el.classList.add('lift');
+    e.preventDefault(); handHtml = ''; drag = { c: +el.dataset.c, el, x: e.clientX, y: e.clientY, mv: false }; el.classList.add('lift');
   });
   window.addEventListener('pointermove', e => {
     if (!drag) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
@@ -95,7 +108,7 @@ const T = (() => {
     drag.mv = true; drag.el.style.transform = `translate(${dx}px,${dy - 22}px) scale(1.1)`;
   });
   window.addEventListener('pointerup', e => {
-    if (!drag) return; const d = drag, dy = e.clientY - d.y; drag = null;
+    if (!drag) return; const d = drag, dy = e.clientY - d.y; drag = null; handHtml = '';
     if (!d.mv) sel = sel == d.c ? null : d.c;
     else if (dy < -55) {
       const g = S.g;
@@ -104,7 +117,7 @@ const T = (() => {
     }
     draw(S);
   });
-  window.addEventListener('pointercancel', () => { if (drag) { drag = null; draw(S); } });
+  window.addEventListener('pointercancel', () => { if (drag) { drag = null; handHtml = ''; draw(S); } });
   return {
     render, val: () => v,
     askSwap: () => { if (!S || !S.g.rot) return act('mir', 'swap'); askSwap = true; askRid = S.g.rid; draw(S); },
