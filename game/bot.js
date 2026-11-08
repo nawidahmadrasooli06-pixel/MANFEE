@@ -1,6 +1,5 @@
 const { suit, rank, deck } = require('./cards');
-let smart, ai = null;
-try { ai = require('./ai'); } catch (e) { console.log('ai.js not loaded:', e.message); }
+let smart;
 try { smart = require('./smartplay'); } catch (e1) { try { smart = require('./game/smartplay'); } catch (e2) { console.log('smartplay.js not found; using simple bot'); smart = { choose: o => o.legal[0] }; } }
 const ALLS = [0, 1, 2, 3].map(s => Array.from({ length: 13 }, (_, i) => s * 13 + i));
 const all = s => ALLS[s];
@@ -37,26 +36,11 @@ function memory(g) {
   learn(g.trick); if (g.last) learn(g.last.cards);
   return m;
 }
-const lvOf = (g, s) => (g.lv && g.lv[s]) | 0;
 function pick(g, seat) {
   const legal = g.legal(seat).slice();
   if (legal.length <= 1) return legal[0];
-  const lv = lvOf(g, seat);
-  if (lv > 0 && ai) { try { const c = ai.pickMf(g, seat, lv); if (c != null && legal.includes(c)) return c; } catch (e) { console.log('ai pick:', e.message); } }
   const m = memory(g), team = seat % 2;
   const need = g.tc(team) - g.tt(team), oppNeed = g.tc(1 - team) - g.tt(1 - team);
   return smart.choose({ legal, hand: g.hands[seat], trick: g.trick.map(x => ({ p: x.s, c: x.c })), me: seat, trump: 0, S: suit, R: rank, all, played: m.played, voids: m.voids, mustWin: need <= 0 || oppNeed <= 0 });
 }
-// ادعا: سطح عادی دقیقاً مثل قبل
-function bid(g, p, maxClaim) {
-  const lv = lvOf(g, p);
-  if (lv > 0 && ai) { try { return ai.bidMf(g, p, lv, maxClaim); } catch (e) { console.log('ai bid:', e.message); } }
-  return Math.min(est(g.hands[p]), maxClaim);
-}
-// تصمیم میر: سطح عادی دقیقاً مثل قبل
-function mir(g) {
-  const p = g.dealer, lv = lvOf(g, p);
-  if (lv > 0 && ai) { try { return ai.mirMf(g, lv); } catch (e) { console.log('ai mir:', e.message); } }
-  return Math.abs(g.claim[p] - est(g.hands[p])) >= 3 ? 'swap' : 'go';
-}
-module.exports = { est, pick, bid, mir };
+module.exports = { est, pick };
