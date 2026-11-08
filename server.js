@@ -4,9 +4,6 @@ const tgbot = require('./bot');
 const app = express();
 app.use(express.static('public'));
 app.get('/health', (q, r) => r.send('ok'));
-let lagH = null; try { lagH = require('perf_hooks').monitorEventLoopDelay({ resolution: 20 }); lagH.enable(); } catch (e) { }
-// میزان تأخیر سرور (برای تشخیص لگ): /api/lag
-app.get('/api/lag', (q, r) => { r.set('Cache-Control', 'no-store'); const f = x => +(x / 1e6).toFixed(1); r.json(lagH ? { meanMs: f(lagH.mean || 0), p99Ms: f(lagH.percentile(99) || 0), maxMs: f(lagH.max || 0) } : {}); if (lagH) lagH.reset(); });
 app.get('/config', (q, r) => r.json({ bot: tgbot.info.username || '' }));
 const srv = http.createServer(app), io = new Server(srv), rooms = {};
 const tables = require('./tables')(io, tgbot); tgbot.tables = tables; // «میز باز»: وضعیت میزها + اعلام در گروه
@@ -71,8 +68,7 @@ io.on('connection', s => {
   });
   s.on('sit', i => R() && R().sit(s.id, i | 0));
   s.on('sub', i => R() && R().sub(s.id, i | 0));
-  s.on('botLevel', n => { const r = R(); r && r.setLevel(s.id, n | 0); });
-  s.on('start', opts => R() && R().start(s.id, !!(opts && opts.forceBots), opts && opts.level));
+  s.on('start', opts => R() && R().start(s.id, !!(opts && opts.forceBots)));
   s.on('bid', n => { const r = R(), i = r && r.seatOf(s.id); if (r && r.g && i >= 0) r.g.bid(i, +n); });
   s.on('mir', a => { const r = R(), i = r && r.seatOf(s.id); if (r && r.g && i >= 0) r.g.mir(i, a); });
   s.on('play', c => { const r = R(), i = r && r.seatOf(s.id); if (r && r.g && i >= 0) r.g.play(i, +c); });
