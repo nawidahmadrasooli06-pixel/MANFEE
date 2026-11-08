@@ -2,8 +2,8 @@ const { suit, deck, sortHand, winner } = require('./cards');
 const bot = require('./bot');
 // seats 0..3 ; play order goes seat -> seat+1 (to the right) ; teams = seat%2
 class Game {
-  constructor(cb, bots, names) {
-    Object.assign(this, { cb, bot: bots, names, ser: [0, 0], dealer: -1, rid: 0, nid: 0, timers: [], phase: 'lobby', win: -1, dl: 0, dls: -1, stopped: false });
+  constructor(cb, bots, names, lv) {
+    Object.assign(this, { cb, bot: bots, names, ser: [0, 0], dealer: -1, rid: 0, nid: 0, timers: [], phase: 'lobby', win: -1, dl: 0, dls: -1, stopped: false, lv: Array.isArray(lv) ? lv : [0, 0, 0, 0], log: [] });
   }
   later(f, ms) { const t = setTimeout(f, ms); this.timers.push(t); return t; }
   emit() { this.cb(); }
@@ -22,7 +22,7 @@ class Game {
     this.dealer = (this.dealer + 1) % 4;
     const d = deck();
     this.hands = [0, 1, 2, 3].map(i => sortHand(d.slice(i * 13, i * 13 + 13)));
-    Object.assign(this, { claim: [0, 0, 0, 0], taken: [0, 0, 0, 0], trick: [], last: null, res: null, note: '', win: -1, bi: 0, phase: 'countdown', countdown: 3 });
+    Object.assign(this, { claim: [0, 0, 0, 0], taken: [0, 0, 0, 0], trick: [], log: [], last: null, res: null, note: '', win: -1, bi: 0, phase: 'countdown', countdown: 3 });
     this.rid++;
     this.order = [1, 2, 3, 4].map(k => (this.dealer + k) % 4);
     this.emit();
@@ -45,7 +45,7 @@ class Game {
     if (this.bi == 3) { this.claim[p] = 13 - sum; this.phase = 'mir'; this.emit(); this.mirStep(); return; }
     const auto = () => {
       if (this.phase != 'bid' || this.order[this.bi] != p) return;
-      this.claim[p] = Math.min(bot.est(this.hands[p]), 13 - sum); this.bi++; this.bidStep();
+      this.claim[p] = bot.bid(this, p, 13 - sum); this.bi++; this.bidStep();
     };
     if (this.bot[p]) { this.emit(); this.later(() => { if (this.bot[p]) auto(); }, 900); }
     else { this.disarm(); this.emit(); }
@@ -65,7 +65,7 @@ class Game {
   mirBot() {
     if (this.phase != 'mir') return;
     const p = this.dealer;
-    Math.abs(this.claim[p] - bot.est(this.hands[p])) >= 3 ? this.swap() : this.go();
+    bot.mir(this) === 'swap' ? this.swap() : this.go();
   }
   mir(s, a) {
     if (this.phase != 'mir' || s != this.dealer) return;
@@ -122,7 +122,7 @@ class Game {
     if (this.phase != 'play' || this.turn != s || !this.legal(s).includes(c)) return;
     this.disarm();
     this.hands[s] = this.hands[s].filter(x => x != c);
-    this.trick.push({ s, c }); this.note = '';
+    this.trick.push({ s, c }); this.log.push({ s, c }); this.note = '';
     if (this.trick.length < 4) { this.turn = (s + 1) % 4; this.turnStep(); return; }
     this.phase = 'trick'; this.win = winner(this.trick); this.emit();
     this.later(() => this.resolve(), 1700);
