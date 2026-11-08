@@ -4,7 +4,7 @@ class Room {
     this.code = code; this.io = io; this.seats = [null, null, null, null];
     this.g = null; this.host = null; this.t = Date.now();
     this.look = { carpet: 'n1', cards: 'n1' }; this.track = 1; this.playing = false; this._hintRid = 0; this._completedHands = 0;
-    this.spec = new Set(); this.botLevel = 0; this.invitePending = false; this.inviteAccepted = false; this.starting = 0; this.startTimer = null;
+    this.spec = new Set(); this.invitePending = false; this.inviteAccepted = false; this.starting = 0; this.startTimer = null;
   }
   setTrack(n) { this.track = n; this.playing = true; this.seats.forEach(s => { if (s && s.sid) this.io.to(s.sid).emit('track', n); }); this.spec.forEach(id => this.io.to(id).emit('track', n)); }
   watch(sid) { this.spec.add(sid); this.send(); [...this.seats.filter(s => s && s.sid).map(s => s.sid), ...this.spec].forEach(id => this.io.to(id).emit('specJoin')); }
@@ -56,19 +56,13 @@ class Room {
     if (this.g || i < 0 || j < 0 || j > 3 || this.seats[j]) return;
     this.seats[j] = this.seats[i]; this.seats[i] = null; this.send();
   }
-  setLevel(sid, n) {
-    const i = this.seatOf(sid);
-    if (this.g || i < 0 || this.seats[i].token != this.host) return;
-    n = n | 0; this.botLevel = n >= 0 && n <= 2 ? n : 0; this.send();
-  }
-  start(sid, forceBots = false, level) {
+  start(sid, forceBots = false) {
     const i = this.seatOf(sid);
     if (this.g || i < 0 || this.seats[i].token != this.host) return false;
     if (this.invitePending && !this.inviteAccepted && !forceBots) return false;
-    if (level !== undefined && level !== null) { level = level | 0; this.botLevel = level >= 0 && level <= 2 ? level : 0; }
     let n = 0;
     this.seats = this.seats.map(s => s || { name: 'ربات ' + (++n), bot: true });
-    this.g = new Game(() => this.send(), this.seats.map(s => !!s.bot), this.seats.map(s => s.name), new Array(4).fill(this.botLevel));
+    this.g = new Game(() => this.send(), this.seats.map(s => !!s.bot), this.seats.map(s => s.name));
     this.g.newHand();
     return true;
   }
@@ -97,7 +91,7 @@ class Room {
     this.seats.forEach((s, i) => {
       if (s && s.sid) this.io.to(s.sid).emit('state', {
         code: this.code, me: i, host: s.token == this.host, hostName, spec: this.spec.size, seats, away, g: g ? g.view(i) : null,
-        look: this.look, track: this.track, playing: this.playing, starting: this.starting, invitePending: this.invitePending, inviteAccepted: this.inviteAccepted, botLevel: this.botLevel
+        look: this.look, track: this.track, playing: this.playing, starting: this.starting, invitePending: this.invitePending, inviteAccepted: this.inviteAccepted
       });
     });
     this.spec.forEach(id => {
