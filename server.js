@@ -4,6 +4,9 @@ const tgbot = require('./bot');
 const app = express();
 app.use(express.static('public'));
 app.get('/health', (q, r) => r.send('ok'));
+let lagH = null; try { lagH = require('perf_hooks').monitorEventLoopDelay({ resolution: 20 }); lagH.enable(); } catch (e) { }
+// میزان تأخیر سرور (برای تشخیص لگ): /api/lag
+app.get('/api/lag', (q, r) => { r.set('Cache-Control', 'no-store'); const f = x => +(x / 1e6).toFixed(1); r.json(lagH ? { meanMs: f(lagH.mean || 0), p99Ms: f(lagH.percentile(99) || 0), maxMs: f(lagH.max || 0) } : {}); if (lagH) lagH.reset(); });
 app.get('/config', (q, r) => r.json({ bot: tgbot.info.username || '' }));
 const srv = http.createServer(app), io = new Server(srv), rooms = {};
 const tables = require('./tables')(io, tgbot); tgbot.tables = tables; // «میز باز»: وضعیت میزها + اعلام در گروه
