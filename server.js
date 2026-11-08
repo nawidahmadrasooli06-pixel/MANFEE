@@ -68,7 +68,8 @@ io.on('connection', s => {
   });
   s.on('sit', i => R() && R().sit(s.id, i | 0));
   s.on('sub', i => R() && R().sub(s.id, i | 0));
-  s.on('start', opts => R() && R().start(s.id, !!(opts && opts.forceBots)));
+  s.on('botLevel', n => { const r = R(); r && r.setLevel(s.id, n | 0); });
+  s.on('start', opts => R() && R().start(s.id, !!(opts && opts.forceBots), opts && opts.level));
   s.on('bid', n => { const r = R(), i = r && r.seatOf(s.id); if (r && r.g && i >= 0) r.g.bid(i, +n); });
   s.on('mir', a => { const r = R(), i = r && r.seatOf(s.id); if (r && r.g && i >= 0) r.g.mir(i, a); });
   s.on('play', c => { const r = R(), i = r && r.seatOf(s.id); if (r && r.g && i >= 0) r.g.play(i, +c); });
