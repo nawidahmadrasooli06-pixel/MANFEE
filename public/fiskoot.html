@@ -144,8 +144,8 @@ function nameV(){const n=($('nm').value||'').trim();if(!n){toast('اسمت را 
 function mkRoom(){const n=nameV();if(n)sk.emit('create',{name:n,token:tok,look:prefLook('fk')})}
 function joinCode(){const n=nameV(),c=$('cin').value.trim().toUpperCase();if(n&&c)sk.emit('join',{code:c,name:n,token:tok})}
 function resume(){sk.emit('rejoin',{code:ld('fk_room'),token:tok})}
-function startFk(){const lv=window.BOTLVL?BOTLVL.take():undefined;const go=()=>sk.emit('start',lv===undefined?undefined:{level:lv});if(window.requestAppearanceStart)requestAppearanceStart('fk',go);else go()}
-function startFkBots(){if(window.BOTLVL&&BOTLVL.ask(st&&st.seats))return;const lv=window.BOTLVL?BOTLVL.take():undefined;const go=()=>sk.emit('start',{bots:1,level:lv});if(window.requestAppearanceStart)requestAppearanceStart('fk',go);else go()}
+function startFk(){const go=()=>sk.emit('start');if(window.requestAppearanceStart)requestAppearanceStart('fk',go);else go()}
+function startFkBots(){const go=()=>sk.emit('start',{bots:1});if(window.requestAppearanceStart)requestAppearanceStart('fk',go);else go()}
 function sit(k){sk.emit('sit',k)}
 function invite(){const go=l=>{const u='https://t.me/share/url?url='+encodeURIComponent(l)+'&text='+encodeURIComponent('بیا بازی حکم (فیسکوت)! کد اتاق: '+st.code);try{Telegram.WebApp.openTelegramLink(u)}catch(e){window.open(u,'_blank')}};fetch('/config').then(r=>r.json()).then(c=>go(c.bot?'https://t.me/'+c.bot+'?start=fk_'+st.code:location.origin+'/fiskoot.html?room='+st.code)).catch(()=>go(location.origin+'/fiskoot.html?room='+st.code))}
 function inviteWatch(){const go=l=>{const u='https://t.me/share/url?url='+encodeURIComponent(l)+'&text='+encodeURIComponent('بیا بازی حکم (فیسکوت) را زنده تماشا کن! 👁 کد اتاق: '+st.code);try{Telegram.WebApp.openTelegramLink(u)}catch(e){window.open(u,'_blank')}};fetch('/config').then(r=>r.json()).then(c=>go(c.bot?'https://t.me/'+c.bot+'?start=fkw_'+st.code:location.origin+'/fiskoot.html?watch='+st.code)).catch(()=>go(location.origin+'/fiskoot.html?watch='+st.code))}
@@ -222,5 +222,5 @@ const wq=new URLSearchParams(location.search).get('watch');if(wq){const go=()=>s
 if(u){$('cin').value=u.toUpperCase();$('inv').style.display='block'}
 if(ld('fk_room')){$('rsm').style.display='block';$('rcode').textContent=ld('fk_room')}
 </script>
-<script src="botlevel.js"></script><script src="custom.js"></script>
+<script src="custom.js"></script>
 <script src="social.js"></script><script src="crack.js"></script><script src="inferno.js"></script><script src="vip.js"></script></body></html>
