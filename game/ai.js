@@ -9,8 +9,11 @@ const smart = require('./smartplay');
 const hr = () => Number(process.hrtime.bigint()) / 1e6;
 // تنظیمات: N = بیشترین تعداد حدس، minN = کمترین حدس، ms = سقف زمان هر تصمیم
 const CFG = {
-  play: { 1: { N: 10, minN: 6, ms: 22 }, 2: { N: 36, minN: 14, ms: 85 } },
-  est: { 1: 150, 2: 260 },        // تعداد شبیه‌سازی برای ادعا
+  // سقف زمان کم است تا سرور هیچ‌وقت قفل نشود؛ روی سرور کند، ربات خودکار کمتر حدس می‌زند ولی بازی روان می‌ماند
+  play: { 1: { N: 10, minN: 3, ms: 12 }, 2: { N: 36, minN: 6, ms: 30 } },
+  est: { 1: 150, 2: 260 },        // بیشترین شبیه‌سازی برای ادعا
+  estMs: { 1: 14, 2: 28 },        // سقف زمان ادعا / میر
+  trumpMs: { 1: 18, 2: 40 },      // سقف زمان انتخاب حکم
   delta: { 1: 0, 2: 0 },          // کم‌کردن از ادعا (۰ = ادعای واقعی)
   mirTheta: { 1: 1.0, 2: 1.0 },   // میر وقتی ادعای اجباری از میانگین انتظار بیشتر از این باشد، «بچرخون» می‌زند
   trump: { 1: 24, 2: 70 }         // تعداد شبیه‌سازی برای انتخاب حکم در فیسکوت
@@ -192,20 +195,22 @@ function simTricks(hands, lead) {
   }
   return cnt;
 }
-function estMean(hand, N, lead0) {
-  const rest = MF.cards.filter(c => !hand.includes(c)); let tot = 0;
-  for (let n = 0; n < N; n++) {
+function estMean(hand, N, lead0, ms) {
+  const rest = MF.cards.filter(c => !hand.includes(c)), t0 = hr(); let tot = 0, n = 0;
+  while (n < N) {
     shuffle(rest);
     tot += simTricks([hand, rest.slice(0, 13), rest.slice(13, 26), rest.slice(26, 39)], lead0 === undefined ? (Math.random() * 4 | 0) : lead0)[0];
+    n++;
+    if (ms && n >= 20 && hr() - t0 > ms) break;
   }
-  return tot / N;
+  return tot / n;
 }
 function bidMf(g, seat, level, maxClaim) {
-  const mu = estMean(g.hands[seat], CFG.est[level] || 150, (g.order[0] - seat + 4) % 4) - (CFG.delta[level] || 0);
+  const mu = estMean(g.hands[seat], CFG.est[level] || 150, (g.order[0] - seat + 4) % 4, CFG.estMs[level]) - (CFG.delta[level] || 0);
   return Math.max(0, Math.min(maxClaim, Math.round(mu)));
 }
 function mirMf(g, level) {
-  const p = g.dealer, F = g.claim[p], mu = estMean(g.hands[p], CFG.est[level] || 150, (g.order[0] - p + 4) % 4);
+  const p = g.dealer, F = g.claim[p], mu = estMean(g.hands[p], CFG.est[level] || 150, (g.order[0] - p + 4) % 4, CFG.estMs[level]);
   return mu < F - (CFG.mirTheta[level] || 1) ? 'swap' : 'go';
 }
 
@@ -229,8 +234,9 @@ function pickFk(r, p, level, legal) {
 // انتخاب حکم توسط حاکم (فقط ۵ کارت اول را دارد)
 function trumpFk(hand5, level, aceLow, seat) {
   const all = FK.all(aceLow), cards = [].concat(all(0), all(1), all(2), all(3));
-  const rest = cards.filter(c => !hand5.includes(c)), N = CFG.trump[level] || 24, val = [0, 0, 0, 0];
+  const rest = cards.filter(c => !hand5.includes(c)), N = CFG.trump[level] || 24, val = [0, 0, 0, 0], t0 = hr();
   for (let n = 0; n < N; n++) {
+    if (n >= 6 && hr() - t0 > (CFG.trumpMs[level] || 30)) break;
     shuffle(rest);
     const deal = [[], [], [], []];
     let o = 0; deal[seat] = hand5.concat(rest.slice(o, o += 8));
