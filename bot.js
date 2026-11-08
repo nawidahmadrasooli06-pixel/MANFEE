@@ -9,10 +9,11 @@ const GUIDE_LD = '🎲 راهنمای لودو\n\n• ۲، ۳ یا ۴ نفر؛ �
 const info = {};
 function start(rooms) {
   if (!T || !URL_) return console.log('Telegram bot disabled: set BOT_TOKEN and PUBLIC_URL');
-  const kb = code => ({ inline_keyboard: [
+  const kb = (code, withGuide) => ({ inline_keyboard: [
     ...(code ? [[{ text: '✉️ ورود به اتاق دعوت', web_app: { url: URL_ + '/?r=' + code + '&invite=1' } }]] : []),
     [{ text: '🎮 شروع بازی‌ها', web_app: { url: URL_ } }],
-    [{ text: '👤 پروفایل من', callback_data: 'me' }, { text: 'ℹ️ درباره ربات', callback_data: 'about' }]
+    [{ text: '👤 پروفایل من', callback_data: 'me' }, { text: 'ℹ️ درباره ربات', callback_data: 'about' }],
+    ...(withGuide ? [[{ text: '📘 راهنما', callback_data: 'guide' }]] : [])
   ] });
   const SHARE = 'https://t.me/share/url?url=' + encodeURIComponent('https://t.me/cactuc580') + '&text=' + encodeURIComponent('آیدی سازندهٔ ربات: @cactuc580');
   const aboutKb = { inline_keyboard: [
@@ -78,9 +79,10 @@ function start(rooms) {
       const code = /^[A-Za-z]{4}$/.test(arg || '') ? arg.toUpperCase() : '';
       const nm = (m.from && m.from.first_name) || 'دوست من';
       if (!code) {
-        // استارت ساده: پنل باز نمی‌شود؛ فقط سلام کوتاه با اسم خودش
-        const nm2 = String((m.from && m.from.first_name) || '').trim().slice(0, 30);
-        await api('sendMessage', { chat_id: m.chat.id, text: `سلام ${nm2 ? nm2 + ' جان' : 'دوست من'} 👋\nبه ربات منفی، حکم (فیسکوت) و لودو خوش آمدی 🃏\nبا دوستانت یا با ربات‌ها بازی کن؛ برای شروع، دکمهٔ «🎮 بازی منفی» پایین صفحه را بزن. راهنما: /guide\nموفق باشی ♠️`, reply_markup: kb(code) });
+        // استارت ساده: سلام کوتاه با اسم (اسم داخل جداکنندهٔ جهت می‌آید تا برعکس نشود) + پنل + دکمهٔ راهنما
+        const nm2 = String((m.from && m.from.first_name) || '').replace(/[\u200e\u200f\u202a-\u202e\u2066-\u2069]/g, '').trim().slice(0, 30);
+        const who = nm2 ? '\u2068' + nm2 + '\u2069' : 'دوست من';
+        await api('sendMessage', { chat_id: m.chat.id, text: `سلام ${who} 👋\nبه ربات بازی و سرگرمی خوش آمدی 🃏\nبا دوستانت بازی کن و لذت ببر ♠️`, reply_markup: kb(code, true) });
         return;
       }
       const text = `🃏 دوستت تو را به اتاق ${code} دعوت کرده!\nبرای دیدن نام دعوت‌کننده و ورود، دکمه را بزن.`;
@@ -88,7 +90,7 @@ function start(rooms) {
     } else if (cmd == '/groupid') {
       if (!ADMIN || String(m.from.id) == ADMIN) await api('sendMessage', { chat_id: m.chat.id, text: 'شناسهٔ این چت (برای GROUP_ID در Render):\n' + m.chat.id });
     } else if (cmd == '/profile') { await sendProfile(m.chat.id, m.from);
-    } else if (cmd == '/guide') { await say(m.chat.id, '📘 راهنمای کدام بازی را می‌خواهی؟', guideKb);
+    } else if (cmd == '/guide' || cmd0 == 'راهنما') { await say(m.chat.id, '📘 راهنمای کدام بازی را می‌خواهی؟', guideKb);
     } else if (cmd == '/about') { await say(m.chat.id, ABOUT, aboutKb);
     } else if (cmd == '/stats' && String(m.from.id) == ADMIN) {
       const rs = Object.values(rooms), on = rs.reduce((a, r) => a + r.seats.filter(s => s && s.sid).length, 0);
