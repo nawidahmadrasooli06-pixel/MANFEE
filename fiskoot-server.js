@@ -1,6 +1,7 @@
 // بازی حکم (فیسکوت) - سرور آنلاین (مستقل از منفی؛ کانال /fiskoot)
 const L = 'ABCDEFGHJKLMNPQRSTUVWXYZ', BOTS = ['احمد', 'محمد', 'محمود'];
-let smart;
+let smart, ai = null;
+try { ai = require('./game/ai'); } catch (e) { try { ai = require('./game/game/ai'); } catch (e2) { console.log('ai.js not loaded:', e.message); } }
 try { smart = require('./game/smartplay'); } catch (e1) { try { smart = require('./game/game/smartplay'); } catch (e2) { console.log('smartplay.js not found; using simple bot'); smart = { choose: o => o.legal[0] }; } }
 const S = c => c / 20 | 0, Rk = c => c % 20;
 const sh = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -48,9 +49,14 @@ module.exports = function (io) {
   };
   const seatOf = (r, tok) => r.seats.findIndex(s => s && s.token === tok);
   const botTrump = h => { let b = 0, bs = -1; for (let s = 0; s < 4; s++) { const l = h.filter(c => S(c) == s); const v = l.length * 100 + l.reduce((a, c) => a + Rk(c), 0); if (v > bs) { bs = v; b = s; } } return b; };
+  const pickTrump = (r, a) => {
+    if ((r.level | 0) > 0 && ai) { try { const t = ai.trumpFk(r.hands[a], r.level | 0, r.aceLow, a); if (t >= 0 && t < 4) return t; } catch (e) { console.log('ai fk trump:', e.message); } }
+    return botTrump(r.hands[a]);
+  };
   const newMem = () => ({ played: new Set(), voids: [new Set(), new Set(), new Set(), new Set()] });
   const botPlay = (r, p) => {
     if (!r.mem) r.mem = newMem();
+    if ((r.level | 0) > 0 && ai) { try { const lg = legal(r, p), c = ai.pickFk(r, p, r.level | 0, lg); if (c != null && lg.includes(c)) return c; } catch (e) { console.log('ai fk play:', e.message); } }
     const all = s => { const a = []; for (let k = 2; k <= 13; k++) a.push(s * 20 + k); a.push(s * 20 + (r.aceLow ? 1 : 14)); return a; };
     return smart.choose({ legal: legal(r, p), hand: r.hands[p], trick: r.trick, me: p, trump: r.trump, S, R: Rk, all, played: r.mem.played, voids: r.mem.voids, mustWin: r.tw[p % 2] >= 6 || r.tw[1 - p % 2] >= 6 });
   };
@@ -80,7 +86,7 @@ module.exports = function (io) {
         if (!s.bot && !s.on) { r.wait = a; return send(r); }
         if (s.bot) at(p == 'pick' ? 700 : p == 'trump' ? 1400 : 850, () => {
           if (p == 'pick') { const un = r.pick.deck.map((_, i) => i).filter(i => !r.pick.f.some(f => f[0] == i)); flip(r, a, un[Math.random() * un.length | 0]); }
-          else if (p == 'trump') setTrump(r, botTrump(r.hands[a]));
+          else if (p == 'trump') setTrump(r, pickTrump(r, a));
           else playCard(r, a, botPlay(r, a));
         });
       }
@@ -127,7 +133,7 @@ module.exports = function (io) {
     const takeSeat = (r, k, name, token) => { const s = r.seats[k]; if (!s || !s.auto || !s.bot) return so.emit('err', 'این صندلی دیگر ربات نیست؛ دوباره امتحان کن.'); r.seats[k] = mkSeat(name, token, so.id); so.data = { code: r.code, tok: token }; step(r); };
     so.on('create', ({ name, token, look } = {}) => {
       let c; do c = [0, 1, 2, 3].map(() => L[Math.random() * 24 | 0]).join(''); while (rooms[c]);
-      const r = rooms[c] = { code: c, host: token, seats: [mkSeat(name, token, so.id), null, null, null], phase: 'lobby', aceLow: false, sc: [0, 0], hk: -1, dl: -1, trump: null, hands: [[], [], [], []], trick: [], last: null, tw: [0, 0], turn: -1, pick: null, res: null, wait: null, cnt: 0, t: null, at: Date.now(), look: cleanLook(look), track: 1, playing: false, paused: false, spec: new Set() };
+      const r = rooms[c] = { code: c, host: token, seats: [mkSeat(name, token, so.id), null, null, null], phase: 'lobby', aceLow: false, sc: [0, 0], hk: -1, dl: -1, trump: null, hands: [[], [], [], []], trick: [], last: null, tw: [0, 0], turn: -1, pick: null, res: null, wait: null, cnt: 0, t: null, at: Date.now(), look: cleanLook(look), track: 1, playing: false, paused: false, spec: new Set(), level: 0 };
       so.data = { code: c, tok: token }; send(r);
     });
     so.on('announce', async () => {
@@ -147,10 +153,12 @@ module.exports = function (io) {
     });
     so.on('take', ({ code, name, token, seat } = {}) => { const r = rooms[String(code || '').toUpperCase().trim()]; if (r && r.phase != 'lobby') takeSeat(r, seat | 0, name, token); });
     so.on('sit', k => { const r = R(), i = r ? seatOf(r, tk()) : -1; k = k | 0; if (r && r.phase == 'lobby' && i >= 0 && k >= 0 && k < 4 && !r.seats[k]) { r.seats[k] = r.seats[i]; r.seats[i] = null; send(r); } });
+    so.on('botLevel', n => { const r = R(); if (r && r.phase == 'lobby' && tk() === r.host) { n = n | 0; r.level = n >= 0 && n <= 2 ? n : 0; send(r); } });
     so.on('cfg', o => { const r = R(); if (r && r.phase == 'lobby' && tk() === r.host) { r.aceLow = !!(o && o.low); send(r); } });
     so.on('start', o => {
       const r = R(); if (!r || r.phase != 'lobby' || tk() !== r.host) return;
       if (!r.seats.every(x => x && x.on) && !(o && o.bots)) return so.emit('err', 'هنوز همهٔ صندلی‌ها پر نشده‌اند.');
+      if (o && o.level !== undefined && o.level !== null) { const lv = o.level | 0; r.level = lv >= 0 && lv <= 2 ? lv : 0; }
       let n = 0; for (let i = 0; i < 4; i++) if (!r.seats[i]) r.seats[i] = { name: BOTS[n++], token: null, sid: null, bot: true, auto: true, on: true };
       r.sc = [0, 0]; r.phase = 'count'; r.cnt = 3; r.pick = { deck: mk(r.aceLow), f: [], turn: 0 }; step(r);
     });
