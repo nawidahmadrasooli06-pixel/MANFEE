@@ -26,8 +26,8 @@ function resume() {
   sk.emit('join', { code: localStorage.room, name: localStorage.nm || 'بازیکن', token: tok }); }
 function fresh() { menuMode = false; localStorage.removeItem('room'); pend = null; history.replaceState(0, '', '/'); $('#cd').value = ''; show('join'); }
 function take(i) { sk.emit('take', { ...pend, seat: i }); }
-function startGame() { if (window.BOTLVL && BOTLVL.ask(st && st.seats)) return; const lv = window.BOTLVL ? BOTLVL.take() : undefined; const go = () => sk.emit('start', { forceBots: false, level: lv }); if (window.requestAppearanceStart) requestAppearanceStart('mf', go); else go(); }
-function startWithBots() { if (window.BOTLVL && BOTLVL.ask(st && st.seats)) return; const lv = window.BOTLVL ? BOTLVL.take() : undefined; const go = () => sk.emit('start', { forceBots: true, level: lv }); if (window.requestAppearanceStart) requestAppearanceStart('mf', go); else go(); }
+function startGame() { const go = () => sk.emit('start', { forceBots: false }); if (window.requestAppearanceStart) requestAppearanceStart('mf', go); else go(); }
+function startWithBots() { const go = () => sk.emit('start', { forceBots: true }); if (window.requestAppearanceStart) requestAppearanceStart('mf', go); else go(); }
 function restartBot() {
   if (BOT && tg && tg.openTelegramLink) tg.openTelegramLink('https://t.me/' + BOT);
   else if (BOT) location.href = 'https://t.me/' + BOT;
