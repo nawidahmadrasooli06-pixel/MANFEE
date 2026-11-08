@@ -3,20 +3,13 @@ const T = (() => {
   const $ = q => document.querySelector(q);
   const cd = (c, x = '') => { const s = c / 13 | 0; return `<div class="c ${s == 1 || s == 2 ? 'r' : ''} ${s == 1 ? 'heart' : ''} ${x}"><em>${RK[c % 13]}</em><b>${SU[s]}</b></div>`; };
   let S, pl = 0, nid = 0, v = 2, tm, rid = -1, lastTk = 0, lastCount = -1, myTurn = false, drag = null, sel = null, pending = null, flyOwn = null, askSwap = false, askRid = -1, born = {}, tblHtml = '', handHtml = '';
-  function sweepFly(force) {
-    const now = Date.now();
-    document.querySelectorAll('.flyc').forEach(e => { if (force || now - (+e.dataset.t || 0) > 700) e.remove(); });
-    if (force || !flyOwn || now - flyOwn.t > 460) document.querySelectorAll('.q.hid').forEach(e => e.classList.remove('hid'));
-  }
-  setInterval(sweepFly, 800);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) sweepFly(true); });
   function flyCard(el, c) {
     const ic = el.querySelector('.c'), ctr = document.querySelector('#tbl .ctr'); if (!ic || !ctr) return;
     const r = ic.getBoundingClientRect(), t = ctr.getBoundingClientRect(), k = ic.offsetWidth, cx = r.left + r.width / 2, cy = r.top + r.height / 2;
     const tx = t.left + t.width / 2, ty = t.bottom - k * 0.7;
     const fl = document.createElement('div'); fl.innerHTML = cd(c); const cc = fl.firstChild;
     cc.style.cssText = `position:fixed;left:${cx - k / 2}px;top:${cy - k * 0.7}px;--k:${k}px;margin:0;z-index:99999;pointer-events:none;transform:scale(1.1);transition:transform .4s cubic-bezier(.2,.8,.25,1)`;
-    cc.classList.add('flyc'); cc.dataset.t = Date.now(); document.body.appendChild(cc); flyOwn = { c, t: Date.now() };
+    document.body.appendChild(cc); flyOwn = { c, t: Date.now() };
     requestAnimationFrame(() => requestAnimationFrame(() => { cc.style.transform = `translate(${tx - cx}px,${ty - cy}px) scale(1)`; }));
     setTimeout(() => { cc.remove(); document.querySelectorAll('.q.hid').forEach(e => e.classList.remove('hid')); }, 460);
   }
@@ -52,7 +45,7 @@ const T = (() => {
 
   function draw(st) {
     S = st; mirReviewOverlay(st); const g = st.g, me = st.me, mt = me % 2, rel = s => (s - me + 4) % 4, name = s => st.seats[s].name, my = g.phase == 'play' && g.turn == me;
-    if (g.rid != rid) { rid = g.rid; sweepFly(true); } else sweepFly(false);
+    if (g.rid != rid) rid = g.rid;
     if (g.phase != 'mir') askSwap = false;
     myTurn = my;
     const pill = (t, l) => `<div class="pl ${t == mt ? 'm' : 'e'}">${l} · سری ${g.ser[t]} از ۵ · ${g.taken[t] + g.taken[t + 2]}/${g.tc ? g.tc[t] : '؟'}</div>`;
@@ -65,7 +58,7 @@ const T = (() => {
     }
     const nowT = Date.now(); if (!g.trick.length) born = {};
     const tcards = g.trick.slice();
-    if (pending != null && g.phase == 'play' && !tcards.some(x => x.s == me)) tcards.push({ s: me, c: pending, ph: 1 });
+    if (pending != null && !tcards.some(x => x.s == me)) tcards.push({ s: me, c: pending, ph: 1 });
     h += '<div class="ctr">' + tcards.map((x, i) => {
       const own = !!(flyOwn && x.s == me && x.c == flyOwn.c), key = g.rid + ':' + x.s + ':' + x.c;
       if (!x.ph && i >= pl && born[key] == null && !(own && nowT - flyOwn.t < 2000)) born[key] = nowT;
@@ -119,7 +112,7 @@ const T = (() => {
     if (!d.mv) sel = sel == d.c ? null : d.c;
     else if (dy < -55) {
       const g = S.g;
-      if (g.phase == 'play' && g.turn == S.me && g.legal.includes(d.c)) { flyCard(d.el, d.c); pending = d.c; sel = null; act('play', d.c); const pc = d.c; setTimeout(() => { if (pending === pc) { pending = null; handHtml = ''; draw(S); } }, 2500); }
+      if (g.phase == 'play' && g.turn == S.me && g.legal.includes(d.c)) { flyCard(d.el, d.c); pending = d.c; sel = null; act('play', d.c); }
       else toast(g.phase == 'play' && g.turn == S.me ? 'این پر را نمی‌توانی بیندازی؛ باید هم‌خال بیندازی' : 'هنوز نوبت تو نیست');
     }
     draw(S);
