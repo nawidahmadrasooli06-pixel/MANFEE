@@ -77,7 +77,13 @@ function start(rooms) {
       }
       const code = /^[A-Za-z]{4}$/.test(arg || '') ? arg.toUpperCase() : '';
       const nm = (m.from && m.from.first_name) || 'دوست من';
-      const text = code ? `🃏 دوستت تو را به اتاق ${code} دعوت کرده!\nبرای دیدن نام دعوت‌کننده و ورود، دکمه را بزن.` : `🃏 منفی، حکم (فیسکوت) و لودو؛ با دوستان یا با ربات. برای دیدن بازی‌ها، «شروع بازی‌ها» را بزن.`;
+      if (!code) {
+        // استارت ساده: پنل باز نمی‌شود؛ فقط سلام کوتاه با اسم خودش
+        const nm2 = String((m.from && m.from.first_name) || '').trim().slice(0, 30);
+        await api('sendMessage', { chat_id: m.chat.id, text: `سلام ${nm2 ? nm2 + ' جان' : 'دوست من'} 👋\nبه ربات منفی، حکم (فیسکوت) و لودو خوش آمدی 🃏\nبا دوستانت یا با ربات‌ها بازی کن؛ برای شروع، دکمهٔ «🎮 بازی منفی» پایین صفحه را بزن. راهنما: /guide\nموفق باشی ♠️` });
+        return;
+      }
+      const text = `🃏 دوستت تو را به اتاق ${code} دعوت کرده!\nبرای دیدن نام دعوت‌کننده و ورود، دکمه را بزن.`;
       await api('sendMessage', { chat_id: m.chat.id, text, reply_markup: kb(code) });
     } else if (cmd == '/groupid') {
       if (!ADMIN || String(m.from.id) == ADMIN) await api('sendMessage', { chat_id: m.chat.id, text: 'شناسهٔ این چت (برای GROUP_ID در Render):\n' + m.chat.id });
