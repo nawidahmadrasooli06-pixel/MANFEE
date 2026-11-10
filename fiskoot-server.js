@@ -185,7 +185,7 @@ module.exports = function (io) {
       ids(r).forEach(id => { const o = nsp.sockets.get(id); if (o) o.emit('swapDone'); }); send(r);
     });
     so.on('look', l => { const r = R(); if (r && tk() === r.host) { r.look = cleanLook(l); send(r); } });
-    so.on('track', n => { const r = R(); n = n | 0; if (r && seatOf(r, tk()) >= 0 && n >= 1 && n <= 21) { r.track = n; r.playing = true; r.seats.forEach(x => { if (x && x.sid && x.on && x.sid !== so.id) { const o = nsp.sockets.get(x.sid); if (o) o.emit('track', n); } }); r.spec.forEach(id => { const o = nsp.sockets.get(id); if (o) o.emit('track', n); }); } });
+    so.on('track', n => { const r = R(); n = n | 0; if (r && tk() === r.host && seatOf(r, tk()) >= 0 && n >= 0 && n <= 2) { if (n === 0) r.playing = false; else { r.track = n; r.playing = true; } r.seats.forEach(x => { if (x && x.sid && x.on && x.sid !== so.id) { const o = nsp.sockets.get(x.sid); if (o) o.emit('track', n); } }); r.spec.forEach(id => { const o = nsp.sockets.get(id); if (o) o.emit('track', n); }); } });
     so.on('pause', () => { const r = R(); if (r && tk() === r.host && r.phase != 'lobby' && r.phase != 'over') { r.paused = true; step(r); } });
     so.on('resume', () => { const r = R(); if (r && tk() === r.host && r.paused) { r.paused = false; step(r); } });
     so.on('replace', () => { const r = R(); if (r && r.wait != null && seatOf(r, tk()) >= 0) { const s = r.seats[r.wait]; s.bot = true; s.rep = true; step(r); } });
