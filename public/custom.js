@@ -126,6 +126,84 @@ function refreshLookPicker() {
 const SILENT = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
 let roomPlaying = false, userStopped = false, needTap = false, unlocked = false;
 
+/* ===== منفی و حکم: آهنگ بی‌کلام منو + موزیک فارسی گروهی =====
+   - آهنگ بی‌کلام (theme.mp3) فقط در منو و لابی پخش می‌شود و با ورود به تخته بازی خاموش می‌شود.
+   - دو موزیک فارسی فقط وقتی پخش می‌شوند که میزبان «پخش برای همه» را بزند.
+   - قطع و وصل با دکمهٔ پایین-چپ فقط برای خود همان بازیکن است و چیزی را برای دیگران تغییر نمی‌دهد.
+   - نام دو فایل موزیک را فقط همین‌جا عوض کن (فایل‌ها داخل پوشهٔ public). */
+const FA_SRC = { 1: 'persian1.mp3', 2: 'persian2.mp3' };
+let gTrack = 0, gPlaying = false, gOff = false, gRoom = '', faLocalAt = 0, faErrShown = false;
+const onBoard = () => document.body.classList.contains('ingame');
+const isHost = () => inRoom() && !!st.host && !st.isSpec;
+const groupOn = () => SINGLE && inRoom() && gPlaying && !!FA_SRC[gTrack];
+function wantSrc() {
+  if (groupOn()) return gOff ? null : FA_SRC[gTrack];
+  if (onBoard()) return null;
+  return lsGet('bgm_off', '0') === '1' ? null : THEME_SRC;
+}
+function playSrc(src) {
+  if (!setupAudioGraph()) bgAudio.volume = savedVol() / 100;
+  if (actx && actx.state === 'suspended') actx.resume();
+  if (bgAudio.getAttribute('src') !== src) bgAudio.src = src;
+  else if (!bgAudio.paused) return;
+  const p = bgAudio.play();
+  if (p && p.catch) p.catch(e => { needTap = true; console.log('Music play blocked, waiting for a tap:', e); });
+}
+function applyAudio() {
+  if (!SINGLE) return;
+  const want = wantSrc();
+  if (want) { musicOn = true; roomPlaying = true; playSrc(want); }
+  else { musicOn = false; if (!bgAudio.paused) bgAudio.pause(); }
+  updateMusicUI(); refreshFaUI();
+}
+function faStatusText() {
+  if (!groupOn()) return 'موزیک گروهی خاموش است';
+  return '🎵 موزیک فارسی ' + gTrack + (gOff ? ' · برای خودت قطع است' : ' · در حال پخش');
+}
+function refreshFaUI() {
+  const el = document.getElementById('faStatus'); if (el) el.textContent = faStatusText();
+}
+function showFaNotice() {
+  let e = document.getElementById('faNotice'); if (e) e.remove();
+  e = document.createElement('div'); e.id = 'faNotice';
+  e.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);top:calc(8px + env(safe-area-inset-top,0px));z-index:9000;background:rgba(11,31,30,.94);border:1px solid #f0b64a;border-radius:14px;padding:7px 12px;color:#fff;font-size:12px;display:flex;align-items:center;gap:10px;max-width:92vw;direction:rtl';
+  e.innerHTML = '<span>🎵 میزبان موزیک فارسی ' + gTrack + ' را برای همه پخش کرد</span><button style="background:#f0b64a;color:#000;border:none;border-radius:9px;padding:4px 9px;font-weight:bold;font-size:12px">قطع برای من</button>';
+  e.querySelector('button').onclick = () => { gOff = true; e.remove(); applyAudio(); };
+  document.body.appendChild(e); setTimeout(() => { if (e.parentNode) e.remove(); }, 7000);
+}
+/* وضعیت موزیک گروهی (از میزبان یا از وضعیت اتاق). فقط میزبان تعیین می‌کند. */
+function faSet(n, playing, announce) {
+  n = n | 0; playing = !!playing && !!FA_SRC[n];
+  const code = inRoom() ? st.code : '';
+  if (code !== gRoom) { gRoom = code; gTrack = 0; gPlaying = false; gOff = false; }
+  const changed = playing !== gPlaying || (playing && n !== gTrack);
+  if (!changed) return;
+  gPlaying = playing; if (FA_SRC[n]) gTrack = n;
+  if (announce && playing && !isHost()) showFaNotice();
+  applyAudio();
+}
+function faPlayAll() {
+  if (!isHost()) return;
+  const sel = document.getElementById('faSel'), n = sel ? parseInt(sel.value, 10) : (gTrack || 1);
+  if (!FA_SRC[n]) return;
+  faLocalAt = Date.now(); gRoom = st.code; gTrack = n; gPlaying = true; gOff = false;
+  sk.emit('track', n); applyAudio();
+}
+function faStopAll() {
+  if (!isHost()) return;
+  faLocalAt = Date.now(); gPlaying = false;
+  sk.emit('track', 0); applyAudio();
+}
+if (SINGLE) {
+  let lastBoard = null;
+  const chk = () => { const b = onBoard(); if (b !== lastBoard) { lastBoard = b; applyAudio(); } };
+  new MutationObserver(chk).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  bgAudio.addEventListener('error', () => {
+    const src = bgAudio.getAttribute('src');
+    if (src && src !== SILENT && src !== THEME_SRC && !faErrShown) { faErrShown = true; idToast('فایل موزیک پیدا نشد'); }
+  });
+}
+
 function savedVol() {
   const v = parseInt(lsGet('mvol', '50'), 10);
   return isNaN(v) ? 50 : Math.max(0, Math.min(100, v));
@@ -152,6 +230,7 @@ function setupAudioGraph() {
 }
 
 function playLocal(n) {
+  if (SINGLE) { applyAudio(); return; }
   lsSet('mon', '1'); lsSet('mtrack', String(n));
   if (!setupAudioGraph()) bgAudio.volume = savedVol() / 100;
   if (actx && actx.state === 'suspended') actx.resume();
@@ -169,9 +248,10 @@ function playLocal(n) {
 
 /* اولین لمس صفحه، صدا را آماده می‌کند تا آهنگ میزبان برای همه خودکار پخش شود */
 function unlockAudio(e) {
-  if (SINGLE && lsGet('bgm_off', '0') !== '1') {
+  if (SINGLE) {
     const onBar = e && e.target && e.target.closest && e.target.closest('#musicBar');
-    if (!onBar && (bgAudio.paused || bgAudio.getAttribute('src') !== THEME_SRC)) { musicOn = true; roomPlaying = true; needTap = false; unlocked = true; playLocal(1); updateMusicUI(); return; }
+    const want = wantSrc();
+    if (!onBar && want && (bgAudio.paused || bgAudio.getAttribute('src') !== want)) { needTap = false; unlocked = true; applyAudio(); return; }
   }
   if (needTap && musicOn && bgAudio.paused) { needTap = false; playLocal(roomTrack); return; }
   if (unlocked) return;
@@ -199,9 +279,10 @@ function updateMusicUI() {
    فقط اگر هنوز هیچ‌کس موزیک را شروع نکرده باشد، شروعش برای همه است */
 function musicToggle() {
   if (SINGLE) {
-    if (musicOn && !bgAudio.paused) { userStopped = true; musicOn = false; lsSet('bgm_off', '1'); lsSet('mon', '0'); bgAudio.pause(); }
-    else { userStopped = false; musicOn = true; roomPlaying = true; playLocal(1); }
-    updateMusicUI(); return;
+    if (groupOn()) { gOff = !gOff; applyAudio(); return; }
+    if (onBoard()) { idToast(isHost() ? 'موزیک گروهی را از تنظیمات انتخاب کن' : 'میزبان هنوز موزیکی پخش نکرده'); return; }
+    if (musicOn && !bgAudio.paused) { lsSet('bgm_off', '1'); lsSet('mon', '0'); } else { lsSet('bgm_off', '0'); }
+    applyAudio(); return;
   }
   if (musicOn) { userStopped = true; musicOn = false; lsSet('mon', '0'); bgAudio.pause(); }
   else if (!roomPlaying) { goTrack(roomTrack); return; }
@@ -211,7 +292,7 @@ function musicToggle() {
 
 /* شروع، قبلی، بعدی و انتخاب آهنگ برای همه‌ی بازیکنان اتاق است */
 function goTrack(n) {
-  if (SINGLE) { userStopped = false; musicOn = true; roomPlaying = true; playLocal(1); updateMusicUI(); return; }
+  if (SINGLE) { applyAudio(); return; }
   roomTrack = n; roomPlaying = true; userStopped = false; musicOn = true;
   playLocal(n); updateMusicUI();
   if (inRoom()) sk.emit('track', n);
@@ -223,7 +304,7 @@ function musicPrev() {
 
 /* پیام آهنگ از طرف یکی از بازیکنان اتاق */
 function onRemoteTrack(n) {
-  if (SINGLE) return;
+  if (SINGLE) { n = parseInt(n, 10) || 0; faSet(n, n >= 1, true); return; }
   n = parseInt(n, 10);
   if (!(n >= 1 && n <= TRACKS)) return;
   const same = n === roomTrack;
@@ -237,7 +318,7 @@ function onRemoteTrack(n) {
 
 /* کسی که بعد از شروع موزیک وارد اتاق می‌شود، آهنگ جاری را می‌شنود */
 function syncTrackFromState(n, playing) {
-  if (SINGLE) return;
+  if (SINGLE) { if (Date.now() - faLocalAt > 2500) faSet(parseInt(n, 10) || 0, playing, true); return; }
   if (trackSynced) return;
   trackSynced = true;
   n = parseInt(n, 10);
@@ -248,7 +329,7 @@ function syncTrackFromState(n, playing) {
 }
 
 function musicSelect(v) {
-  if (SINGLE) { if (v === '-1') { userStopped = true; musicOn = false; lsSet('bgm_off', '1'); lsSet('mon', '0'); bgAudio.pause(); } else { userStopped = false; musicOn = true; roomPlaying = true; playLocal(1); } updateMusicUI(); return; }
+  if (SINGLE) { if (v === '-1') { lsSet('bgm_off', '1'); lsSet('mon', '0'); } else { lsSet('bgm_off', '0'); } applyAudio(); return; }
   if (v === '-1') { userStopped = true; musicOn = false; lsSet('mon', '0'); bgAudio.pause(); updateMusicUI(); }
   else goTrack(parseInt(v, 10));
 }
@@ -286,11 +367,26 @@ function closeSettingsModal() {
   }
 }
 
+function faSettingsHTML(row, selStyle) {
+  const btn = 'padding:8px 10px; border:none; border-radius:10px; font-weight:bold; cursor:pointer; flex:1;';
+  if (isHost()) return `<div style="border:1px solid #2d5a55; border-radius:12px; padding:8px; display:flex; flex-direction:column; gap:8px;">
+          <div style="color:#f0b64a; font-weight:bold;">🎶 موزیک فارسی برای همه (میزبان)</div>
+          <div style="${row}"><span>آهنگ:</span><select id="faSel" style="${selStyle}"><option value="1"${gTrack !== 2 ? ' selected' : ''}>موزیک فارسی ۱</option><option value="2"${gTrack === 2 ? ' selected' : ''}>موزیک فارسی ۲</option></select></div>
+          <div style="display:flex; gap:8px;"><button style="${btn} background:#f0b64a; color:#000;" onclick="faPlayAll()">▶ پخش برای همه</button><button style="${btn} background:#3a2a2a; color:#fff;" onclick="faStopAll()">⏹ توقف برای همه</button></div>
+          <div id="faStatus" style="font-size:12px; opacity:.85;">${faStatusText()}</div>
+          <div style="font-size:11px; opacity:.7;">هر بازیکن می‌تواند با دکمهٔ پایین-چپ فقط صدای خودش را قطع یا وصل کند.</div>
+        </div>`;
+  return `<div style="border:1px solid #2d5a55; border-radius:12px; padding:8px; display:flex; flex-direction:column; gap:6px;">
+          <div style="color:#f0b64a; font-weight:bold;">🎶 موزیک گروهی</div>
+          <div id="faStatus" style="font-size:12px; opacity:.85;">${faStatusText()}</div>
+          <div style="font-size:11px; opacity:.7;">میزبان موزیک گروهی را کنترل می‌کند؛ با دکمهٔ پایین-چپ فقط صدای خودت را قطع یا وصل می‌کنی.</div>
+        </div>`;
+}
 function openSettingsModal(required = false) {
   const oldModal = document.getElementById('customSettingsModal'); if (oldModal) oldModal.remove();
   requiredAppearanceSettings = !!required;
   let musicOptions = `<option value="-1"${!musicOn ? ' selected' : ''}>خاموش</option>`;
-  if (SINGLE) { const on = musicOn && !bgAudio.paused; musicOptions = `<option value="-1"${!on ? ' selected' : ''}>خاموش</option><option value="1"${on ? ' selected' : ''}>🎵 آهنگ بازی</option>`; }
+  if (SINGLE) { const on = lsGet('bgm_off', '0') !== '1'; musicOptions = `<option value="-1"${!on ? ' selected' : ''}>خاموش</option><option value="1"${on ? ' selected' : ''}>🎵 آهنگ بازی</option>`; }
   else for (let i = 1; i <= TRACKS; i++) musicOptions += `<option value="${i}"${musicOn && roomTrack === i ? ' selected' : ''}>موزیک شماره ${i}</option>`;
   const selStyle = 'background:#0f2a28; color:#fff; border:1px solid #f0b64a; border-radius:8px; padding:5px;';
   const row = 'display:flex; justify-content:space-between; align-items:center; gap:8px;';
@@ -298,10 +394,11 @@ function openSettingsModal(required = false) {
     <div id="customSettingsModal" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; display:flex; align-items:center; justify-content:center; padding:14px;">
       <div style="background:#0b1f1e; border:2px solid #f0b64a; border-radius:18px; padding:16px; width:100%; max-width:320px; max-height:92vh; overflow-y:auto; -webkit-overflow-scrolling:touch; color:#fff; text-align:center; display:flex; flex-direction:column; gap:10px;">
         <h3 style="margin:0; color:#f0b64a;">${PAGE_GAME === 'ld' ? '⚙️ تنظیمات و موزیک' : '⚙️ فرش، پر و موزیک'}</h3>
-        <div style="${row}">
-          <span>🎵 موزیک:</span>
+        ${SINGLE && inRoom() ? faSettingsHTML(row, selStyle) : ''}
+        ${SINGLE && onBoard() ? '' : `<div style="${row}">
+          <span>🎵 ${SINGLE && inRoom() ? 'آهنگ منو' : 'موزیک'}:</span>
           <select id="musicSelect" onchange="musicSelect(this.value)" style="${selStyle}">${musicOptions}</select>
-        </div>
+        </div>`}
         <div style="${row}">
           <span>🔊 ولوم: <b id="volLabel">${savedVol()}</b></span>
           <input type="range" id="volRange" min="0" max="100" step="1" value="${savedVol()}" oninput="changeVolume(this.value)" onchange="changeVolume(this.value)" style="flex:1; min-width:0; direction:ltr;">
@@ -402,7 +499,7 @@ document.addEventListener('click', e => { if (e.target.closest && e.target.close
 })();
 
 applyLook(prefLook());
-if (SINGLE) { if (lsGet('bgm_off', '0') !== '1') { roomPlaying = true; musicOn = true; playLocal(1); } }
+if (SINGLE) applyAudio();
 else if (lsGet('mon', '0') === '1') { roomTrack = parseInt(lsGet('mtrack', '1'), 10) || 1; roomPlaying = true; musicOn = true; playLocal(roomTrack); }
 updateMusicUI();
 if (typeof sk !== 'undefined') sk.on('track', onRemoteTrack);
