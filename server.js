@@ -59,7 +59,7 @@ io.on('connection', s => {
     if (r && r.take(s.id, cl(name), token, seat | 0)) s.data.code = code; else s.emit('err', 'این صندلی دیگر خالی نیست');
   });
   s.on('look', l => { const r = R(), i = r ? r.seatOf(s.id) : -1; if (r && i >= 0 && r.seats[i].token == r.host) { r.look = cleanLook(l); r.send(); } });
-  s.on('track', n => { const r = R(); n = n | 0; if (r && r.seatOf(s.id) >= 0 && n >= 1 && n <= 21) r.setTrack(n); });
+  s.on('track', n => { const r = R(), i = r ? r.seatOf(s.id) : -1; n = n | 0; if (r && i >= 0 && r.seats[i].token == r.host && n >= 0 && n <= 2) r.setTrack(n); });
   s.on('invite', () => R() && R().invite(s.id));
   s.on('announce', async () => {
     const r = R(), i = r ? r.seatOf(s.id) : -1;
