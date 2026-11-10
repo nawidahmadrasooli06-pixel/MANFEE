@@ -131,7 +131,7 @@ let roomPlaying = false, userStopped = false, needTap = false, unlocked = false;
    - دو موزیک فارسی فقط وقتی پخش می‌شوند که میزبان «پخش برای همه» را بزند.
    - قطع و وصل با دکمهٔ پایین-چپ فقط برای خود همان بازیکن است و چیزی را برای دیگران تغییر نمی‌دهد.
    - نام دو فایل موزیک را فقط همین‌جا عوض کن (فایل‌ها داخل پوشهٔ public). */
-const FA_SRC = { 1: 'persian1.mp3', 2: 'persian2.mp3' };
+const FA_SRC = { 1: 'persian1.m4a', 2: 'persian2.m4a' };
 let gTrack = 0, gPlaying = false, gOff = false, gRoom = '', faLocalAt = 0, faErrShown = false;
 const onBoard = () => document.body.classList.contains('ingame');
 const isHost = () => inRoom() && !!st.host && !st.isSpec;
@@ -144,7 +144,9 @@ function wantSrc() {
 function playSrc(src) {
   if (!setupAudioGraph()) bgAudio.volume = savedVol() / 100;
   if (actx && actx.state === 'suspended') actx.resume();
-  if (bgAudio.getAttribute('src') !== src) bgAudio.src = src;
+  const same = bgAudio.getAttribute('src') === src;
+  if (!same) faErrShown = false;
+  if (!same || bgAudio.error) bgAudio.src = src;
   else if (!bgAudio.paused) return;
   const p = bgAudio.play();
   if (p && p.catch) p.catch(e => { needTap = true; console.log('Music play blocked, waiting for a tap:', e); });
@@ -408,6 +410,26 @@ function openSettingsModal(required = false) {
       </div>
     </div>`;
   document.body.insertAdjacentHTML('beforeend', html);
+  if (SINGLE) addScrollLine();
+}
+/* خط باریک سمت راست پنجره: نشان می‌دهد صفحه بالا و پایین می‌شود */
+function addScrollLine() {
+  const ov = document.getElementById('customSettingsModal'); if (!ov) return;
+  const box = ov.firstElementChild; if (!box) return;
+  const th = document.createElement('div');
+  th.style.cssText = 'position:absolute;width:4px;border-radius:4px;background:#f0b64a;opacity:.85;pointer-events:none;display:none';
+  ov.appendChild(th);
+  const upd = () => {
+    if (!th.parentNode) return;
+    const r = box.getBoundingClientRect(), sh = box.scrollHeight, ch = box.clientHeight;
+    if (sh <= ch + 4) { th.style.display = 'none'; return; }
+    const trackH = r.height - 28, h = Math.max(28, trackH * ch / sh), top = r.top + 14 + (trackH - h) * (box.scrollTop / (sh - ch));
+    th.style.display = 'block'; th.style.height = h + 'px'; th.style.top = top + 'px'; th.style.left = (r.right - 9) + 'px';
+  };
+  box.addEventListener('scroll', upd, { passive: true });
+  window.addEventListener('resize', upd);
+  try { new MutationObserver(upd).observe(box, { childList: true, subtree: true }); } catch (e) { }
+  setTimeout(upd, 60); setTimeout(upd, 400);
 }
 
 /* ---------- نوار کوچک موزیک (پایین سمت چپ) ---------- */
