@@ -1,0 +1,92 @@
+/* ===== تم‌های چرخان منو — فقط رنگ‌ها (منفی و حکم)؛ چیدمان، اندازه و دکمه‌ها همان قبلی‌اند =====
+   همه‌چیز فقط وقتی کار می‌کند که seasons.js روی <body> ویژگی data-th بگذارد. بدون آن، منوی «دوزخ» دست‌نخورده است.
+   تخته‌های بازی (#game) و همهٔ منطق بازی‌ها اینجا اصلاً دست نمی‌خورند. */
+
+/* رنگ «طلایی» فقط داخل صفحه‌های منو/لابی؛ داخل بازی همان قبلی می‌ماند */
+body.inf-ok[data-th] .scr:not(#game){--gold:var(--t-mid)}
+
+/* ---- متن و لوگو ---- */
+body.inf-ok[data-th].pg-mf .scr:not(#game),body.inf-ok[data-th].pg-fk #menu,body.inf-ok[data-th].pg-fk #lobby{color:var(--t-txt)}
+body.inf-ok[data-th] .scr:not(#game) h2{color:var(--t-hi);text-shadow:0 0 14px var(--t-gl2)}
+body.inf-ok[data-th] #menu .logo{background-image:linear-gradient(var(--t-hi),var(--t-mid) 45%,var(--t-lo));filter:drop-shadow(0 0 calc(8px + var(--beat)*16px) var(--t-gl2))}
+body.inf-ok[data-th] #menu .sub{color:var(--t-sub)}
+body.inf-ok[data-th].pg-mf #menu .logo,body.inf-ok[data-th].pg-fk #menu .logo{text-shadow:0 0 22px var(--t-gl2),0 4px 0 var(--t-sh)}
+body.inf-ok[data-th] .vipH{color:var(--t-mid);text-shadow:0 0 10px var(--t-glt)}
+body.inf-ok[data-th] .infEmblem{filter:drop-shadow(0 0 calc(8px + var(--beat)*14px) var(--t-gl2))}
+/* رنگ‌های نشان کاکتوس (SVG) */
+body[data-th] .infEmblem linearGradient:nth-of-type(1) stop:nth-child(1),body[data-th] #infSplash svg linearGradient:nth-of-type(1) stop:nth-child(1){stop-color:var(--t-b1)}
+body[data-th] .infEmblem linearGradient:nth-of-type(1) stop:nth-child(2),body[data-th] #infSplash svg linearGradient:nth-of-type(1) stop:nth-child(2){stop-color:var(--t-bg0)}
+body[data-th] .infEmblem linearGradient:nth-of-type(2) stop:nth-child(1),body[data-th] #infSplash svg linearGradient:nth-of-type(2) stop:nth-child(1){stop-color:var(--t-hi)}
+body[data-th] .infEmblem linearGradient:nth-of-type(2) stop:nth-child(2),body[data-th] #infSplash svg linearGradient:nth-of-type(2) stop:nth-child(2){stop-color:var(--t-mid)}
+body[data-th] .infEmblem linearGradient:nth-of-type(2) stop:nth-child(3),body[data-th] #infSplash svg linearGradient:nth-of-type(2) stop:nth-child(3){stop-color:var(--t-lo)}
+body[data-th] .infEmblem linearGradient:nth-of-type(3) stop:nth-child(1),body[data-th] #infSplash svg linearGradient:nth-of-type(3) stop:nth-child(1){stop-color:var(--t-hi)}
+body[data-th] .infEmblem linearGradient:nth-of-type(3) stop:nth-child(2),body[data-th] #infSplash svg linearGradient:nth-of-type(3) stop:nth-child(2){stop-color:var(--t-lo)}
+
+/* ---- دکمه‌ها ---- */
+body.inf-ok[data-th] .scr:not(#game) .btn{color:var(--t-txt);border-color:var(--t-bd);background-image:linear-gradient(180deg,var(--t-b1),var(--t-b2));
+  box-shadow:inset 0 1px 0 #ffffff14,inset 0 0 14px var(--t-gl3),0 4px 0 var(--t-sh),0 8px 16px #000a}
+body.inf-ok[data-th] .scr:not(#game) .btn:active{box-shadow:inset 0 1px 0 #ffffff10,inset 0 0 20px var(--t-gl),0 1px 0 var(--t-sh),0 3px 8px #000a}
+body.inf-ok[data-th] .scr:not(#game) .btn::after{background-image:linear-gradient(100deg,transparent,var(--t-sweep),transparent)}
+body.inf-ok[data-th] .scr:not(#game) .btn.go{background-image:linear-gradient(180deg,var(--t-go1),var(--t-go2) 70%,var(--t-go3));color:var(--t-got);border-color:var(--t-gob);
+  box-shadow:inset 0 1px 0 #fff9,0 4px 0 var(--t-god),0 8px 16px #000a,0 0 calc(8px + var(--beat)*26px) var(--t-gl2)}
+body.inf-ok[data-th] .scr:not(#game) .btn.gm{background-image:linear-gradient(180deg,var(--t-b1),var(--t-b2));color:#fff;
+  box-shadow:inset 0 0 22px var(--acg),inset 0 1px 0 #ffffff18,0 4px 0 var(--t-sh),0 8px 16px #000a,0 0 14px var(--acg)}
+body.inf-ok[data-th] .scr:not(#game) .btn.gm.go{color:#fff}
+body.inf-ok[data-th] .lnk{color:var(--t-lnk)}
+body.inf-ok[data-th].vip-on .scr:not(#game) .btn:not(.gcard):not(.go){border-color:var(--t-bd2);
+  box-shadow:inset 0 1px 0 #ffffff1c,inset 0 0 14px var(--t-gl3),0 4px 0 var(--t-sh),0 8px 16px #000a,0 0 12px var(--t-gl3)}
+
+/* ---- کارت‌های سه بازی ---- */
+body.inf-ok[data-th].vip-on .scr:not(#game) .gcards .btn.gcard{color:var(--t-txt);
+  background:linear-gradient(180deg,var(--t-b1),var(--t-b2)) padding-box,linear-gradient(135deg,var(--vg1),var(--vg2) 42%,var(--vfire)) border-box;
+  box-shadow:0 6px 16px #000b,inset 0 1px 0 #ffffff14,inset 0 0 22px var(--acg,var(--t-gl)),0 0 14px var(--t-gl3);animation-name:thPulse}
+@keyframes thPulse{50%{box-shadow:0 6px 16px #000b,inset 0 1px 0 #ffffff14,inset 0 0 26px var(--acg,var(--t-gl)),0 0 24px var(--t-gl)}}
+body.inf-ok[data-th] .gcard .gi{background:radial-gradient(circle at 35% 30%,var(--t-b1),var(--t-b2))}
+body.inf-ok[data-th] .gcard .gt b{background-image:linear-gradient(var(--t-hi),var(--t-mid))}
+body.inf-ok[data-th] .gcard .gt small{color:var(--t-sub)}
+body.inf-ok[data-th] .gcard .gp{background:linear-gradient(var(--t-go1),var(--t-go2));color:var(--t-got)}
+body.inf-ok[data-th].vip-on .scr:not(#game) .btn.vipPrac{color:var(--t-hi);border-color:var(--t-bd2);background:linear-gradient(180deg,var(--t-b1),var(--t-b2));
+  box-shadow:inset 0 0 18px var(--t-gl3),0 4px 0 var(--t-sh),0 8px 16px #000a}
+body.inf-ok[data-th] .vSfx{color:var(--t-sub)}
+
+/* ---- ورودی‌ها، صندلی‌ها و کادرها ---- */
+body.inf-ok[data-th] .scr:not(#game) input:not([type=checkbox]):not([type=radio]):not([type=range]),body.inf-ok[data-th].pg-fk #nm,body.inf-ok[data-th].pg-fk #cin{background:var(--t-in)!important;color:var(--t-txt)!important;border-color:var(--t-ibd)!important}
+body.inf-ok[data-th] .scr:not(#game) input:not([type=checkbox]):focus{border-color:var(--t-ibf)!important;box-shadow:0 0 0 3px var(--t-gl),0 0 16px var(--t-gl)}
+body.inf-ok[data-th] .sb,body.inf-ok[data-th].pg-fk .st{background:var(--t-in)!important;border-color:var(--t-ibd)!important;color:var(--t-sub)!important}
+body.inf-ok[data-th] .sb.f,body.inf-ok[data-th].pg-fk .st.me{background:var(--t-b1)!important;border-color:var(--t-ibf)!important;color:#fff!important;box-shadow:0 0 14px var(--t-gl)}
+body.inf-ok[data-th] .or,body.inf-ok[data-th].pg-fk .th{color:var(--t-sub)}
+body.inf-ok[data-th] .inviteBox,body.inf-ok[data-th] .waitInvite,body.inf-ok[data-th] .guidebox{background:var(--t-panel);border-color:var(--t-ibf)}
+body.inf-ok[data-th] .credit a{color:var(--t-mid)}
+body.inf-ok[data-th] #resumeBox,body.inf-ok[data-th].pg-fk #rsm{background:var(--t-panel)!important;border-color:var(--t-ibf)!important}
+
+/* ---- نوار موزیک و پنجرهٔ تنظیمات (فقط رنگ لبه و عنوان) ---- */
+body[data-th].pg-mf #musicBar button,body[data-th].pg-fk #musicBar button{border-color:var(--t-bd2);background:var(--t-panel);color:var(--t-hi)}
+body[data-th].pg-mf #customSettingsModal>div,body[data-th].pg-fk #customSettingsModal>div{background:var(--t-in)!important;border-color:var(--t-ibf)!important}
+body[data-th].pg-mf #customSettingsModal h3,body[data-th].pg-fk #customSettingsModal h3{color:var(--t-mid)!important}
+body[data-th].pg-mf #customSettingsModal select,body[data-th].pg-fk #customSettingsModal select{background:var(--t-b1)!important;border-color:var(--t-ibf)!important}
+body[data-th].pg-mf #customSettingsModal button[onclick*="closeSettingsModal"],body[data-th].pg-fk #customSettingsModal button[onclick*="closeSettingsModal"]{background:linear-gradient(var(--t-go1),var(--t-go3))!important;color:var(--t-got)!important}
+
+/* ---- پنجرهٔ پایین (میز باز / تمرین) ---- */
+body[data-th] #vSheet .vbox{color:var(--t-txt);border-color:var(--t-bd2);background:linear-gradient(var(--t-b1),var(--t-bg0));box-shadow:0 -12px 40px #000c,0 -2px 20px var(--t-gl)}
+body[data-th] #vSheet h3{background-image:linear-gradient(var(--t-hi),var(--t-mid))}
+body[data-th] #vSheet .vsm{color:var(--t-sub)}
+body[data-th] #vSheet .btn{color:var(--t-txt);border-color:var(--t-bd2);background:linear-gradient(180deg,var(--t-b1),var(--t-b2));box-shadow:0 4px 0 var(--t-sh),0 6px 14px #000a}
+body[data-th] #vSheet .btn.go{color:var(--t-got);border-color:var(--t-gob);background:linear-gradient(180deg,var(--t-go1),var(--t-go2) 75%,var(--t-go3));box-shadow:0 4px 0 var(--t-god),0 6px 14px #000a,0 0 16px var(--t-gl2)}
+
+/* ---- جرقهٔ لمس ---- */
+body[data-th] .infSpark{background:var(--t-mid);box-shadow:0 0 8px var(--t-ac)}
+
+/* ---- صفحهٔ ورود ---- */
+body[data-th] #infSplash{background:radial-gradient(ellipse at 50% 58%,var(--t-b1),var(--t-bg0) 72%)!important}
+body[data-th] #infSplash .fan i{border-color:var(--t-mid);box-shadow:0 0 22px var(--t-gl2)}
+body[data-th] #infSplash .em{filter:drop-shadow(0 0 26px var(--t-gl2))}
+body[data-th] #infSplash .tt{color:var(--t-mid);text-shadow:0 0 12px var(--t-ac)}
+body[data-th] #infSplash .tt2{color:var(--t-sub)}
+body[data-th] #infSplash .bar i{background:linear-gradient(90deg,var(--t-lo),var(--t-hi))}
+
+/* ---- پردهٔ انتقال به بازی (فقط شفافیت و چرخش؛ لمس را رد می‌کند) ---- */
+#thCur{position:fixed;inset:0;z-index:99997;pointer-events:none;opacity:0;background:radial-gradient(ellipse at 50% 55%,var(--tc1),var(--tc0) 75%);animation:thCurIn 1s ease both}
+#thCur i{position:absolute;left:50%;top:50%;width:46px;height:68px;margin:-34px 0 0 -23px;border-radius:8px;background:linear-gradient(#fff6e6,#e8d2b4);border:2px solid var(--tcb);box-shadow:0 0 18px var(--tcg);opacity:0;animation:thCard .8s cubic-bezier(.2,.9,.3,1.2) both;animation-delay:calc(var(--n)*.05s + .06s)}
+@keyframes thCurIn{0%{opacity:0}28%{opacity:1}74%{opacity:1}100%{opacity:0}}
+@keyframes thCard{0%{opacity:0;transform:rotate(0) scale(.4)}35%{opacity:1}100%{opacity:0;transform:rotate(var(--r)) translateY(-64px) scale(1.15)}}
+@media (prefers-reduced-motion:reduce){#thCur{display:none}}
