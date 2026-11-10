@@ -26,9 +26,13 @@
     cv.style.zIndex = FK ? '19' : '0';
     body.insertBefore(cv, body.firstChild);
     const cx = cv.getContext('2d'); if (!cx) return;
+    const P = window.SEASON_PAL || null; // رنگ‌های تم چرخان (seasons.js)؛ اگر نباشد همان آتش قبلی
     let W = 0, H = 0, dpr = 1, crack = null, smoke = null, run = false, last = 0, B = 0;
     const embers = [], N = low ? 16 : 32, rnd = (a, b) => a + Math.random() * (b - a);
-    const mkEmber = (init) => ({ x: rnd(0, W), y: init ? rnd(0, H) : H + rnd(0, 40), v: rnd(14, 46) * dpr, r: rnd(.8, 2.4) * dpr, ph: rnd(0, 6.3), sp: rnd(.6, 1.6) });
+    const NN = P ? Math.max(8, Math.round(N * Math.min(1, P.nm))) : N, MODE = P ? P.mode : 'rise', DIR = MODE === 'fall' ? 1 : -1;
+    const mkEmber = (init) => P ? ({ x: rnd(0, W), y: (init || MODE === 'float' || MODE === 'twinkle') ? rnd(0, H) : (DIR < 0 ? H + rnd(0, 40) : -rnd(0, 40)),
+      v: (MODE === 'twinkle' ? 0 : MODE === 'float' ? rnd(3, 10) : MODE === 'fall' ? rnd(18, 50) : rnd(14, 46)) * dpr * P.vs, r: (MODE === 'twinkle' ? rnd(.6, 1.8) : rnd(.8, 2.4)) * dpr * P.rs, ph: rnd(0, 6.3), sp: rnd(.6, 1.6) })
+      : ({ x: rnd(0, W), y: init ? rnd(0, H) : H + rnd(0, 40), v: rnd(14, 46) * dpr, r: rnd(.8, 2.4) * dpr, ph: rnd(0, 6.3), sp: rnd(.6, 1.6) });
 
     function build() {
       dpr = Math.min(window.devicePixelRatio || 1, low ? 1 : 1.5);
@@ -36,12 +40,12 @@
       crack = document.createElement('canvas'); crack.width = W; crack.height = H;
       const g = crack.getContext('2d');
       const fl = g.createRadialGradient(W / 2, H * 1.08, 0, W / 2, H * 1.08, H * .75);
-      fl.addColorStop(0, 'rgba(255,90,30,.42)'); fl.addColorStop(.5, 'rgba(160,30,10,.18)'); fl.addColorStop(1, 'rgba(0,0,0,0)');
+      fl.addColorStop(0, P ? P.fl0 : 'rgba(255,90,30,.42)'); fl.addColorStop(.5, P ? P.fl1 : 'rgba(160,30,10,.18)'); fl.addColorStop(1, 'rgba(0,0,0,0)');
       g.fillStyle = fl; g.fillRect(0, 0, W, H);
       const path = (x, y, len, ang, depth) => {
         const pts = [[x, y]]; let cx2 = x, cy2 = y, a = ang;
         for (let i = 0; i < len; i++) { a += rnd(-.55, .55); cx2 += Math.cos(a) * rnd(10, 26) * dpr; cy2 += Math.sin(a) * rnd(10, 26) * dpr; pts.push([cx2, cy2]); if (depth < 2 && Math.random() < .22) path(cx2, cy2, Math.floor(len / 2), a + rnd(-1, 1), depth + 1); }
-        [[11 * dpr, 'rgba(255,60,20,.07)'], [5 * dpr, 'rgba(255,100,40,.2)'], [1.6 * dpr, 'rgba(255,214,150,.85)']].forEach(([w, c]) => {
+        [[11 * dpr, P ? P.cr[0] : 'rgba(255,60,20,.07)'], [5 * dpr, P ? P.cr[1] : 'rgba(255,100,40,.2)'], [1.6 * dpr, P ? P.cr[2] : 'rgba(255,214,150,.85)']].forEach(([w, c]) => {
           g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) g.lineTo(pts[i][0], pts[i][1]);
           g.lineWidth = w; g.strokeStyle = c; g.lineCap = 'round'; g.lineJoin = 'round'; g.stroke();
         });
@@ -50,8 +54,8 @@
       for (let i = 0; i < n; i++) path(rnd(.08, .92) * W, H * rnd(.98, 1.04), Math.floor(rnd(9, 17)), -Math.PI / 2 + rnd(-.5, .5), 0);
       smoke = document.createElement('canvas'); smoke.width = smoke.height = 256;
       const s = smoke.getContext('2d'), sg = s.createRadialGradient(128, 128, 0, 128, 128, 128);
-      sg.addColorStop(0, 'rgba(70,24,16,.38)'); sg.addColorStop(1, 'rgba(0,0,0,0)'); s.fillStyle = sg; s.fillRect(0, 0, 256, 256);
-      embers.length = 0; for (let i = 0; i < N; i++) embers.push(mkEmber(true));
+      sg.addColorStop(0, P ? P.sm : 'rgba(70,24,16,.38)'); sg.addColorStop(1, 'rgba(0,0,0,0)'); s.fillStyle = sg; s.fillRect(0, 0, 256, 256);
+      embers.length = 0; for (let i = 0; i < NN; i++) embers.push(mkEmber(true));
     }
 
     function visible() { return IDS.some(id => { const e = document.getElementById(id); return e && getComputedStyle(e).display !== 'none'; }); }
@@ -69,12 +73,26 @@
       if (now - last < 33) return;
       const dt = Math.min(.1, (now - last) / 1000); last = now; const t = now / 1000;
       beat();
-      const bg = cx.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#050202'); bg.addColorStop(1, '#140706');
+      const bg = cx.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, P ? P.bg0 : '#050202'); bg.addColorStop(1, P ? P.bg1 : '#140706');
       cx.globalCompositeOperation = 'source-over'; cx.fillStyle = bg; cx.fillRect(0, 0, W, H);
       cx.globalAlpha = Math.min(1, .55 + .22 * Math.sin(t * 1.25) + B * .5); cx.drawImage(crack, 0, 0); cx.globalAlpha = 1;
       for (let i = 0; i < 3; i++) { const sz = H * (.7 + i * .15), x = (Math.sin(t * .09 + i * 2) * .5 + .5) * (W - sz * .4) - sz * .3, y = H - sz * .8 + Math.sin(t * .13 + i) * H * .04; cx.globalAlpha = .75; cx.drawImage(smoke, x, y, sz, sz); }
       cx.globalAlpha = 1; cx.globalCompositeOperation = 'lighter';
-      for (const e of embers) {
+      if (P) for (const e of embers) { // تم چرخان: همان تعداد ذره، فقط رنگ و جهت حرکت فرق می‌کند
+        let life = .5, a;
+        if (MODE === 'twinkle') a = .12 + .78 * Math.pow(Math.sin(t * e.sp * 1.4 + e.ph) * .5 + .5, 3);
+        else if (MODE === 'float') {
+          e.y += (Math.cos(t * e.sp * .6 + e.ph) * 9 - e.v * .4) * dt * dpr; e.x += Math.sin(t * e.sp * .5 + e.ph) * 12 * dt * dpr;
+          if (e.x < -10) e.x = W + 10; else if (e.x > W + 10) e.x = -10; if (e.y < -10) e.y = H + 10; else if (e.y > H + 10) e.y = -10;
+          a = .15 + .65 * (Math.sin(t * e.sp * 1.2 + e.ph) * .5 + .5);
+        } else {
+          e.y += DIR * e.v * dt; e.x += Math.sin(t * e.sp + e.ph) * 14 * dt * dpr;
+          if (DIR < 0 ? e.y < -10 : e.y > H + 10) Object.assign(e, mkEmber(false));
+          life = Math.max(0, Math.min(1, DIR < 0 ? e.y / H : 1 - e.y / H)); a = (.25 + .6 * life) * (.6 + .4 * Math.sin(t * P.fk * e.sp + e.ph));
+        }
+        cx.fillStyle = P.pc(life, Math.max(0, Math.min(1, a)));
+        cx.beginPath(); cx.arc(e.x, e.y, e.r * (1 + B), 0, 6.283); cx.fill();
+      } else for (const e of embers) {
         e.y -= e.v * dt; e.x += Math.sin(t * e.sp + e.ph) * 14 * dt * dpr;
         if (e.y < -10) Object.assign(e, mkEmber(false));
         const life = Math.max(0, e.y / H), a = (.25 + .6 * life) * (.6 + .4 * Math.sin(t * 6 * e.sp + e.ph));
