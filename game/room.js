@@ -3,7 +3,7 @@ class Room {
   constructor(code, io) {
     this.code = code; this.io = io; this.seats = [null, null, null, null];
     this.g = null; this.host = null; this.t = Date.now();
-    this.look = { carpet: 'n1', cards: 'n1' }; this.track = 1; this.playing = false; this._hintRid = 0; this._completedHands = 0;
+    this.look = { carpet: 'v1', cards: 'h1' }; this.track = 1; this.playing = false; this._hintRid = 0; this._completedHands = 0;
     this.spec = new Set(); this.invitePending = false; this.inviteAccepted = false; this.starting = 0; this.startTimer = null;
   }
   setTrack(n) { if (n === 0) this.playing = false; else { this.track = n; this.playing = true; } this.seats.forEach(s => { if (s && s.sid) this.io.to(s.sid).emit('track', n); }); this.spec.forEach(id => this.io.to(id).emit('track', n)); }
@@ -115,8 +115,12 @@ class Room {
     if (av.length > 7000) av = '';
     this.seats[i].av = av || undefined; this.send();
   }
+  signal(i, k) { // 1=تپ 2=هوا؛ هر مقدار دیگری نادیده گرفته می‌شود
+    k = k | 0; if (k !== 1 && k !== 2) return;
+    this._ids().forEach(id => this.io.to(id).emit('tphv', { s: i, k }));
+  }
   react(sid, k) {
-    const i = this.seatOf(sid); if (i < 0 || !(k >= 0 && k < 6)) return;
+    const i = this.seatOf(sid); if (i < 0 || !(k >= 0 && k < 7)) return;
     const s = this.seats[i], now = Date.now(); if (now - (s.lr || 0) < 1200) return; s.lr = now;
     this._ids().forEach(id => this.io.to(id).emit('react', { s: i, k }));
   }
