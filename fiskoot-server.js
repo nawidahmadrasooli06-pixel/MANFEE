@@ -7,8 +7,8 @@ const sh = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random
 const mk = low => { const d = []; for (let s = 0; s < 4; s++) for (let r = 2; r <= 14; r++) d.push(s * 20 + (r == 14 && low ? 1 : r)); return sh(d); };
 const beats = (a, b, t) => S(a) == S(b) ? Rk(a) > Rk(b) : (S(a) == t && S(b) != t);
 const winner = (tr, t) => { let b = tr[0]; for (const x of tr) if (beats(x.c, b.c, t)) b = x; return b.p; };
-const FC = ['n1','x3','x9','x10','x11','x12','x13'], GC = ['n1','n2','g17','g18','g19','g20','g21'];
-const cleanLook = l => ({ carpet: FC.includes(l && l.carpet) ? l.carpet : 'n1', cards: GC.includes(l && l.cards) ? l.cards : 'n1' });
+const FC = ['v1','v2','v3','v4','v5','v6','v7'], GC = ['h1','h2','h3','h4','h5','h6','h7'];
+const cleanLook = l => ({ carpet: FC.includes(l && l.carpet) ? l.carpet : 'v1', cards: GC.includes(l && l.cards) ? l.cards : 'h1' });
 module.exports = function (io) {
   const nsp = io.of('/fiskoot'), rooms = {};
   io.tables && io.tables.register('fk', c => {
@@ -156,7 +156,10 @@ module.exports = function (io) {
     });
     so.on('flip', i => { const r = R(), s = r ? seatOf(r, tk()) : -1; if (s >= 0) flip(r, s, i | 0); });
     so.on('trump', t => { const r = R(), s = r ? seatOf(r, tk()) : -1; if (s >= 0 && s == r.hk) setTrump(r, t | 0); });
-    so.on('play', c => { const r = R(), s = r ? seatOf(r, tk()) : -1; if (s >= 0 && !playCard(r, s, c | 0) && r.phase == 'play' && !r.paused) so.emit('err', 'بازی این کارت مجاز نیست؛ باید از همان خالی که بازی شده بازی کنی.'); });
+    so.on('play', (c, sig) => {
+      const r = R(), s = r ? seatOf(r, tk()) : -1; if (s < 0) return;
+      if (playCard(r, s, c | 0)) { sig = sig | 0; if (sig === 1 || sig === 2) ids(r).forEach(id => { const o = nsp.sockets.get(id); if (o) o.emit('tphv', { s, k: sig }); }); return; }
+      if (r.phase == 'play' && !r.paused) so.emit('err', 'بازی این کارت مجاز نیست؛ باید از همان خالی که بازی شده بازی کنی.'); });
     so.on('watch', ({ code } = {}) => { const r = rooms[String(code || '').toUpperCase().trim()]; if (!r) return so.emit('gone'); r.spec.add(so.id); so.data = { code: r.code, spec: true }; send(r); r.seats.forEach(x => { if (x && x.sid && x.on) { const o = nsp.sockets.get(x.sid); if (o) o.emit('specJoin'); } }); r.spec.forEach(id => { const o = nsp.sockets.get(id); if (o) o.emit('specJoin'); }); });
     so.on('av', av => {
       const r = R(), i = r ? seatOf(r, tk()) : -1; if (i < 0) return;
@@ -166,7 +169,7 @@ module.exports = function (io) {
       r.seats[i].av = av || undefined; send(r);
     });
     so.on('react', k => {
-      const r = R(), i = r ? seatOf(r, tk()) : -1; k = k | 0; if (i < 0 || k < 0 || k > 5) return;
+      const r = R(), i = r ? seatOf(r, tk()) : -1; k = k | 0; if (i < 0 || k < 0 || k > 6) return;
       const s = r.seats[i], now = Date.now(); if (now - (s.lr || 0) < 1200) return; s.lr = now;
       ids(r).forEach(id => { const o = nsp.sockets.get(id); if (o) o.emit('react', { s: i, k }); });
     });
