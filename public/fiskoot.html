@@ -95,7 +95,7 @@ body{display:block}
 #hand{bottom:calc(48px + env(safe-area-inset-bottom,0px))}#s0{bottom:calc(138px + env(safe-area-inset-bottom,0px))!important}
 #ex{left:auto;right:8px}.c.r{color:#d11}
 #pz{position:fixed;inset:0;z-index:24;background:#000b;display:none;align-items:center;justify-content:center;padding:16px}
-</style><link rel="stylesheet" href="fk-theme.css"><link rel="stylesheet" href="inferno.css"><link rel="stylesheet" href="cactus-pack.css"><link rel="stylesheet" href="vip.css"><link rel="stylesheet" href="seasons.css"></head><body>
+</style><link rel="stylesheet" href="fk-theme.css"><link rel="stylesheet" href="inferno.css"><link rel="stylesheet" href="cactus-pack.css"><link rel="stylesheet" href="vip.css"><link rel="stylesheet" href="seasons.css"><link rel="stylesheet" href="deluxe.css"></head><body>
 <div id="top"><div class="chip">امتیاز (تا 13)<br><span class="g">تیم ما <b id="sa">0</b></span><br><span class="r">تیم حریف <b id="sb">0</b></span></div><div class="chip" id="tr">رنگ (حکم): —</div><div class="chip">دورها (تا 7)<br><span class="g">تیم ما <b id="ta">0</b></span><br><span class="r">تیم حریف <b id="tb">0</b></span></div></div>
 <div id="tbl"><div id="tc"></div><div class="idTag">@cactuc580</div><div id="lt"></div><div id="ann"></div><button id="ex" onclick="exitG()">خروج ✕</button>
 <div class="seat" id="s2" style="top:6px;left:50%;transform:translateX(-50%)"></div><div class="seat" id="s3" style="left:4px;top:50%;transform:translateY(-50%)"></div><div class="seat" id="s1" style="right:4px;top:50%;transform:translateY(-50%)"></div><div class="seat" id="s0" style="bottom:4px;left:50%;transform:translateX(-50%)"></div>
@@ -124,9 +124,11 @@ body{display:block}
 <li>حاکم برد = همان حاکم؛ باخت = حاکم به سمت راست می‌رود.</li></ul>
 <button onclick="this.closest('.ovl').style.display='none'">بستن</button></div></div>
 <div id="pz"></div><div id="ov"></div><div id="wt"></div>
+<script src="cardface.js"></script>
 <script>const SU=['♠','♣','♦','♥'],SN=['پیک','گشنیز','خشت','دل'],$=id=>document.getElementById(id);
 const S=c=>c/20|0,Rk=c=>c%20,lab=r=>r==14||r==1?'A':r==13?'K':r==12?'Q':r==11?'J':r;
-const cel=(c,cls='')=>`<div class="c ${cls} ${S(c)>1?'r':''}"><b>${lab(Rk(c))}</b><i>${SU[S(c)]}</i></div>`;
+const FSC=[0,3,2,1]; // نگاشت خال‌های حکم (پیک،گشنیز،خشت،دل) به ترتیب کارت‌ها
+const cel=(c,cls='')=>window.CF?CF.card(lab(Rk(c)),FSC[S(c)],cls):`<div class="c ${cls} ${S(c)>1?'r':''}"><b>${lab(Rk(c))}</b><i>${SU[S(c)]}</i></div>`;
 const sv=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}},ld=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
 let tok=ld('fk_tok');if(!tok){tok=Math.random().toString(36).slice(2)+Date.now().toString(36);sv('fk_tok',tok)}
 let tpT,st=null,pv=null,sel=null,drag=null,dis=null,hk0='',pvHand=[];
@@ -182,7 +184,7 @@ function rGame(){
  const P=$('pick'),g=$('pg');P.style.display=(ph=='hint'||ph=='pick')?'flex':'none';
  if(ph=='hint'||ph=='pick'){if(g.children.length!=52){g.innerHTML='';for(let i=0;i<52;i++){const e=document.createElement('div');e.className='c back sm';e.onclick=()=>{if(!st.isSpec&&st.ph=='pick'&&st.pk.t==st.me)sk.emit('flip',i)};g.appendChild(e)}}
   [...g.children].forEach(e=>{e.className='c back sm'});
-  st.pk.f.forEach(f=>{const e=g.children[f[0]];e.className='c sm flip '+(S(f[1])>1?'r':'');e.innerHTML=`<b>${lab(Rk(f[1]))}</b><i>${SU[S(f[1])]}</i>`});
+  st.pk.f.forEach(f=>{const e=g.children[f[0]];if(window.CF){e.className='c sm flip '+CF.cls(lab(Rk(f[1])),FSC[S(f[1])]);e.innerHTML=CF.inner(lab(Rk(f[1])),FSC[S(f[1])])}else{e.className='c sm flip '+(S(f[1])>1?'r':'');e.innerHTML=`<b>${lab(Rk(f[1]))}</b><i>${SU[S(f[1])]}</i>`}});
   const lf=st.pk.f[st.pk.f.length-1];$('pm').innerHTML=lf?`${st.seats[lf[2]].n}: <span style="color:${S(lf[1])>1?'#ff6b6b':'#fff'}">${lab(Rk(lf[1]))}${SU[S(lf[1])]}</span>`:''}
  else g.innerHTML='';
  if(ph=='hint'&&pv!='hint')ann('برای اینکه حاکم بازی معلوم شود، باید <span class="ring">توس</span> یا آس (A) بیاوری',5000,'24%');
@@ -212,7 +214,7 @@ function bindCard(e,c){
  e.onpointerdown=ev=>{if(!st.lg)return;ev.preventDefault();drag={c,e,x:ev.clientX,y:ev.clientY,m:false,was:sel===c};sel=c;try{e.setPointerCapture(ev.pointerId)}catch(_){}[...$('hand').children].forEach(paint)};
  e.onpointermove=ev=>{if(!drag||drag.e!==e)return;const dx=ev.clientX-drag.x,dy=ev.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>8)drag.m=true;if(drag.m){e.style.transition='none';e.style.zIndex=50;e.style.transform=`translate(${dx}px,${dy-18}px)`}};
  e.onpointerup=ev=>{if(!drag||drag.e!==e)return;const d=drag,dy=ev.clientY-d.y,rc=e.getBoundingClientRect();drag=null;e.style.transition='';e.style.zIndex='';e.style.transform='';
-  if(d.m&&dy<-70){if(st.lg.includes(c)){sel=null;dropCard(e,c,rc);sk.emit('play',c)}else toast('نمی‌توانی از آن خال بازی کنی! باید از همان خالی که بازی شده بازی کنی')}
+  if(d.m&&dy<-70){if(st.lg.includes(c)){sel=null;dropCard(e,c,rc);sk.emit('play',c,window.SGN?SGN.take():0)}else toast('نمی‌توانی از آن خال بازی کنی! باید از همان خالی که بازی شده بازی کنی')}
   else if(!d.m&&d.was){sel=null;[...$('hand').children].forEach(paint)}};
  e.onpointercancel=()=>{drag=null;e.style.transform=''}}
 try{Telegram.WebApp.ready();Telegram.WebApp.expand()}catch(e){}
@@ -223,4 +225,4 @@ if(u){$('cin').value=u.toUpperCase();$('inv').style.display='block'}
 if(ld('fk_room')){$('rsm').style.display='block';$('rcode').textContent=ld('fk_room')}
 </script>
 <script src="custom.js"></script>
-<script src="social.js"></script><script src="crack.js"></script><script src="seasons.js"></script><script src="inferno.js"></script><script src="vip.js"></script></body></html>
+<script src="social.js"></script><script src="crack.js"></script><script src="seasons.js"></script><script src="inferno.js"></script><script src="vip.js"></script><script src="signals.js"></script></body></html>
