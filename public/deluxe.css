@@ -165,21 +165,3 @@ body.cards-h4 .c:not(.back) x-f,.pv.cards-h4 .c:not(.back) x-f{border-radius:50%
 body.cards-h5 .c:not(.back) x-f,.pv.cards-h5 .c:not(.back) x-f{border-radius:.65em;border-style:double}
 body.cards-h6 .c:not(.back) x-f,.pv.cards-h6 .c:not(.back) x-f{border-radius:50%/35%;border-width:.1em}
 body.cards-h7 .c:not(.back) x-f,.pv.cards-h7 .c:not(.back) x-f{border-radius:.9em .9em .2em .2em}
-
-
-
-/* CACTUC card hand readability: keep a small suit peek on each overlapped card.
-   In the hand, the center ornament is hidden and the suit is moved into the
-   exposed left strip. Played cards keep their full center suit and ornament. */
-body[class*="cards-h"] #hand .c:not(.back) x-f,
-.pv[class*="cards-h"] #hand .c:not(.back) x-f {
-  display: none !important;
-}
-body[class*="cards-h"] #hand .c:not(.back) x-s.a,
-.pv[class*="cards-h"] #hand .c:not(.back) x-s.a {
-  left: 14% !important;
-  top: 50% !important;
-  width: .52em !important;
-  height: .52em !important;
-  transform: translate(-50%, -50%) !important;
-}
