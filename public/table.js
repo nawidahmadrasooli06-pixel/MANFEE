@@ -1,7 +1,7 @@
 const T = (() => {
   const SU = ['♠', '♥', '♦', '♣'], RK = '2 3 4 5 6 7 8 9 10 J Q K A'.split(' ');
   const $ = q => document.querySelector(q);
-  const cd = (c, x = '') => { const s = c / 13 | 0; return `<div class="c ${s == 1 || s == 2 ? 'r' : ''} ${s == 1 ? 'heart' : ''} ${x}"><em>${RK[c % 13]}</em><b>${SU[s]}</b></div>`; };
+  const cd = (c, x = '') => { const s = c / 13 | 0; return window.CF ? CF.card(RK[c % 13], s, x) : `<div class="c ${s == 1 || s == 2 ? 'r' : ''} ${s == 1 ? 'heart' : ''} ${x}"><em>${RK[c % 13]}</em><b>${SU[s]}</b></div>`; };
   let S, pl = 0, nid = 0, v = 2, tm, rid = -1, lastTk = 0, lastCount = -1, myTurn = false, drag = null, sel = null, pending = null, flyOwn = null, askSwap = false, askRid = -1, born = {}, tblHtml = '', handHtml = '';
   function flyCard(el, c) {
     const ic = el.querySelector('.c'), ctr = document.querySelector('#tbl .ctr'); if (!ic || !ctr) return;
@@ -112,7 +112,7 @@ const T = (() => {
     if (!d.mv) sel = sel == d.c ? null : d.c;
     else if (dy < -55) {
       const g = S.g;
-      if (g.phase == 'play' && g.turn == S.me && g.legal.includes(d.c)) { flyCard(d.el, d.c); pending = d.c; sel = null; act('play', d.c); }
+      if (g.phase == 'play' && g.turn == S.me && g.legal.includes(d.c)) { flyCard(d.el, d.c); pending = d.c; sel = null; sk.emit('play', d.c, window.SGN ? SGN.take() : 0); }
       else toast(g.phase == 'play' && g.turn == S.me ? 'این پر را نمی‌توانی بیندازی؛ باید هم‌خال بیندازی' : 'هنوز نوبت تو نیست');
     }
     draw(S);
