@@ -7,9 +7,9 @@ const TRACKS = 21;
 let actx = null, gainNode = null, roomTrack = 1, musicOn = false, trackSynced = false, lookNow = null;
 
 /* چهار فرش نهایی: دو طرح منتخب + دو طرح اختصاصی تازه */
-const CACT_CARPETS = [['n1', 'کاکتوس کلاسیک'], ['x3', 'لاجورد سلطنتی'], ['x9', 'زمرد آبی'], ['x10', 'یاقوت آتشین'], ['x11', 'شب فیروزه‌ای'], ['x12', 'مخمل سلطنتی'], ['x13', 'طلوع کهربایی']];
+const CACT_CARPETS = [['v1', 'زرشکی سلطنتی'], ['v2', 'آبی نیمه‌شب'], ['v3', 'سبز زمردی'], ['v4', 'بنفش سلطنتی'], ['v5', 'فیروزه‌ای تیره'], ['v6', 'مشکی طلایی'], ['v7', 'آبی یاقوتی']];
 /* پشت کارت‌ها با چهار فرش هماهنگ شده‌اند */
-const CACT_CARDS = [['n1', 'کاکتوس طلایی'], ['n2', 'لاجورد و طلا'], ['g17', 'زمرد و نقره'], ['g18', 'یاقوت و طلایی'], ['g19', 'شب الماس'], ['g20', 'مخمل آبی'], ['g21', 'کهربای سیاه']];
+const CACT_CARDS = [['h1', 'کلاسیک عاجی'], ['h2', 'سلطنتی (شاه، بی‌بی، سرباز)'], ['h3', 'لاجورد و طلا'], ['h4', 'زمرد کلاسیک'], ['h5', 'یاقوت مخملی'], ['h6', 'نقره‌ای مدرن'], ['h7', 'کهربایی قدیمی']];
 /* طرح‌های قدیمی که نگه داشته شدند */
 const FK_CARPETS = CACT_CARPETS;
 const FK_CARDS = CACT_CARDS;
@@ -20,7 +20,7 @@ try { if (PAGE_GAME !== 'ld') { ['mf','fk'].forEach(g => { localStorage.removeIt
 /* منفی و حکم: فقط یک آهنگ ثابت که همیشه تکرار می‌شود. لودو مثل قبل می‌ماند */
 const SINGLE = PAGE_GAME !== 'ld', THEME_SRC = 'theme.mp3';
 bgAudio.loop = SINGLE;
-const GAMES = { ld: { c: [], k: [], kc: 'ld_carpet', kk: 'ld_cards', dc: 'c1', dk: 'k1' }, mf: { c: MF_CARPETS, k: MF_CARDS, kc: 'carpet', kk: 'cards', dc: 'n1', dk: 'n1' }, fk: { c: FK_CARPETS, k: FK_CARDS, kc: 'fk_carpet', kk: 'fk_cards', dc: 'n1', dk: 'n1' } };
+const GAMES = { ld: { c: [], k: [], kc: 'ld_carpet', kk: 'ld_cards', dc: 'c1', dk: 'k1' }, mf: { c: MF_CARPETS, k: MF_CARDS, kc: 'carpet', kk: 'cards', dc: 'v1', dk: 'h1' }, fk: { c: FK_CARPETS, k: FK_CARDS, kc: 'fk_carpet', kk: 'fk_cards', dc: 'v1', dk: 'h1' } };
 let tabGame = PAGE_GAME;
 const modalGame = () => inRoom() ? PAGE_GAME : tabGame;
 
@@ -97,7 +97,8 @@ function pickCards(id) {
 }
 function pickGame(g) { tabGame = g; refreshLookPicker(); }
 
-const SAMPLE = '<div class="c"><em>A</em><b>♠</b></div><div class="c r heart"><em>K</em><b>♥</b></div><div class="c r"><em>Q</em><b>♦</b></div><div class="c"><em>J</em><b>♣</b></div>';
+const SAMPLE_OLD = '<div class="c"><em>A</em><b>♠</b></div><div class="c r heart"><em>K</em><b>♥</b></div><div class="c r"><em>Q</em><b>♦</b></div><div class="c"><em>J</em><b>♣</b></div>';
+const SAMPLE = window.CF ? CF.card('A', 0) + CF.card('K', 1) + CF.card('10', 2) + CF.card('Q', 3) : SAMPLE_OLD;
 
 function lookPickerHTML() {
   const g = modalGame(), G = GAMES[g];
@@ -109,7 +110,7 @@ function lookPickerHTML() {
   const car = G.c.map(([id, n]) =>
     `<button class="sw pv carpet-${id}${l.carpet === id ? ' sel' : ''}"${dis} onclick="pickCarpet('${id}')"><span>${n}</span></button>`).join('');
   const crd = G.k.map(([id, n]) =>
-    `<button class="sw swc pv cards-${id}${l.cards === id ? ' sel' : ''}"${dis} onclick="pickCards('${id}')"><div class="c back"></div><span>${n}</span></button>`).join('');
+    `<button class="sw swc pv cards-${id}${l.cards === id ? ' sel' : ''}"${dis} onclick="pickCards('${id}')">${window.CF ? CF.card('K', 1) : ''}<div class="c back"></div><span>${n}</span></button>`).join('');
   return `${tabs}
     <div class="pv pvbig carpet-${l.carpet} cards-${l.cards}"><div class="pvmark"><span class="pv-cactus" aria-hidden="true">♣</span><span>CACTUC</span><small>@cactuc580</small></div><div class="pvrow">${SAMPLE}<div class="c back"></div></div></div>
     <div class="lkTitle">فرش میز</div><div class="swrow">${car}</div>
